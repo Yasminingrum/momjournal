@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "388543209260",
+    "project_id": "mom-journal",
+    "storage_bucket": "mom-journal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:388543209260:android:96856b6c788de77bfe9689",
+        "android_client_info": {
+          "package_name": "com.momjournal.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCm3M6Zbz0VsoPjb1ffAeblVpMWDUhBFb8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

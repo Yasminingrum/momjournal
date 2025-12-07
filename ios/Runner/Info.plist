@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
+< version="1.0">
+<>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -45,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>com.momjournal.app</string>
+            </array>
+        </dict>
+    </array>
+    
+    <!-- ⭐ ADD THESE PERMISSIONS -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>MomJournal needs access to your photo library to upload photos</string>
+    <key>NSCameraUsageDescription</key>
+    <string>MomJournal needs access to camera to take photos</string>
 </dict>
 </plist>

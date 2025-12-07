@@ -487,7 +487,7 @@ Overall, MVVM has transformed how I approach Flutter development, emphasizing cl
 
 ## 📝 Development Timeline
 
-Based on the project proposal, this is Week 1 implementation covering:
+Based on the project proposal, this implementation covering:
 - ✅ Project setup and structure
 - ✅ Core constants and configuration
 - ✅ Data models (Entities)
@@ -497,41 +497,6 @@ Based on the project proposal, this is Week 1 implementation covering:
 - ✅ MVVM architecture implementation
 
 **Current Progress**: ~15% (Foundation complete)
-
-See [DEVELOPMENT_TIMELINE.md](DEVELOPMENT_TIMELINE.md) for the complete 10-week roadmap.
-
----
-
-## 👥 Author
-
-**Titi Dwiayu Yasminingrum**  
-Student ID: 0706012324025  
-Program Studi Informatika  
-Universitas Ciputra Surabaya
-
----
-
-## 📄 License
-
-This project is developed as part of the AFL 2 assignment for the Informatika program at Universitas Ciputra.
-
----
-
-## 🙏 Acknowledgments
-
-- Flutter Team for the amazing framework
-- Provider package contributors
-- Hive database creators
-- Firebase team
-- Universitas Ciputra Informatika faculty
-
----
-
-## 📧 Support
-
-For questions or issues, please contact:
-- Email: [your-email@example.com]
-- GitHub Issues: [project-repository-url]
 
 ---
 
