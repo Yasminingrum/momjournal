@@ -18,7 +18,7 @@ enum Mood {
   sad, // Sedih
 
   @HiveField(4)
-  veryS ad, // Sangat Sedih
+  verySad, // Sangat Sedih
 }
 
 /// Extension untuk mendapatkan emoji dan display name dari Mood
