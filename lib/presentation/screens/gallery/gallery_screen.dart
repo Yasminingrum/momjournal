@@ -14,7 +14,6 @@ class GalleryScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navigate to add photo
         },
         child: const Icon(Icons.add_a_photo),
       ),

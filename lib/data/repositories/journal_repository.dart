@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../domain/entities/journal_entity.dart';
+import '/domain/entities/journal_entity.dart';
 
 /// Repository for Journal data management
 /// Implements offline-first approach with cloud sync capability
@@ -31,18 +31,21 @@ class JournalRepository {
   /// Get journal for a specific date
   Future<JournalEntity?> getJournalByDate(DateTime date) async {
     await init();
-    return _box!.values.firstWhere(
-      (journal) =>
-          journal.date.year == date.year &&
-          journal.date.month == date.month &&
-          journal.date.day == date.day,
-      orElse: () => null as JournalEntity,
-    );
+    try {
+      return _box!.values.firstWhere(
+        (journal) =>
+            journal.date.year == date.year &&
+            journal.date.month == date.month &&
+            journal.date.day == date.day,
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Get journals for a date range
   Future<List<JournalEntity>> getJournalsByDateRange(
-      DateTime start, DateTime end) async {
+      DateTime start, DateTime end,) async {
     await init();
     final journals = _box!.values.where((journal) {
       return journal.date.isAfter(start.subtract(const Duration(days: 1))) &&

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '../data/repositories/schedule_repository.dart';
-import '../domain/entities/schedule_entity.dart';
+import '/data/repositories/schedule_repository.dart';
+import '/domain/entities/schedule_entity.dart';
 
 /// ViewModel for Schedule management
 /// Manages schedule state and business logic using Provider pattern

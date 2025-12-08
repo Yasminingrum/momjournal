@@ -14,7 +14,6 @@ class ScheduleScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navigate to add schedule
         },
         child: const Icon(Icons.add),
       ),

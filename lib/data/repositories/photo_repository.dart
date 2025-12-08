@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../domain/entities/photo_entity.dart';
+import '/domain/entities/photo_entity.dart';
 
 /// Repository for Photo data management
 /// Implements offline-first approach with cloud sync capability
@@ -62,7 +62,7 @@ class PhotoRepository {
 
   /// Get photos for a date range
   Future<List<PhotoEntity>> getPhotosByDateRange(
-      DateTime start, DateTime end) async {
+      DateTime start, DateTime end,) async {
     await init();
     final photos = _box!.values.where((photo) {
       return photo.dateTaken.isAfter(start.subtract(const Duration(days: 1))) &&

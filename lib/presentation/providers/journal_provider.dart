@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '../data/repositories/journal_repository.dart';
-import '../domain/entities/journal_entity.dart';
+import '/data/repositories/journal_repository.dart';
+import '/domain/entities/journal_entity.dart';
 
 /// ViewModel for Journal management
 /// Manages journal state and business logic using Provider pattern

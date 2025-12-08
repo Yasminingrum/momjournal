@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../domain/entities/schedule_entity.dart';
+import '/domain/entities/schedule_entity.dart';
 
 /// Repository for Schedule data management
 /// Implements offline-first approach with cloud sync capability
@@ -51,7 +51,7 @@ class ScheduleRepository {
 
   /// Get schedules by category
   Future<List<ScheduleEntity>> getSchedulesByCategory(
-      ScheduleCategory category) async {
+      ScheduleCategory category,) async {
     await init();
     return _box!.values.where((schedule) => schedule.category == category).toList();
   }

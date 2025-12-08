@@ -1,0 +1,311 @@
+import 'package:hive/hive.dart';
+
+part 'schedule_model.g.dart';
+
+/// Enum untuk kategori jadwal
+@HiveType(typeId: 10)
+enum ScheduleCategory {
+  @HiveField(0)
+  feeding, // Pemberian Makan/Menyusui
+
+  @HiveField(1)
+  sleeping, // Tidur
+
+  @HiveField(2)
+  health, // Kesehatan (vaksinasi, dokter)
+
+  @HiveField(3)
+  milestone, // Pencapaian perkembangan
+
+  @HiveField(4)
+  other, // Lainnya
+}
+
+/// Extension untuk mendapatkan display name dan emoji dari category
+extension ScheduleCategoryExtension on ScheduleCategory {
+  String get displayName {
+    switch (this) {
+      case ScheduleCategory.feeding:
+        return 'Pemberian Makan';
+      case ScheduleCategory.sleeping:
+        return 'Tidur';
+      case ScheduleCategory.health:
+        return 'Kesehatan';
+      case ScheduleCategory.milestone:
+        return 'Pencapaian';
+      case ScheduleCategory.other:
+        return 'Lainnya';
+    }
+  }
+
+  String get emoji {
+    switch (this) {
+      case ScheduleCategory.feeding:
+        return '🍼';
+      case ScheduleCategory.sleeping:
+        return '😴';
+      case ScheduleCategory.health:
+        return '🏥';
+      case ScheduleCategory.milestone:
+        return '🎉';
+      case ScheduleCategory.other:
+        return '📌';
+    }
+  }
+
+  /// Color code untuk UI (hex string)
+  String get colorHex {
+    switch (this) {
+      case ScheduleCategory.feeding:
+        return '#4A90E2'; // Blue
+      case ScheduleCategory.sleeping:
+        return '#9B59B6'; // Purple
+      case ScheduleCategory.health:
+        return '#E74C3C'; // Red
+      case ScheduleCategory.milestone:
+        return '#2ECC71'; // Green
+      case ScheduleCategory.other:
+        return '#95A5A6'; // Gray
+    }
+  }
+}
+
+/// Data model untuk Schedule/Agenda
+/// 
+/// Menyimpan informasi jadwal harian anak seperti
+/// waktu makan, tidur, kontrol kesehatan, dll
+@HiveType(typeId: 1)
+class ScheduleModel extends HiveObject {
+  /// ID unik untuk schedule
+  @HiveField(0)
+  final String id;
+
+  /// User ID pemilik schedule
+  @HiveField(1)
+  final String userId;
+
+  /// Judul/nama schedule
+  @HiveField(2)
+  final String title;
+
+  /// Deskripsi detail (optional)
+  @HiveField(3)
+  final String? description;
+
+  /// Kategori schedule
+  @HiveField(4)
+  final ScheduleCategory category;
+
+  /// Waktu schedule
+  @HiveField(5)
+  final DateTime scheduledTime;
+
+  /// Apakah reminder enabled
+  @HiveField(6)
+  final bool reminderEnabled;
+
+  /// Waktu reminder sebelum schedule (dalam menit)
+  /// Contoh: 15 = 15 menit sebelum scheduledTime
+  @HiveField(7)
+  final int? reminderMinutesBefore;
+
+  /// Apakah schedule sudah selesai/completed
+  @HiveField(8)
+  final bool isCompleted;
+
+  /// Waktu kapan schedule di-complete
+  @HiveField(9)
+  final DateTime? completedAt;
+
+  /// Catatan saat schedule di-complete
+  @HiveField(10)
+  final String? completionNotes;
+
+  /// Timestamp kapan schedule dibuat
+  @HiveField(11)
+  final DateTime createdAt;
+
+  /// Timestamp terakhir kali schedule diupdate
+  @HiveField(12)
+  final DateTime updatedAt;
+
+  /// Flag untuk sinkronisasi cloud
+  @HiveField(13)
+  final bool isSynced;
+
+  /// ID notification yang di-schedule (untuk cancellation)
+  @HiveField(14)
+  final int? notificationId;
+
+  ScheduleModel({
+    required this.id,
+    required this.userId,
+    required this.title,
+    this.description,
+    required this.category,
+    required this.scheduledTime,
+    this.reminderEnabled = true,
+    this.reminderMinutesBefore = 15,
+    this.isCompleted = false,
+    this.completedAt,
+    this.completionNotes,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isSynced = false,
+    this.notificationId,
+  });
+
+  /// Factory constructor dari JSON (Firestore)
+  factory ScheduleModel.fromJson(Map<String, dynamic> json) {
+    return ScheduleModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      category: ScheduleCategory.values.firstWhere(
+        (e) => e.toString() == 'ScheduleCategory.${json['category']}',
+        orElse: () => ScheduleCategory.other,
+      ),
+      scheduledTime: json['scheduledTime'] is DateTime
+          ? json['scheduledTime'] as DateTime
+          : DateTime.parse(json['scheduledTime'] as String),
+      reminderEnabled: json['reminderEnabled'] as bool? ?? true,
+      reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      completedAt: json['completedAt'] != null
+          ? (json['completedAt'] is DateTime
+              ? json['completedAt'] as DateTime
+              : DateTime.parse(json['completedAt'] as String))
+          : null,
+      completionNotes: json['completionNotes'] as String?,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] is DateTime
+          ? json['updatedAt'] as DateTime
+          : DateTime.parse(json['updatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
+      notificationId: json['notificationId'] as int?,
+    );
+  }
+
+  /// Convert ke JSON untuk Firestore
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'title': title,
+      'description': description,
+      'category': category.toString().split('.').last,
+      'scheduledTime': scheduledTime.toIso8601String(),
+      'reminderEnabled': reminderEnabled,
+      'reminderMinutesBefore': reminderMinutesBefore,
+      'isCompleted': isCompleted,
+      'completedAt': completedAt?.toIso8601String(),
+      'completionNotes': completionNotes,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'isSynced': isSynced,
+      'notificationId': notificationId,
+    };
+  }
+
+  /// Create copy with updated fields
+  ScheduleModel copyWith({
+    String? id,
+    String? userId,
+    String? title,
+    String? description,
+    ScheduleCategory? category,
+    DateTime? scheduledTime,
+    bool? reminderEnabled,
+    int? reminderMinutesBefore,
+    bool? isCompleted,
+    DateTime? completedAt,
+    String? completionNotes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isSynced,
+    int? notificationId,
+  }) {
+    return ScheduleModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      scheduledTime: scheduledTime ?? this.scheduledTime,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
+      completionNotes: completionNotes ?? this.completionNotes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isSynced: isSynced ?? this.isSynced,
+      notificationId: notificationId ?? this.notificationId,
+    );
+  }
+
+  /// Getter untuk cek apakah schedule sudah lewat
+  bool get isPast => scheduledTime.isBefore(DateTime.now());
+
+  /// Getter untuk cek apakah schedule hari ini
+  bool get isToday {
+    final now = DateTime.now();
+    return scheduledTime.year == now.year &&
+        scheduledTime.month == now.month &&
+        scheduledTime.day == now.day;
+  }
+
+  /// Getter untuk cek apakah schedule upcoming (belum lewat & belum complete)
+  bool get isUpcoming => !isPast && !isCompleted;
+
+  @override
+  String toString() {
+    return 'ScheduleModel(id: $id, title: $title, category: $category, '
+        'scheduledTime: $scheduledTime, isCompleted: $isCompleted)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is ScheduleModel &&
+        other.id == id &&
+        other.userId == userId &&
+        other.title == title &&
+        other.description == description &&
+        other.category == category &&
+        other.scheduledTime == scheduledTime &&
+        other.reminderEnabled == reminderEnabled &&
+        other.reminderMinutesBefore == reminderMinutesBefore &&
+        other.isCompleted == isCompleted &&
+        other.completedAt == completedAt &&
+        other.completionNotes == completionNotes &&
+        other.createdAt == createdAt &&
+        other.updatedAt == updatedAt &&
+        other.isSynced == isSynced &&
+        other.notificationId == notificationId;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        userId.hashCode ^
+        title.hashCode ^
+        description.hashCode ^
+        category.hashCode ^
+        scheduledTime.hashCode ^
+        reminderEnabled.hashCode ^
+        reminderMinutesBefore.hashCode ^
+        isCompleted.hashCode ^
+        completedAt.hashCode ^
+        completionNotes.hashCode ^
+        createdAt.hashCode ^
+        updatedAt.hashCode ^
+        isSynced.hashCode ^
+        notificationId.hashCode;
+  }
+}

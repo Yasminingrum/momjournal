@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '../data/repositories/photo_repository.dart';
-import '../domain/entities/photo_entity.dart';
+import '/data/repositories/photo_repository.dart';
+import '/domain/entities/photo_entity.dart';
 
 /// ViewModel for Photo management
 /// Manages photo state and business logic using Provider pattern

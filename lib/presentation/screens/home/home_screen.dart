@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/color_constants.dart';
-import '../../core/constants/text_constants.dart';
-import '../providers/schedule_provider.dart';
-import '../providers/journal_provider.dart';
-import '../providers/photo_provider.dart';
-import 'schedule/schedule_screen.dart';
-import 'journal/journal_screen.dart';
-import 'gallery/gallery_screen.dart';
-import 'settings/settings_screen.dart';
+import '/core/constants/color_constants.dart';
+import '/core/constants/text_constants.dart';
+import '/core/constants/app_constants.dart';
+import '/presentation/providers/schedule_provider.dart';
+import '/presentation/providers/journal_provider.dart';
+import '/presentation/providers/photo_provider.dart';
+import '/presentation/screens/schedule/schedule_screen.dart';
+import '/presentation/screens/journal/journal_screen.dart';
+import '/presentation/screens/gallery/gallery_screen.dart';
+import '/presentation/screens/settings/settings_screen.dart';
 
 /// Home Screen with bottom navigation and dashboard
 class HomeScreen extends StatefulWidget {

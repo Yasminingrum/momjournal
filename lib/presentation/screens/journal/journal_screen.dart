@@ -14,7 +14,6 @@ class JournalScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Navigate to add journal
         },
         child: const Icon(Icons.edit),
       ),
