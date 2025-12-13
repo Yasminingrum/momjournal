@@ -4,9 +4,9 @@
 /// Location: lib/domain/usecases/schedule/create_schedule.dart
 library;
 
+import '../../../core/errors/exceptions.dart';
 import '../../../data/repositories/schedule_repository.dart';
 import '../../entities/schedule_entity.dart';
-import '../../../core/errors/exceptions.dart';
 
 class CreateScheduleUseCase {
 

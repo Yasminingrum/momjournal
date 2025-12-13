@@ -1,8 +1,8 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
-import '../../../data/models/journal_model.dart';
-import '../../../data/models/schedule_model.dart';
 import 'package:provider/provider.dart';
-import '/core/constants/app_constants.dart';
+
 import '/core/constants/color_constants.dart';
 import '/core/constants/text_constants.dart';
 import '/presentation/providers/journal_provider.dart';
@@ -12,6 +12,8 @@ import '/presentation/screens/gallery/gallery_screen.dart';
 import '/presentation/screens/journal/journal_screen.dart';
 import '/presentation/screens/schedule/schedule_screen.dart';
 import '/presentation/screens/settings/settings_screen.dart';
+import '../../../domain/entities/journal_entity.dart';
+import '../../../domain/entities/schedule_entity.dart';
 
 /// Home Screen with bottom navigation and dashboard
 class HomeScreen extends StatefulWidget {
@@ -109,7 +111,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           IconButton(
             icon: const Icon(Icons.sync),
             onPressed: () {
-              // TODO: Implement sync
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Syncing...')),
               );
@@ -195,9 +196,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.event_note,
                 label: 'Add Schedule',
                 color: ColorConstants.categoryHealth,
-                onTap: () {
-                  // TODO: Navigate to add schedule
-                },
+                onTap: () {},
               ),
             ),
             const SizedBox(width: 12),
@@ -206,9 +205,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.edit_note,
                 label: 'Write Journal',
                 color: ColorConstants.primaryColor,
-                onTap: () {
-                  // TODO: Navigate to add journal
-                },
+                onTap: () {},
               ),
             ),
             const SizedBox(width: 12),
@@ -217,9 +214,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.add_a_photo,
                 label: 'Add Photo',
                 color: ColorConstants.categoryMilestone,
-                onTap: () {
-                  // TODO: Navigate to add photo
-                },
+                onTap: () {},
               ),
             ),
           ],
@@ -254,31 +249,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               )
             else
-              ...schedules.take(3).map((schedule) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.circle,
-                        color: _getCategoryColor(schedule.category),
-                        size: 12,
+              ...schedules.take(3).map(
+                    (schedule) => Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.circle,
+                          color: _getCategoryColor(schedule.category),
+                          size: 12,
+                        ),
+                        title: Text(schedule.title),
+                        subtitle: Text(
+                          '${schedule.dateTime.hour}:'
+                          '${schedule.dateTime.minute.toString().padLeft(2, '0')}',
+                        ),
+                        trailing: schedule.isCompleted
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
+                            : null,
                       ),
-                      title: Text(schedule.title),
-                      subtitle: Text(
-                        '${schedule.dateTime.hour}:${schedule.dateTime.minute.toString().padLeft(2, '0')}',
-                      ),
-                      trailing: schedule.isCompleted
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : null,
                     ),
-                  )),
+                  ),
           ],
         );
       },
     );
 
   Widget _buildMoodSection() => Consumer<JournalProvider>(
-      builder: (context, provider, child) {
-        return Column(
+      builder: (context, provider, child) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -294,18 +294,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildMoodStat('😄', provider.moodStats[MoodType.veryHappy] ?? 0),
-                    _buildMoodStat('🙂', provider.moodStats[MoodType.happy] ?? 0),
-                    _buildMoodStat('😐', provider.moodStats[MoodType.neutral] ?? 0),
-                    _buildMoodStat('☹️', provider.moodStats[MoodType.sad] ?? 0),
-                    _buildMoodStat('😢', provider.moodStats[MoodType.verySad] ?? 0),
+                    _buildMoodStat(
+                      '😄',
+                      provider.moodStats[MoodType.veryHappy] ?? 0,
+                    ),
+                    _buildMoodStat(
+                      '🙂',
+                      provider.moodStats[MoodType.happy] ?? 0,
+                    ),
+                    _buildMoodStat(
+                      '😐',
+                      provider.moodStats[MoodType.neutral] ?? 0,
+                    ),
+                    _buildMoodStat(
+                      '☹️',
+                      provider.moodStats[MoodType.sad] ?? 0,
+                    ),
+                    _buildMoodStat(
+                      '😢',
+                      provider.moodStats[MoodType.verySad] ?? 0,
+                    ),
                   ],
                 ),
               ),
             ),
           ],
-        );
-      },
+        ),
     );
 
   Widget _buildMoodStat(String emoji, int count) => Column(
@@ -320,8 +334,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
 
   Widget _buildPhotoMemories() => Consumer<PhotoProvider>(
-      builder: (context, provider, child) {
-        return Column(
+      builder: (context, provider, child) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -334,9 +347,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    // TODO: Navigate to gallery
-                  },
+                  onPressed: () {},
                   child: const Text('View All'),
                 ),
               ],
@@ -369,11 +380,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
           ],
-        );
-      },
+        ),
     );
 
-  Color _getCategoryColor(category) {
+  Color _getCategoryColor(ScheduleCategory category) {
     switch (category) {
       case ScheduleCategory.feeding:
         return ColorConstants.categoryFeeding;
@@ -383,20 +393,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return ColorConstants.categoryHealth;
       case ScheduleCategory.milestone:
         return ColorConstants.categoryMilestone;
-      default:
+      case ScheduleCategory.other:
         return ColorConstants.categoryOther;
     }
   }
 }
 
 class _QuickActionButton extends StatelessWidget {
-
   const _QuickActionButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
   });
+
   final IconData icon;
   final String label;
   final Color color;

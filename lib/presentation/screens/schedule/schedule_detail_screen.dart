@@ -1,30 +1,22 @@
-/// Schedule Detail Screen
-/// 
-/// Screen untuk melihat dan edit detail schedule
-/// Location: lib/presentation/screens/schedule/schedule_detail_screen.dart
-library;
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/constants/color_constants.dart';
 import '../../../domain/entities/schedule_entity.dart';
 import '../../providers/schedule_provider.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
-import '../../widgets/dialogs/info_dialog.dart';
-import '../../../core/constants/color_constants.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
-
   const ScheduleDetailScreen({
-    super.key,
-    required this.schedule,
+    required this.schedule, super.key,
   });
+
   final ScheduleEntity schedule;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,10 +46,10 @@ class ScheduleDetailScreen extends StatelessWidget {
               ),
             ),
 
-            if (schedule.description != null && schedule.description!.isNotEmpty) ...[
+            if (schedule.notes != null && schedule.notes!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                schedule.description!,
+                schedule.notes!,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: Colors.grey[600],
                 ),
@@ -94,14 +86,14 @@ class ScheduleDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Reminder card
-            if (schedule.isReminderEnabled)
+            if (schedule.hasReminder && schedule.reminderMinutes != null)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: _buildInfoRow(
                     icon: Icons.notifications_active,
                     label: 'Pengingat',
-                    value: _formatReminderTime(schedule.reminderMinutesBefore),
+                    value: _formatReminderTime(schedule.reminderMinutes!),
                     theme: theme,
                   ),
                 ),
@@ -153,7 +145,7 @@ class ScheduleDetailScreen extends StatelessWidget {
                   onPressed: provider.isLoading
                       ? null
                       : () => _handleToggleCompletion(context),
-                  label: schedule.isCompleted
+                  text: schedule.isCompleted
                       ? 'Tandai Belum Selesai'
                       : 'Tandai Selesai',
                   icon: schedule.isCompleted
@@ -161,7 +153,7 @@ class ScheduleDetailScreen extends StatelessWidget {
                       : Icons.check,
                   type: schedule.isCompleted
                       ? ButtonType.outlined
-                      : ButtonType.primary,
+                      : ButtonType.elevated,
                   isFullWidth: true,
                 ),
             ),
@@ -232,11 +224,16 @@ class ScheduleDetailScreen extends StatelessWidget {
 
   Future<void> _handleToggleCompletion(BuildContext context) async {
     final provider = context.read<ScheduleProvider>();
-    final updated = schedule.copyWith(isCompleted: !schedule.isCompleted);
+    final updated = schedule.copyWith(
+      isCompleted: !schedule.isCompleted,
+      updatedAt: DateTime.now(),
+    );
     
     final success = await provider.updateSchedule(updated);
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -251,27 +248,32 @@ class ScheduleDetailScreen extends StatelessWidget {
       );
       Navigator.pop(context);
     } else {
-      await showErrorDialog(
-        context,
-        title: 'Gagal',
-        message: provider.errorMessage ?? 'Terjadi kesalahan',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? 'Terjadi kesalahan'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      provider.clearError();
     }
   }
 
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDeleteConfirmation(
       context,
-      itemName: 'Jadwal',
+      itemName: 'jadwal ini',
     );
 
-    if (!confirmed || !context.mounted) return;
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
 
     final provider = context.read<ScheduleProvider>();
     final success = await provider.deleteSchedule(schedule.id);
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
       Navigator.pop(context);
@@ -282,12 +284,13 @@ class ScheduleDetailScreen extends StatelessWidget {
         ),
       );
     } else {
-      await showErrorDialog(
-        context,
-        title: 'Gagal',
-        message: provider.errorMessage ?? 'Terjadi kesalahan',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? 'Terjadi kesalahan'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      provider.clearError();
     }
   }
 
@@ -295,8 +298,8 @@ class ScheduleDetailScreen extends StatelessWidget {
     switch (schedule.category) {
       case ScheduleCategory.feeding:
         return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleeping:
-        return ColorConstants.categorySleeping;
+      case ScheduleCategory.sleep:
+        return ColorConstants.categorySleep;
       case ScheduleCategory.health:
         return ColorConstants.categoryHealth;
       case ScheduleCategory.milestone:
@@ -310,7 +313,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     switch (schedule.category) {
       case ScheduleCategory.feeding:
         return Icons.restaurant;
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return Icons.bedtime;
       case ScheduleCategory.health:
         return Icons.medical_services;
@@ -325,7 +328,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     switch (schedule.category) {
       case ScheduleCategory.feeding:
         return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return 'Tidur';
       case ScheduleCategory.health:
         return 'Kesehatan';

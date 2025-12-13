@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:hive/hive.dart';
 
 part 'schedule_model.g.dart';

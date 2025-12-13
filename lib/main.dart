@@ -42,8 +42,7 @@ void main() async {
 class MomJournalApp extends StatelessWidget {
 
   const MomJournalApp({
-    super.key,
-    required this.hiveDatabase,
+    required this.hiveDatabase, super.key,
   });
   final HiveDatabase hiveDatabase;
 
@@ -52,17 +51,17 @@ class MomJournalApp extends StatelessWidget {
       providers: [
         // Schedule Provider
         ChangeNotifierProvider(
-          create: (_) => ScheduleProvider(hiveDatabase),
+          create: (_) => ScheduleProvider(),
         ),
 
         // Journal Provider
         ChangeNotifierProvider(
-          create: (_) => JournalProvider(hiveDatabase),
+          create: (_) => JournalProvider(),
         ),
 
         // Photo Provider
         ChangeNotifierProvider(
-          create: (_) => PhotoProvider(hiveDatabase),
+          create: (_) => PhotoProvider(),
         ),
       ],
       child: Consumer<ScheduleProvider>(
@@ -84,9 +83,7 @@ class MomJournalApp extends StatelessWidget {
             // Error handling
             builder: (context, child) {
               // Global error boundary
-              ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-                return _ErrorScreen(errorDetails: errorDetails);
-              };
+              ErrorWidget.builder = (FlutterErrorDetails errorDetails) => _ErrorScreen(errorDetails: errorDetails);
 
               return child ?? const SizedBox.shrink();
             },
@@ -107,7 +104,7 @@ class _ErrorScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -167,11 +164,7 @@ class _ErrorScreen extends StatelessWidget {
 
               // Restart button
               ElevatedButton.icon(
-                onPressed: () {
-                  // Restart app (akan di-implement dengan restart package)
-                  // Untuk sekarang, keluar dari app
-                  SystemNavigator.pop();
-                },
+                onPressed: SystemNavigator.pop,
                 icon: const Icon(Icons.refresh),
                 label: const Text('Restart Aplikasi'),
                 style: ElevatedButton.styleFrom(

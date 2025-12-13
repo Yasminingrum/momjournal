@@ -1,31 +1,31 @@
-/// App Router
-/// 
-/// Centralized route definitions dan navigation
-/// Location: lib/presentation/routes/app_router.dart
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import '../screens/splash/splash_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/auth/setup_profile_screen.dart';
-import '../screens/home/home_screen.dart';
-import '../screens/schedule/schedule_screen.dart';
-import '../screens/schedule/add_schedule_screen.dart';
-import '../screens/schedule/schedule_detail_screen.dart';
-import '../screens/journal/journal_screen.dart';
-import '../screens/journal/add_journal_screen.dart';
-import '../screens/journal/journal_detail_screen.dart';
-import '../screens/gallery/gallery_screen.dart';
-import '../screens/gallery/photo_detail_screen.dart';
-import '../screens/settings/settings_screen.dart';
-import '../screens/settings/notification_settings_screen.dart';
-import '../screens/settings/account_screen.dart';
-import '../../domain/entities/schedule_entity.dart';
+
 import '../../domain/entities/journal_entity.dart';
 import '../../domain/entities/photo_entity.dart';
+import '../../domain/entities/schedule_entity.dart';
+import '../screens/auth/login_screen.dart';
+import '../screens/auth/setup_profile_screen.dart';
+import '../screens/gallery/gallery_screen.dart';
+import '../screens/gallery/photo_detail_screen.dart';
+import '../screens/home/home_screen.dart';
+import '../screens/journal/add_journal_screen.dart';
+import '../screens/journal/journal_detail_screen.dart';
+import '../screens/journal/journal_screen.dart';
+import '../screens/schedule/add_schedule_screen.dart';
+import '../screens/schedule/schedule_detail_screen.dart';
+import '../screens/schedule/schedule_screen.dart';
+import '../screens/settings/account_screen.dart';
+import '../screens/settings/notification_settings_screen.dart';
+import '../screens/settings/settings_screen.dart';
+import '../screens/splash/splash_screen.dart';
 
 /// Route names constants
 class Routes {
+  Routes._(); // Private constructor to prevent instantiation
+  
   // Auth & Onboarding
   static const String splash = '/';
   static const String login = '/login';
@@ -56,9 +56,13 @@ class Routes {
 
 /// App Router class
 class AppRouter {
+  AppRouter._(); // Private constructor to prevent instantiation
+  
   /// Generate route based on settings
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    print('🗺️ Navigating to: ${settings.name}');
+    if (kDebugMode) {
+      print('🗺️ Navigating to: ${settings.name}');
+    }
     
     switch (settings.name) {
       // ==================== AUTH & ONBOARDING ====================
@@ -157,7 +161,7 @@ class AppRouter {
       // ==================== 404 ====================
       default:
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
+          builder: (context) => Scaffold(
             appBar: AppBar(title: const Text('Error')),
             body: Center(
               child: Column(
@@ -198,26 +202,35 @@ class AppRouter {
 /// Navigation Helper Extensions
 extension NavigationHelper on BuildContext {
   /// Push named route
-  Future<T?> pushNamed<T>(String routeName, {Object? arguments}) => Navigator.pushNamed<T>(this, routeName, arguments: arguments);
+  Future<T?> pushNamed<T>(
+    String routeName, {
+    Object? arguments,
+  }) =>
+      Navigator.pushNamed<T>(this, routeName, arguments: arguments);
   
   /// Push replacement
-  Future<T?> pushReplacementNamed<T, TO>(String routeName, {Object? arguments}) => Navigator.pushReplacementNamed<T, TO>(
-      this,
-      routeName,
-      arguments: arguments,
-    );
+  Future<T?> pushReplacementNamed<T, TO>(
+    String routeName, {
+    Object? arguments,
+  }) =>
+      Navigator.pushReplacementNamed<T, TO>(
+        this,
+        routeName,
+        arguments: arguments,
+      );
   
   /// Push and remove until
   Future<T?> pushNamedAndRemoveUntil<T>(
     String routeName,
     bool Function(Route<dynamic>) predicate, {
     Object? arguments,
-  }) => Navigator.pushNamedAndRemoveUntil<T>(
-      this,
-      routeName,
-      predicate,
-      arguments: arguments,
-    );
+  }) =>
+      Navigator.pushNamedAndRemoveUntil<T>(
+        this,
+        routeName,
+        predicate,
+        arguments: arguments,
+      );
   
   /// Pop
   void pop<T>([T? result]) {
@@ -235,71 +248,80 @@ extension NavigationHelper on BuildContext {
 
 /// Quick Navigation Methods
 class Nav {
+  Nav._(); // Private constructor to prevent instantiation
+  
   /// Navigate to home (clear stack)
-  static Future<void> toHome(BuildContext context) => Navigator.pushNamedAndRemoveUntil(
-      context,
-      Routes.home,
-      (route) => false,
-    );
+  static Future<void> toHome(BuildContext context) =>
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Routes.home,
+        (route) => false,
+      );
   
   /// Navigate to login (clear stack)
-  static Future<void> toLogin(BuildContext context) => Navigator.pushNamedAndRemoveUntil(
-      context,
-      Routes.login,
-      (route) => false,
-    );
+  static Future<void> toLogin(BuildContext context) =>
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Routes.login,
+        (route) => false,
+      );
   
   /// Navigate to add schedule
   static Future<void> toAddSchedule(
     BuildContext context, {
     DateTime? selectedDate,
-  }) => Navigator.pushNamed(
-      context,
-      Routes.addSchedule,
-      arguments: {'selectedDate': selectedDate},
-    );
+  }) =>
+      Navigator.pushNamed(
+        context,
+        Routes.addSchedule,
+        arguments: {'selectedDate': selectedDate},
+      );
   
   /// Navigate to schedule detail
   static Future<void> toScheduleDetail(
     BuildContext context,
     ScheduleEntity schedule,
-  ) => Navigator.pushNamed(
-      context,
-      Routes.scheduleDetail,
-      arguments: schedule,
-    );
+  ) =>
+      Navigator.pushNamed(
+        context,
+        Routes.scheduleDetail,
+        arguments: schedule,
+      );
   
   /// Navigate to add journal
   static Future<void> toAddJournal(
     BuildContext context, {
     DateTime? selectedDate,
-  }) => Navigator.pushNamed(
-      context,
-      Routes.addJournal,
-      arguments: {'selectedDate': selectedDate},
-    );
+  }) =>
+      Navigator.pushNamed(
+        context,
+        Routes.addJournal,
+        arguments: {'selectedDate': selectedDate},
+      );
   
   /// Navigate to journal detail
   static Future<void> toJournalDetail(
     BuildContext context,
     JournalEntity journal,
-  ) => Navigator.pushNamed(
-      context,
-      Routes.journalDetail,
-      arguments: journal,
-    );
+  ) =>
+      Navigator.pushNamed(
+        context,
+        Routes.journalDetail,
+        arguments: journal,
+      );
   
   /// Navigate to photo detail
   static Future<void> toPhotoDetail(
     BuildContext context,
     PhotoEntity photo,
     String heroTag,
-  ) => Navigator.pushNamed(
-      context,
-      Routes.photoDetail,
-      arguments: {
-        'photo': photo,
-        'heroTag': heroTag,
-      },
-    );
+  ) =>
+      Navigator.pushNamed(
+        context,
+        Routes.photoDetail,
+        arguments: {
+          'photo': photo,
+          'heroTag': heroTag,
+        },
+      );
 }

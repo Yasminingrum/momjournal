@@ -37,9 +37,7 @@ Future<bool> showConfirmationDialog(
 class ConfirmationDialog extends StatelessWidget {
 
   const ConfirmationDialog({
-    super.key,
-    required this.title,
-    required this.message,
+    required this.title, required this.message, super.key,
     this.confirmText = 'Ya',
     this.cancelText = 'Tidak',
     this.isDangerous = false,

@@ -1,12 +1,10 @@
-/// Firebase Service
-/// 
-/// Handles Firebase initialization and provides utilities for Firebase operations
-/// Location: lib/data/datasources/remote/firebase_service.dart
+// ignore_for_file: lines_longer_than_80_chars
+
 library;
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 /// Service untuk mengelola koneksi dan instance Firebase
@@ -85,25 +83,33 @@ class FirebaseService {
 
   /// Get schedules collection reference for current user
   CollectionReference? get schedulesCollection {
-    if (currentUserId == null) return null;
+    if (currentUserId == null) {
+      return null;
+    }
     return usersCollection.doc(currentUserId).collection('schedules');
   }
 
   /// Get journals collection reference for current user
   CollectionReference? get journalsCollection {
-    if (currentUserId == null) return null;
+    if (currentUserId == null) {
+      return null;
+    }
     return usersCollection.doc(currentUserId).collection('journals');
   }
 
   /// Get photos collection reference for current user
   CollectionReference? get photosCollection {
-    if (currentUserId == null) return null;
+    if (currentUserId == null) {
+      return null;
+    }
     return usersCollection.doc(currentUserId).collection('photos');
   }
 
   /// Get storage reference for user photos
   Reference? get userPhotosRef {
-    if (currentUserId == null) return null;
+    if (currentUserId == null) {
+      return null;
+    }
     return storage.ref().child('users/$currentUserId/photos');
   }
 

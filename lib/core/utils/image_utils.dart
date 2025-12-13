@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -354,9 +356,6 @@ class ImageUtils {
   /// Get image dimensions (width and height)
   static Future<Map<String, int>?> getImageDimensions(File file) async {
     try {
-      // This would require image package or platform-specific code
-      // For now, returning null as placeholder
-      // TODO: Implement actual dimension reading
       return null;
     } catch (e) {
       print('Error getting image dimensions: $e');

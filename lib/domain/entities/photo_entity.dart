@@ -8,19 +8,15 @@ class PhotoEntity extends HiveObject {
   PhotoEntity({
     required this.id,
     required this.userId,
-    this.localPath,
+    required this.dateTaken, required this.createdAt, required this.updatedAt, this.localPath,
     this.cloudUrl,
     this.caption,
     this.isMilestone = false,
-    required this.dateTaken,
-    required this.createdAt,
-    required this.updatedAt,
     this.isSynced = false,
     this.isUploaded = false,
   });
 
-  factory PhotoEntity.fromJson(Map<String, dynamic> json) {
-    return PhotoEntity(
+  factory PhotoEntity.fromJson(Map<String, dynamic> json) => PhotoEntity(
       id: json['id'] as String,
       userId: json['userId'] as String,
       localPath: json['localPath'] as String?,
@@ -33,7 +29,6 @@ class PhotoEntity extends HiveObject {
       isSynced: true,
       isUploaded: json['cloudUrl'] != null,
     );
-  }
   @HiveField(0)
   final String id;
   
@@ -66,6 +61,12 @@ class PhotoEntity extends HiveObject {
   
   @HiveField(10)
   final bool isUploaded;
+
+  /// Get download URL (prefer cloudUrl, fallback to localPath)
+  String get downloadUrl => cloudUrl ?? localPath ?? '';
+  
+  /// Get captured date (prefer dateTaken)
+  DateTime get capturedAt => dateTaken;
 
   PhotoEntity copyWith({
     String? id,

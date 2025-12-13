@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/photo_repository.dart';
 import '/domain/entities/photo_entity.dart';
 
@@ -8,10 +7,9 @@ import '/domain/entities/photo_entity.dart';
 /// Manages photo state and business logic using Provider pattern
 class PhotoProvider extends ChangeNotifier {
 
-  PhotoProvider(this._hiveDatabase);
+  PhotoProvider();
   final PhotoRepository _repository = PhotoRepository();
   final Uuid _uuid = const Uuid();
-  final HiveDatabase _hiveDatabase;
 
   List<PhotoEntity> _photos = [];
   List<PhotoEntity> _milestonePhotos = [];
@@ -29,6 +27,7 @@ class PhotoProvider extends ChangeNotifier {
   bool get isUploading => _isUploading;
   double get uploadProgress => _uploadProgress;
   String? get error => _error;
+  String? get errorMessage => _error;
 
   /// Initialize provider
   Future<void> init() async {
@@ -46,7 +45,10 @@ class PhotoProvider extends ChangeNotifier {
         _currentPage = 0;
       }
       
-      final newPhotos = await _repository.getPhotosPaginated(_currentPage, _pageSize);
+      final newPhotos = await _repository.getPhotosPaginated(
+        _currentPage,
+        _pageSize,
+      );
       
       if (refresh) {
         _photos = newPhotos;
@@ -206,13 +208,18 @@ class PhotoProvider extends ChangeNotifier {
     notifyListeners();
 
     for (int i = 0; i <= 100; i += 10) {
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future<void>.delayed(const Duration(milliseconds: 200));
       _uploadProgress = i / 100;
       notifyListeners();
     }
 
     _isUploading = false;
     notifyListeners();
+  }
+
+  /// Clear error message
+  void clearError() {
+    _clearError();
   }
 
   // Helper methods

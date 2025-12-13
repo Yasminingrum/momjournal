@@ -1,4 +1,5 @@
-/// Text constants for UI labels, messages, and content
+// ignore_for_file: lines_longer_than_80_chars
+
 class TextConstants {
   // App
   static const String appName = 'MomJournal';
@@ -51,6 +52,7 @@ class TextConstants {
   static const String writeYourThoughts = 'Write your thoughts...';
   static const String moodTrends = 'Mood Trends';
   static const String journalHistory = 'Journal History';
+  static const String addJournal = 'Add Journal';
   
   // Moods
   static const String moodVeryHappy = 'Very Happy';
@@ -65,6 +67,7 @@ class TextConstants {
   static const String markAsMilestone = 'Mark as Milestone';
   static const String milestones = 'Milestones';
   static const String allPhotos = 'All Photos';
+  static const String addPhoto = 'Add Photo';
   
   // Settings
   static const String settings = 'Settings';
@@ -99,12 +102,15 @@ class TextConstants {
   static const String delete = 'Delete';
   static const String edit = 'Edit';
   static const String confirm = 'Confirm';
+  static const String retry = 'Retry';
   
   // Error Messages
   static const String errorGeneric = 'Something went wrong';
   static const String errorNetwork = 'Network error. Please check your connection';
   static const String errorAuth = 'Authentication failed';
   static const String errorPermission = 'Permission denied';
+  static const String errorNoInternet = 'No internet connection. Please check your network settings.';
+  static const String errorPermissionDenied = 'Permission denied. Please grant the required permissions to continue.';
   
   // Confirmation Messages
   static const String confirmDelete = 'Are you sure you want to delete this?';
@@ -116,4 +122,16 @@ class TextConstants {
   static const String noJournals = 'No journal entries yet';
   static const String noPhotos = 'No photos yet';
   static const String startJournaling = 'Start documenting your journey';
+  
+  // Empty State Titles
+  static const String emptySchedules = 'Belum Ada Jadwal';
+  static const String emptyJournals = 'Belum Ada Jurnal';
+  static const String emptyPhotos = 'Belum Ada Foto';
+  static const String emptySearch = 'Tidak Ada Hasil';
+  
+  // Empty State Descriptions
+  static const String emptySchedulesDescription = 'Mulai menambahkan jadwal untuk mengatur hari Anda';
+  static const String emptyJournalsDescription = 'Mulai menulis jurnal untuk mendokumentasikan perjalanan Anda';
+  static const String emptyPhotosDescription = 'Tambahkan foto untuk menyimpan momen berharga';
+  static const String emptySearchDescription = 'Coba kata kunci lain atau hapus filter pencarian';
 }

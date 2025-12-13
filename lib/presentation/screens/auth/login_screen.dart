@@ -34,7 +34,9 @@ class LoginScreen extends StatelessWidget {
                     color: Colors.black54,
                     child: const Center(
                       child: LoadingOverlay(
+                        isLoading: true,
                         message: 'Masuk dengan Google...',
+                        child: SizedBox(),
                       ),
                     ),
                   ),
@@ -95,7 +97,8 @@ class LoginScreen extends StatelessWidget {
             
             // Tagline
             Text(
-              'Kelola jadwal, dokumentasikan perjalanan,\ndan jaga kesehatan mental Anda',
+              'Kelola jadwal, dokumentasikan perjalanan,\n'
+              'dan jaga kesehatan mental Anda',
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -105,7 +108,7 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 60),
             
             // Features list
-            _FeatureItem(
+            const _FeatureItem(
               icon: Icons.calendar_today,
               title: 'Manajemen Jadwal',
               description: 'Atur jadwal harian anak dengan mudah',
@@ -113,7 +116,7 @@ class LoginScreen extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            _FeatureItem(
+            const _FeatureItem(
               icon: Icons.edit_note,
               title: 'Jurnal Harian',
               description: 'Catat momen dan perasaan Anda',
@@ -121,7 +124,7 @@ class LoginScreen extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            _FeatureItem(
+            const _FeatureItem(
               icon: Icons.photo_library,
               title: 'Galeri Foto',
               description: 'Simpan kenangan indah bersama si kecil',
@@ -129,7 +132,7 @@ class LoginScreen extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            _FeatureItem(
+            const _FeatureItem(
               icon: Icons.cloud_upload,
               title: 'Backup Otomatis',
               description: 'Data aman tersimpan di cloud',
@@ -138,19 +141,18 @@ class LoginScreen extends StatelessWidget {
             const Spacer(),
             
             // Google Sign-In Button
-            CustomButton.icon(
+            PrimaryButton(
+              text: 'Masuk dengan Google',
               onPressed: () => _handleGoogleSignIn(context),
-              label: 'Masuk dengan Google',
               icon: Icons.g_mobiledata_rounded,
-              type: ButtonType.primary,
-              isFullWidth: true,
             ),
             
             const SizedBox(height: 12),
             
             // Terms & Privacy
             Text(
-              'Dengan masuk, Anda menyetujui\nSyarat & Ketentuan serta Kebijakan Privasi',
+              'Dengan masuk, Anda menyetujui\n'
+              'Syarat & Ketentuan serta Kebijakan Privasi',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.grey[600],
               ),
@@ -166,11 +168,13 @@ class LoginScreen extends StatelessWidget {
     
     final success = await authProvider.signInWithGoogle();
     
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
     
     if (success) {
       // Navigate to home
-      Navigator.pushReplacementNamed(context, Routes.home);
+      await Navigator.pushReplacementNamed(context, Routes.home);
     } else {
       // Show error dialog
       await showErrorDialog(
@@ -192,6 +196,7 @@ class _FeatureItem extends StatelessWidget {
     required this.title,
     required this.description,
   });
+  
   final IconData icon;
   final String title;
   final String description;

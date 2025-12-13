@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 
 /// SettingsTile
@@ -14,10 +16,9 @@ import 'package:flutter/material.dart';
 class SettingsTile extends StatelessWidget {
 
   const SettingsTile({
-    super.key,
+    required this.title, super.key,
     this.icon,
     this.iconColor,
-    required this.title,
     this.subtitle,
     this.trailing,
     this.onTap,
@@ -92,13 +93,10 @@ class SettingsTile extends StatelessWidget {
 class SettingsSwitchTile extends StatelessWidget {
 
   const SettingsSwitchTile({
-    super.key,
+    required this.title, required this.value, required this.onChanged, super.key,
     this.icon,
     this.iconColor,
-    required this.title,
     this.subtitle,
-    required this.value,
-    required this.onChanged,
     this.enabled = true,
     this.showDivider = true,
   });
@@ -122,7 +120,7 @@ class SettingsSwitchTile extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: enabled ? onChanged : null,
-        activeColor: iconColor ?? Theme.of(context).primaryColor,
+        activeThumbColor: iconColor ?? Theme.of(context).primaryColor,
       ),
       onTap: enabled ? () => onChanged(!value) : null,
     );
@@ -133,12 +131,10 @@ class SettingsSwitchTile extends StatelessWidget {
 class SettingsValueTile extends StatelessWidget {
 
   const SettingsValueTile({
-    super.key,
+    required this.title, required this.value, super.key,
     this.icon,
     this.iconColor,
-    required this.title,
     this.subtitle,
-    required this.value,
     this.onTap,
     this.enabled = true,
     this.showDivider = true,
@@ -186,12 +182,9 @@ class SettingsValueTile extends StatelessWidget {
 class SettingsActionTile extends StatelessWidget {
 
   const SettingsActionTile({
-    super.key,
-    required this.icon,
-    required this.title,
+    required this.icon, required this.title, required this.onTap, super.key,
     this.subtitle,
     this.color = Colors.red,
-    required this.onTap,
     this.showDivider = true,
   });
   final IconData icon;
@@ -217,8 +210,7 @@ class SettingsActionTile extends StatelessWidget {
 class SettingsSectionHeader extends StatelessWidget {
 
   const SettingsSectionHeader({
-    super.key,
-    required this.title,
+    required this.title, super.key,
     this.padding = const EdgeInsets.fromLTRB(16, 24, 16, 8),
   });
   final String title;
@@ -268,11 +260,8 @@ class SettingsCard extends StatelessWidget {
 class SettingsInfoTile extends StatelessWidget {
 
   const SettingsInfoTile({
-    super.key,
-    required this.icon,
+    required this.icon, required this.title, required this.value, super.key,
     this.iconColor,
-    required this.title,
-    required this.value,
     this.showDivider = true,
   });
   final IconData icon;
@@ -302,17 +291,14 @@ class SettingsInfoTile extends StatelessWidget {
 class SettingsSliderTile extends StatelessWidget {
 
   const SettingsSliderTile({
-    super.key,
+    required this.title, required this.value, required this.onChanged, super.key,
     this.icon,
     this.iconColor,
-    required this.title,
     this.subtitle,
-    required this.value,
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
     this.valueLabel,
-    required this.onChanged,
     this.enabled = true,
   });
   final IconData? icon;
@@ -389,13 +375,10 @@ class SettingsSliderTile extends StatelessWidget {
 class SettingsCheckboxTile extends StatelessWidget {
 
   const SettingsCheckboxTile({
-    super.key,
+    required this.title, required this.value, required this.onChanged, super.key,
     this.icon,
     this.iconColor,
-    required this.title,
     this.subtitle,
-    required this.value,
-    required this.onChanged,
     this.enabled = true,
     this.showDivider = true,
   });

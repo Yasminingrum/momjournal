@@ -1,9 +1,3 @@
-/// Notification Settings Screen
-/// 
-/// Screen untuk mengatur notification settings
-/// Location: lib/presentation/screens/settings/notification_settings_screen.dart
-library;
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/notification_provider.dart';
@@ -27,9 +21,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                 title: const Text('Aktifkan Notifikasi'),
                 subtitle: const Text('Terima pengingat untuk jadwal'),
                 value: provider.notificationsEnabled,
-                onChanged: (value) {
-                  provider.toggleNotifications(value);
-                },
+                onChanged: (bool value) =>
+                    provider.toggleNotifications(enabled: value),
                 secondary: const Icon(Icons.notifications_active),
               ),
 
@@ -41,7 +34,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                 subtitle: const Text('Mainkan suara saat notifikasi'),
                 value: provider.soundEnabled,
                 onChanged: provider.notificationsEnabled
-                    ? (value) => provider.toggleSound(value)
+                    ? (bool value) => provider.toggleSound(enabled: value)
                     : null,
                 secondary: const Icon(Icons.volume_up),
               ),
@@ -52,7 +45,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                 subtitle: const Text('Getarkan HP saat notifikasi'),
                 value: provider.vibrationEnabled,
                 onChanged: provider.notificationsEnabled
-                    ? (value) => provider.toggleVibration(value)
+                    ? (bool value) => provider.toggleVibration(enabled: value)
                     : null,
                 secondary: const Icon(Icons.vibration),
               ),
@@ -61,7 +54,10 @@ class NotificationSettingsScreen extends StatelessWidget {
 
               // Quiet hours section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Text(
                   'Jam Tenang',
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -75,7 +71,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                 subtitle: const Text('Tidak ada notifikasi di jam tenang'),
                 value: provider.quietHoursEnabled,
                 onChanged: provider.notificationsEnabled
-                    ? (value) => provider.toggleQuietHours(value)
+                    ? (bool value) => provider.toggleQuietHours(enabled: value)
                     : null,
                 secondary: const Icon(Icons.nightlight_round),
               ),
@@ -125,7 +121,9 @@ class NotificationSettingsScreen extends StatelessWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Notifikasi akan dinonaktifkan dari ${_formatTime(provider.quietHoursStart)} hingga ${_formatTime(provider.quietHoursEnd)}',
+                            'Notifikasi akan dinonaktifkan dari '
+                            '${_formatTime(provider.quietHoursStart)} '
+                            'hingga ${_formatTime(provider.quietHoursEnd)}',
                             style: TextStyle(
                               color: Colors.blue[700],
                               fontSize: 12,

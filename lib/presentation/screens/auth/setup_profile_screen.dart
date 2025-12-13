@@ -1,13 +1,10 @@
-/// Setup Profile Screen
-/// 
-/// Screen untuk setup profil anak setelah login pertama kali
-/// Location: lib/presentation/screens/auth/setup_profile_screen.dart
 library;
 
 import 'package:flutter/material.dart';
+
+import '../../routes/app_router.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
-import '../../routes/app_router.dart';
 
 class SetupProfileScreen extends StatefulWidget {
   const SetupProfileScreen({super.key});
@@ -74,7 +71,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 const SizedBox(height: 8),
                 
                 Text(
-                  'Informasi ini membantu kami personalisasi pengalaman Anda',
+                  'Informasi ini membantu kami personalisasi '
+                  'pengalaman Anda',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),
@@ -87,7 +85,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 CustomTextField(
                   label: 'Nama Anak',
                   controller: _nameController,
-                  hintText: 'Contoh: Fjola',
+                  hint: 'Contoh: Fjola',
                   prefixIcon: Icons.person,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -178,8 +176,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 // Submit button
                 CustomButton(
                   onPressed: _isLoading ? null : _handleSubmit,
-                  label: _isLoading ? 'Menyimpan...' : 'Lanjutkan',
-                  type: ButtonType.primary,
+                  text: _isLoading ? 'Menyimpan...' : 'Lanjutkan',
                   isFullWidth: true,
                 ),
                 
@@ -200,7 +197,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
   Future<void> _selectDate() async {
     final now = DateTime.now();
-    final initialDate = _selectedDate ?? now.subtract(const Duration(days: 365));
+    final initialDate = _selectedDate ?? 
+        now.subtract(const Duration(days: 365));
     
     final picked = await showDatePicker(
       context: context,
@@ -238,13 +236,13 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       _isLoading = true;
     });
 
-    // TODO: Save to Firestore
-    // For now, just navigate
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
-    Navigator.pushReplacementNamed(context, Routes.home);
+    await Navigator.pushReplacementNamed(context, Routes.home);
   }
 
   void _handleSkip() {

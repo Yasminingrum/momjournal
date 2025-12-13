@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../models/journal_model.dart';

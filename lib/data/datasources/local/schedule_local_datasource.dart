@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:hive/hive.dart';
 import '../../models/schedule_model.dart';
 import 'hive_database.dart';
@@ -80,7 +82,9 @@ class ScheduleLocalDataSource {
       final targetDate = DateTime(date.year, date.month, date.day);
 
       return _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
 
         final scheduleDate = DateTime(
           schedule.scheduledTime.year,
@@ -105,7 +109,9 @@ class ScheduleLocalDataSource {
   ) {
     try {
       return _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
         return schedule.scheduledTime.year == year &&
             schedule.scheduledTime.month == month;
       }).toList()
@@ -139,7 +145,9 @@ class ScheduleLocalDataSource {
       final now = DateTime.now();
 
       return _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
         return schedule.scheduledTime.isAfter(now) && !schedule.isCompleted;
       }).toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
@@ -155,7 +163,9 @@ class ScheduleLocalDataSource {
       final now = DateTime.now();
 
       return _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
         return schedule.scheduledTime.isBefore(now) || schedule.isCompleted;
       }).toList()
         ..sort((a, b) => b.scheduledTime.compareTo(a.scheduledTime));
@@ -215,7 +225,9 @@ class ScheduleLocalDataSource {
       final end = DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
 
       return _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
         return schedule.scheduledTime.isAfter(start) &&
             schedule.scheduledTime.isBefore(end);
       }).toList()

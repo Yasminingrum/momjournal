@@ -1,7 +1,5 @@
-/// Add Journal Screen
-/// 
-/// Screen untuk menulis journal entry baru
-/// Location: lib/presentation/screens/journal/add_journal_screen.dart
+// ignore_for_file: lines_longer_than_80_chars
+
 library;
 
 import 'package:flutter/material.dart';
@@ -9,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../../../domain/entities/journal_entity.dart';
 import '../../providers/journal_provider.dart';
 import '../../widgets/common/custom_button.dart';
-import '../../widgets/dialogs/info_dialog.dart';
 
 class AddJournalScreen extends StatefulWidget {
 
@@ -25,7 +22,7 @@ class AddJournalScreen extends StatefulWidget {
 
 class _AddJournalScreenState extends State<AddJournalScreen> {
   final _contentController = TextEditingController();
-  Mood _selectedMood = Mood.neutral;
+  MoodType _selectedMood = MoodType.neutral;
   DateTime? _selectedDate;
   bool _isLoading = false;
   int _characterCount = 0;
@@ -107,8 +104,8 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
           // Save button
           CustomButton(
             onPressed: _isLoading ? null : _handleSave,
-            label: _isLoading ? 'Menyimpan...' : 'Simpan Jurnal',
-            type: ButtonType.primary,
+            text: _isLoading ? 'Menyimpan...' : 'Simpan Jurnal',
+            type: ButtonType.elevated,
             isFullWidth: true,
           ),
         ],
@@ -155,7 +152,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
 
   Widget _buildMoodSelector() => Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: Mood.values.map((mood) {
+      children: MoodType.values.map((mood) {
         final isSelected = _selectedMood == mood;
         return GestureDetector(
           onTap: () {
@@ -168,7 +165,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
             width: isSelected ? 70 : 60,
             height: isSelected ? 70 : 60,
             decoration: BoxDecoration(
-              color: isSelected ? _getMoodColor().withOpacity(0.2) : Colors.grey[100],
+              color: isSelected ? _getMoodColor().withValues(alpha: 0.2) : Colors.grey[100],
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected ? _getMoodColor() : Colors.transparent,
@@ -207,19 +204,27 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
     final content = _contentController.text.trim();
 
     if (content.isEmpty) {
-      await showErrorDialog(
-        context,
-        title: 'Konten Kosong',
-        message: 'Silakan tulis sesuatu di jurnal',
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Silakan tulis sesuatu di jurnal'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     if (content.length < 10) {
-      await showErrorDialog(
-        context,
-        title: 'Terlalu Pendek',
-        message: 'Konten jurnal minimal 10 karakter',
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Konten jurnal minimal 10 karakter'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -228,65 +233,65 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
       _isLoading = true;
     });
 
-    final journal = JournalEntity.create(
-      content: content,
+    final journalProvider = context.read<JournalProvider>();
+    final success = await journalProvider.createJournal(
       mood: _selectedMood,
-      date: _selectedDate!,
+      content: content,
+      date: _selectedDate,
     );
 
-    final journalProvider = context.read<JournalProvider>();
-    final success = await journalProvider.createJournal(journal);
-
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (success) {
-      await showSuccessDialog(
-        context,
-        title: 'Berhasil',
-        message: 'Jurnal berhasil disimpan',
-        onPressed: () => Navigator.pop(context),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Jurnal berhasil disimpan'),
+          backgroundColor: Colors.green,
+        ),
       );
+      Navigator.pop(context);
     } else {
       setState(() {
         _isLoading = false;
       });
 
-      await showErrorDialog(
-        context,
-        title: 'Gagal',
-        message: journalProvider.errorMessage ?? 'Terjadi kesalahan',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(journalProvider.error ?? 'Terjadi kesalahan'),
+          backgroundColor: Colors.red,
+        ),
       );
-
-      journalProvider.clearError();
     }
   }
 
-  String _getMoodEmoji(Mood mood) {
+  String _getMoodEmoji(MoodType mood) {
     switch (mood) {
-      case Mood.veryHappy:
+      case MoodType.veryHappy:
         return '😄';
-      case Mood.happy:
+      case MoodType.happy:
         return '😊';
-      case Mood.neutral:
+      case MoodType.neutral:
         return '😐';
-      case Mood.sad:
+      case MoodType.sad:
         return '😔';
-      case Mood.verySad:
+      case MoodType.verySad:
         return '😢';
     }
   }
 
   Color _getMoodColor() {
     switch (_selectedMood) {
-      case Mood.veryHappy:
+      case MoodType.veryHappy:
         return Colors.green;
-      case Mood.happy:
+      case MoodType.happy:
         return Colors.lightGreen;
-      case Mood.neutral:
+      case MoodType.neutral:
         return Colors.amber;
-      case Mood.sad:
+      case MoodType.sad:
         return Colors.orange;
-      case Mood.verySad:
+      case MoodType.verySad:
         return Colors.red;
     }
   }

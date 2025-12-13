@@ -1,23 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// ignore_for_file: lines_longer_than_80_chars
 
-/// PhotoGrid
-/// Grid layout for displaying photo gallery with lazy loading.
-/// Supports different grid configurations and photo selection.
-///
-/// Features:
-/// - Responsive grid (2-4 columns)
-/// - Lazy loading with placeholders
-/// - Cached images
-/// - Date section headers
-/// - Milestone badges
-/// - Selection mode
-/// - Pull to refresh
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
 class PhotoGrid extends StatelessWidget {
 
   const PhotoGrid({
-    super.key,
-    required this.photos,
+    required this.photos, super.key,
     this.crossAxisCount = 3,
     this.spacing = 4,
     this.showHeaders = true,
@@ -33,8 +22,8 @@ class PhotoGrid extends StatelessWidget {
   final bool showHeaders;
   final bool selectionMode;
   final Set<String> selectedPhotoIds;
-  final Function(String)? onPhotoTap;
-  final Function(String, bool)? onPhotoSelected;
+  final void Function(String)? onPhotoTap;
+  final void Function(String, {required bool selected})? onPhotoSelected;
   final bool isLoading;
 
   @override
@@ -60,12 +49,10 @@ class PhotoGrid extends StatelessWidget {
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: spacing,
         mainAxisSpacing: spacing,
-        childAspectRatio: 1.0,
+        childAspectRatio: 1,
       ),
       itemCount: photos.length,
-      itemBuilder: (context, index) {
-        return _buildPhotoTile(photos[index]);
-      },
+      itemBuilder: (context, index) => _buildPhotoTile(photos[index]),
     );
 
   Widget _buildGridWithHeaders() {
@@ -123,14 +110,14 @@ class PhotoGrid extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (selectionMode && onPhotoSelected != null) {
-          onPhotoSelected!(photo.id, !isSelected);
+          onPhotoSelected!(photo.id, selected: !isSelected);
         } else if (onPhotoTap != null) {
           onPhotoTap!(photo.id);
         }
       },
       onLongPress: () {
         if (onPhotoSelected != null) {
-          onPhotoSelected!(photo.id, true);
+          onPhotoSelected!(photo.id, selected: true);
         }
       },
       child: Stack(
@@ -204,17 +191,15 @@ class PhotoGrid extends StatelessWidget {
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: spacing,
         mainAxisSpacing: spacing,
-        childAspectRatio: 1.0,
+        childAspectRatio: 1,
       ),
       itemCount: 12,
-      itemBuilder: (context, index) {
-        return Container(
+      itemBuilder: (context, index) => Container(
           decoration: BoxDecoration(
             color: Colors.grey[200],
             borderRadius: BorderRadius.circular(4),
           ),
-        );
-      },
+        ),
     );
 
   Widget _buildEmptyState(BuildContext context) => Center(
@@ -271,8 +256,7 @@ class PhotoGridItem {
   const PhotoGridItem({
     required this.id,
     required this.imageUrl,
-    this.thumbnailUrl,
-    required this.createdAt,
+    required this.createdAt, this.thumbnailUrl,
     this.caption,
     this.isMilestone = false,
   });
@@ -289,13 +273,12 @@ class PhotoGridItem {
 class AdaptivePhotoGrid extends StatelessWidget {
 
   const AdaptivePhotoGrid({
-    super.key,
-    required this.photos,
+    required this.photos, super.key,
     this.onPhotoTap,
     this.isLoading = false,
   });
   final List<PhotoGridItem> photos;
-  final Function(String)? onPhotoTap;
+  final void Function(String)? onPhotoTap;
   final bool isLoading;
 
   @override
@@ -325,13 +308,8 @@ class AdaptivePhotoGrid extends StatelessWidget {
 class PhotoGridHeader extends StatelessWidget {
 
   const PhotoGridHeader({
-    super.key,
-    required this.photoCount,
-    required this.showMilestonesOnly,
-    required this.onToggleMilestones,
+    required this.photoCount, required this.showMilestonesOnly, required this.onToggleMilestones, required this.isGridView, required this.onToggleView, super.key,
     this.onSort,
-    required this.isGridView,
-    required this.onToggleView,
   });
   final int photoCount;
   final bool showMilestonesOnly;
@@ -347,7 +325,7 @@ class PhotoGridHeader extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),

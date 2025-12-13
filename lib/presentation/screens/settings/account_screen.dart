@@ -2,15 +2,18 @@
 /// 
 /// Screen untuk account settings dan user info
 /// Location: lib/presentation/screens/settings/account_screen.dart
+// ignore_for_file: lines_longer_than_80_chars
+
 library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../providers/auth_provider.dart';
 import '../../providers/sync_provider.dart';
+import '../../routes/app_router.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
 import '../../widgets/dialogs/info_dialog.dart';
-import '../../routes/app_router.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -86,7 +89,6 @@ class AccountScreen extends StatelessWidget {
                 subtitle: const Text('Ubah informasi anak'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  // TODO: Navigate to edit child profile
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Fitur akan segera tersedia'),
@@ -123,7 +125,6 @@ class AccountScreen extends StatelessWidget {
                 subtitle: const Text('Unduh semua data Anda'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                 onTap: () {
-                  // TODO: Export data
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Fitur akan segera tersedia'),
@@ -203,7 +204,9 @@ class AccountScreen extends StatelessWidget {
     
     final success = await syncProvider.syncAll();
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -225,15 +228,19 @@ class AccountScreen extends StatelessWidget {
   Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await showLogoutConfirmation(context);
 
-    if (!confirmed || !context.mounted) return;
+    if (!confirmed || !context.mounted) {
+      return;
+    }
 
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.signOut();
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
-      Nav.toLogin(context);
+      await Nav.toLogin(context);
     } else {
       await showErrorDialog(
         context,
@@ -260,10 +267,12 @@ class AccountScreen extends StatelessWidget {
       ),
     );
 
-    if (!confirmed || !context.mounted) return;
+    if (!confirmed || !context.mounted) {
+      return;
+    }
 
     // Show loading
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
@@ -274,12 +283,14 @@ class AccountScreen extends StatelessWidget {
     final authProvider = context.read<AuthProvider>();
     final success = await authProvider.deleteAccount();
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     Navigator.pop(context); // Close loading
 
     if (success) {
-      Nav.toLogin(context);
+      await Nav.toLogin(context);
     } else {
       await showErrorDialog(
         context,

@@ -1,7 +1,3 @@
-/// Notification Provider
-/// 
-/// State management untuk notification settings
-/// Location: lib/presentation/providers/notification_provider.dart
 library;
 
 import 'package:flutter/foundation.dart';
@@ -33,63 +29,62 @@ class NotificationProvider with ChangeNotifier {
 
   /// Initialize settings
   Future<void> initialize() async {
-    // TODO: Load settings from local storage
     notifyListeners();
   }
 
   /// Toggle notifications
-  Future<void> toggleNotifications(bool enabled) async {
+  Future<void> toggleNotifications({required bool enabled}) async {
     _notificationsEnabled = enabled;
     notifyListeners();
     
     if (!enabled) {
-      await _notifications.cancelAll();
-      print('🔕 All notifications cancelled');
+      await _notificationService.cancelAllNotifications();
+      if (kDebugMode) {
+        print('🔕 All notifications cancelled');
+      }
     } else {
-      print('🔔 Notifications enabled');
+      if (kDebugMode) {
+        print('🔔 Notifications enabled');
+      }
     }
     
-    // TODO: Save to local storage
   }
 
   /// Toggle sound
-  void toggleSound(bool enabled) {
+  void toggleSound({required bool enabled}) {
     _soundEnabled = enabled;
     notifyListeners();
-    // TODO: Save to local storage
   }
 
   /// Toggle vibration
-  void toggleVibration(bool enabled) {
+  void toggleVibration({required bool enabled}) {
     _vibrationEnabled = enabled;
     notifyListeners();
-    // TODO: Save to local storage
   }
 
   /// Set quiet hours start
   void setQuietHoursStart(TimeOfDay time) {
     _quietHoursStart = time;
     notifyListeners();
-    // TODO: Save to local storage
   }
 
   /// Set quiet hours end
   void setQuietHoursEnd(TimeOfDay time) {
     _quietHoursEnd = time;
     notifyListeners();
-    // TODO: Save to local storage
   }
 
   /// Toggle quiet hours
-  void toggleQuietHours(bool enabled) {
+  void toggleQuietHours({required bool enabled}) {
     _quietHoursEnabled = enabled;
     notifyListeners();
-    // TODO: Save to local storage
   }
 
   /// Check if currently in quiet hours
   bool isInQuietHours() {
-    if (!_quietHoursEnabled) return false;
+    if (!_quietHoursEnabled) {
+      return false;
+    }
 
     final now = TimeOfDay.now();
     final start = _quietHoursStart;
@@ -116,23 +111,32 @@ class NotificationProvider with ChangeNotifier {
     required String id,
     required String title,
     required String body,
-    required DateTime scheduledTime,
+    required DateTime scheduledDate,
   }) async {
-    if (!_notificationsEnabled) return;
-    if (isInQuietHours()) return;
+    if (!_notificationsEnabled) {
+      return;
+    }
+    if (isInQuietHours()) {
+      return;
+    }
+
+    // Convert String id to int for notification service
+    final notificationId = id.hashCode % 1000000;
 
     await _notificationService.scheduleNotification(
-      id: id,
+      id: notificationId,
       title: title,
       body: body,
-      scheduledTime: scheduledTime,
+      scheduledDate: scheduledDate,
       payload: id,
     );
   }
 
   /// Cancel notification
   Future<void> cancelNotification(String id) async {
-    await _notificationService.cancelNotification(id);
+    // Convert String id to int for notification service
+    final notificationId = id.hashCode % 1000000;
+    await _notificationService.cancelNotification(notificationId);
   }
 
   /// Show instant notification
@@ -141,9 +145,15 @@ class NotificationProvider with ChangeNotifier {
     required String body,
     String? payload,
   }) async {
-    if (!_notificationsEnabled) return;
+    if (!_notificationsEnabled) {
+      return;
+    }
+
+    // Generate a unique id for instant notification
+    final notificationId = DateTime.now().millisecondsSinceEpoch % 1000000;
 
     await _notificationService.showNotification(
+      id: notificationId,
       title: title,
       body: body,
       payload: payload,

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants/color_constants.dart';
 
 /// Custom Text Field Widget
 /// Provides consistent text input styling across the app
 class CustomTextField extends StatelessWidget {
   
   const CustomTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.hint,
@@ -32,7 +31,7 @@ class CustomTextField extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.contentPadding,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -94,7 +93,7 @@ class CustomTextField extends StatelessWidget {
 class MultiLineTextField extends StatelessWidget {
   
   const MultiLineTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.hint,
@@ -103,7 +102,7 @@ class MultiLineTextField extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.showCounter = true,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -131,13 +130,13 @@ class MultiLineTextField extends StatelessWidget {
 class PasswordTextField extends StatefulWidget {
   
   const PasswordTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.hint,
     this.validator,
     this.onSubmitted,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -179,12 +178,12 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
 class SearchTextField extends StatefulWidget {
   
   const SearchTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.hint,
     this.onChanged,
     this.onClear,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? hint;
   final ValueChanged<String>? onChanged;
@@ -243,11 +242,11 @@ class _SearchTextFieldState extends State<SearchTextField> {
 class EmailTextField extends StatelessWidget {
   
   const EmailTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.validator,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final FormFieldValidator<String>? validator;
@@ -268,11 +267,11 @@ class EmailTextField extends StatelessWidget {
 class PhoneTextField extends StatelessWidget {
   
   const PhoneTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.validator,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final FormFieldValidator<String>? validator;
@@ -297,14 +296,14 @@ class PhoneTextField extends StatelessWidget {
 class NumberTextField extends StatelessWidget {
   
   const NumberTextField({
-    Key? key,
+    super.key,
     this.controller,
     this.label,
     this.hint,
     this.maxLength,
     this.validator,
     this.allowDecimal = false,
-  }) : super(key: key);
+  });
   final TextEditingController? controller;
   final String? label;
   final String? hint;
@@ -337,15 +336,14 @@ class NumberTextField extends StatelessWidget {
 class DatePickerField extends StatelessWidget {
   
   const DatePickerField({
-    Key? key,
-    required this.controller,
+    required this.controller, super.key,
     this.label,
     this.initialDate,
     this.firstDate,
     this.lastDate,
     this.onDateSelected,
     this.validator,
-  }) : super(key: key);
+  });
   final TextEditingController controller;
   final String? label;
   final DateTime? initialDate;
@@ -382,13 +380,12 @@ class DatePickerField extends StatelessWidget {
 class TimePickerField extends StatelessWidget {
   
   const TimePickerField({
-    Key? key,
-    required this.controller,
+    required this.controller, super.key,
     this.label,
     this.initialTime,
     this.onTimeSelected,
     this.validator,
-  }) : super(key: key);
+  });
   final TextEditingController controller;
   final String? label;
   final TimeOfDay? initialTime;

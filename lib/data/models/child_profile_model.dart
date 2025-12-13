@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:hive/hive.dart';
 
 part 'child_profile_model.g.dart';
@@ -13,20 +15,17 @@ class ChildProfileModel extends HiveObject {
     required this.userId,
     required this.name,
     required this.birthDate,
-    this.gender,
+    required this.createdAt, required this.updatedAt, this.gender,
     this.photoUrl,
     this.localPhotoPath,
     this.birthWeightGrams,
     this.birthHeightCm,
     this.notes,
-    required this.createdAt,
-    required this.updatedAt,
     this.isSynced = false,
   });
 
   /// Factory constructor dari JSON (Firestore)
-  factory ChildProfileModel.fromJson(Map<String, dynamic> json) {
-    return ChildProfileModel(
+  factory ChildProfileModel.fromJson(Map<String, dynamic> json) => ChildProfileModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
       name: json['name'] as String,
@@ -47,7 +46,6 @@ class ChildProfileModel extends HiveObject {
           : DateTime.parse(json['updatedAt'] as String),
       isSynced: json['isSynced'] as bool? ?? false,
     );
-  }
   /// ID unik untuk child profile
   @HiveField(0)
   final String id;
@@ -215,14 +213,18 @@ class ChildProfileModel extends HiveObject {
 
   /// Getter untuk birth weight yang readable (kg)
   String get readableBirthWeight {
-    if (birthWeightGrams == null) return 'Tidak ada data';
+    if (birthWeightGrams == null) {
+      return 'Tidak ada data';
+    }
     final kg = birthWeightGrams! / 1000;
     return '${kg.toStringAsFixed(2)} kg';
   }
 
   /// Getter untuk birth height yang readable (cm)
   String get readableBirthHeight {
-    if (birthHeightCm == null) return 'Tidak ada data';
+    if (birthHeightCm == null) {
+      return 'Tidak ada data';
+    }
     return '$birthHeightCm cm';
   }
 
@@ -232,7 +234,9 @@ class ChildProfileModel extends HiveObject {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is ChildProfileModel &&
         other.id == id &&

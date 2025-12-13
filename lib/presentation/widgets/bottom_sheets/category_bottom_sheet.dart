@@ -1,12 +1,9 @@
-/// Category Bottom Sheet
-/// 
-/// Bottom sheet untuk memilih kategori schedule
-/// Location: lib/presentation/widgets/bottom_sheets/category_bottom_sheet.dart
 library;
 
 import 'package:flutter/material.dart';
+
+import '/core/constants/color_constants.dart';
 import '../../../domain/entities/schedule_entity.dart';
-import '../../../core/constants/color_constants.dart';
 
 /// Show category bottom sheet
 /// 
@@ -14,7 +11,7 @@ import '../../../core/constants/color_constants.dart';
 Future<ScheduleCategory?> showCategoryBottomSheet(
   BuildContext context, {
   ScheduleCategory? selectedCategory,
-}) async => await showModalBottomSheet<ScheduleCategory>(
+}) => showModalBottomSheet<ScheduleCategory>(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -102,10 +99,7 @@ class CategoryBottomSheet extends StatelessWidget {
 class CategoryTile extends StatelessWidget {
 
   const CategoryTile({
-    super.key,
-    required this.category,
-    required this.isSelected,
-    required this.onTap,
+    required this.category, required this.isSelected, required this.onTap, super.key,
   });
   final ScheduleCategory category;
   final bool isSelected;
@@ -123,7 +117,7 @@ class CategoryTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? categoryColor.withOpacity(0.1) : null,
+          color: isSelected ? categoryColor.withValues(alpha: 0.1) : null,
           border: Border(
             left: BorderSide(
               color: isSelected ? categoryColor : Colors.transparent,
@@ -138,7 +132,7 @@ class CategoryTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: categoryColor.withOpacity(0.2),
+                color: categoryColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -177,8 +171,8 @@ class CategoryTile extends StatelessWidget {
     switch (category) {
       case ScheduleCategory.feeding:
         return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleeping:
-        return ColorConstants.categorySleeping;
+      case ScheduleCategory.sleep:
+        return ColorConstants.categorySleep;
       case ScheduleCategory.health:
         return ColorConstants.categoryHealth;
       case ScheduleCategory.milestone:
@@ -192,7 +186,7 @@ class CategoryTile extends StatelessWidget {
     switch (category) {
       case ScheduleCategory.feeding:
         return Icons.restaurant;
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return Icons.bedtime;
       case ScheduleCategory.health:
         return Icons.medical_services;
@@ -207,7 +201,7 @@ class CategoryTile extends StatelessWidget {
     switch (category) {
       case ScheduleCategory.feeding:
         return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return 'Tidur';
       case ScheduleCategory.health:
         return 'Kesehatan';

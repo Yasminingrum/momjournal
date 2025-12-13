@@ -4,9 +4,9 @@
 /// Location: lib/domain/usecases/journal/create_journal.dart
 library;
 
+import '../../../core/errors/exceptions.dart';
 import '../../../data/repositories/journal_repository.dart';
 import '../../entities/journal_entity.dart';
-import '../../../core/errors/exceptions.dart';
 
 class CreateJournalUseCase {
 

@@ -1,21 +1,14 @@
-/// Journal Detail Screen
-/// 
-/// Screen untuk melihat detail journal entry
-/// Location: lib/presentation/screens/journal/journal_detail_screen.dart
 library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../domain/entities/journal_entity.dart';
 import '../../providers/journal_provider.dart';
-import '../../widgets/dialogs/confirmation_dialog.dart';
-import '../../widgets/dialogs/info_dialog.dart';
 
 class JournalDetailScreen extends StatelessWidget {
 
   const JournalDetailScreen({
-    super.key,
-    required this.journal,
+    required this.journal, super.key,
   });
   final JournalEntity journal;
 
@@ -133,18 +126,35 @@ class JournalDetailScreen extends StatelessWidget {
   }
 
   Future<void> _handleDelete(BuildContext context) async {
-    final confirmed = await showDeleteConfirmation(
-      context,
-      itemName: 'Jurnal',
-      message: 'Jurnal yang dihapus tidak dapat dikembalikan.',
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Jurnal'),
+        content: const Text('Jurnal yang dihapus tidak dapat dikembalikan.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
     );
 
-    if (!confirmed || !context.mounted) return;
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
 
     final provider = context.read<JournalProvider>();
     final success = await provider.deleteJournal(journal.id);
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
       Navigator.pop(context);
@@ -155,56 +165,57 @@ class JournalDetailScreen extends StatelessWidget {
         ),
       );
     } else {
-      await showErrorDialog(
-        context,
-        title: 'Gagal',
-        message: provider.errorMessage ?? 'Terjadi kesalahan',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? 'Terjadi kesalahan'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
-      provider.clearError();
     }
   }
 
-  String _getMoodEmoji(Mood mood) {
+  String _getMoodEmoji(MoodType mood) {
     switch (mood) {
-      case Mood.veryHappy:
+      case MoodType.veryHappy:
         return '😄';
-      case Mood.happy:
+      case MoodType.happy:
         return '😊';
-      case Mood.neutral:
+      case MoodType.neutral:
         return '😐';
-      case Mood.sad:
+      case MoodType.sad:
         return '😔';
-      case Mood.verySad:
+      case MoodType.verySad:
         return '😢';
     }
   }
 
-  Color _getMoodColor(Mood mood) {
+  Color _getMoodColor(MoodType mood) {
     switch (mood) {
-      case Mood.veryHappy:
+      case MoodType.veryHappy:
         return Colors.green;
-      case Mood.happy:
+      case MoodType.happy:
         return Colors.lightGreen;
-      case Mood.neutral:
+      case MoodType.neutral:
         return Colors.amber;
-      case Mood.sad:
+      case MoodType.sad:
         return Colors.orange;
-      case Mood.verySad:
+      case MoodType.verySad:
         return Colors.red;
     }
   }
 
-  String _getMoodLabel(Mood mood) {
+  String _getMoodLabel(MoodType mood) {
     switch (mood) {
-      case Mood.veryHappy:
+      case MoodType.veryHappy:
         return 'Sangat Bahagia';
-      case Mood.happy:
+      case MoodType.happy:
         return 'Bahagia';
-      case Mood.neutral:
+      case MoodType.neutral:
         return 'Biasa Saja';
-      case Mood.sad:
+      case MoodType.sad:
         return 'Sedih';
-      case Mood.verySad:
+      case MoodType.verySad:
         return 'Sangat Sedih';
     }
   }

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/color_constants.dart';
-import '../../core/constants/text_constants.dart';
+import '/core/constants/color_constants.dart';
+import '/core/constants/text_constants.dart';
 import 'custom_button.dart';
 
 /// Empty State Widget
 /// Displays empty states with optional action button
 class EmptyState extends StatelessWidget {
-  
   const EmptyState({
-    Key? key,
+    super.key,
     this.title,
     this.message,
     this.icon,
@@ -16,7 +15,8 @@ class EmptyState extends StatelessWidget {
     this.onAction,
     this.actionText,
     this.showAction = true,
-  }) : super(key: key);
+  });
+  
   final String? title;
   final String? message;
   final IconData? icon;
@@ -73,7 +73,6 @@ class EmptyState extends StatelessWidget {
                 text: actionText ?? 'Tambah',
                 onPressed: onAction,
                 icon: Icons.add,
-                isFullWidth: false,
               ),
             ],
           ],
@@ -84,11 +83,11 @@ class EmptyState extends StatelessWidget {
 
 /// Empty Schedule State
 class EmptyScheduleState extends StatelessWidget {
-  
   const EmptyScheduleState({
-    Key? key,
+    super.key,
     this.onAddSchedule,
-  }) : super(key: key);
+  });
+  
   final VoidCallback? onAddSchedule;
   
   @override
@@ -103,11 +102,11 @@ class EmptyScheduleState extends StatelessWidget {
 
 /// Empty Journal State
 class EmptyJournalState extends StatelessWidget {
-  
   const EmptyJournalState({
-    Key? key,
+    super.key,
     this.onAddJournal,
-  }) : super(key: key);
+  });
+  
   final VoidCallback? onAddJournal;
   
   @override
@@ -122,11 +121,11 @@ class EmptyJournalState extends StatelessWidget {
 
 /// Empty Photo State
 class EmptyPhotoState extends StatelessWidget {
-  
   const EmptyPhotoState({
-    Key? key,
+    super.key,
     this.onAddPhoto,
-  }) : super(key: key);
+  });
+  
   final VoidCallback? onAddPhoto;
   
   @override
@@ -141,14 +140,14 @@ class EmptyPhotoState extends StatelessWidget {
 
 /// Empty Search Results State
 class EmptySearchState extends StatelessWidget {
-  final String? query;
-  final VoidCallback? onClear;
-  
   const EmptySearchState({
     super.key,
     this.query,
     this.onClear,
   });
+  
+  final String? query;
+  final VoidCallback? onClear;
   
   @override
   Widget build(BuildContext context) => EmptyState(
@@ -165,11 +164,11 @@ class EmptySearchState extends StatelessWidget {
 
 /// No Connection State
 class NoConnectionState extends StatelessWidget {
-  
   const NoConnectionState({
-    Key? key,
+    super.key,
     this.onRetry,
-  }) : super(key: key);
+  });
+  
   final VoidCallback? onRetry;
   
   @override
@@ -184,12 +183,12 @@ class NoConnectionState extends StatelessWidget {
 
 /// Coming Soon State
 class ComingSoonState extends StatelessWidget {
-  final String? feature;
-  
   const ComingSoonState({
     super.key,
     this.feature,
   });
+  
+  final String? feature;
   
   @override
   Widget build(BuildContext context) => EmptyState(
@@ -204,11 +203,11 @@ class ComingSoonState extends StatelessWidget {
 
 /// Under Maintenance State
 class MaintenanceState extends StatelessWidget {
-  
   const MaintenanceState({
-    Key? key,
+    super.key,
     this.message,
-  }) : super(key: key);
+  });
+  
   final String? message;
   
   @override
@@ -225,7 +224,7 @@ class NoNotificationsState extends StatelessWidget {
   const NoNotificationsState({super.key});
   
   @override
-  Widget build(BuildContext context) => EmptyState(
+  Widget build(BuildContext context) => const EmptyState(
       icon: Icons.notifications_none_outlined,
       title: 'Tidak Ada Notifikasi',
       message: 'Anda belum memiliki notifikasi',
@@ -235,14 +234,14 @@ class NoNotificationsState extends StatelessWidget {
 
 /// Placeholder Card (for loading states)
 class PlaceholderCard extends StatelessWidget {
-  
   const PlaceholderCard({
-    Key? key,
+    super.key,
     this.height = 100,
     this.width,
     this.borderRadius = 12,
     this.child,
-  }) : super(key: key);
+  });
+  
   final double height;
   final double? width;
   final double borderRadius;
@@ -263,7 +262,7 @@ class PlaceholderCard extends StatelessWidget {
         ),
       ),
       child: child ??
-          Center(
+          const Center(
             child: Icon(
               Icons.add,
               size: 32,
@@ -275,12 +274,11 @@ class PlaceholderCard extends StatelessWidget {
 
 /// Empty List Message
 class EmptyListMessage extends StatelessWidget {
-  
   const EmptyListMessage({
-    Key? key,
-    required this.message,
+    required this.message, super.key,
     this.icon,
-  }) : super(key: key);
+  });
+  
   final String message;
   final IconData? icon;
   

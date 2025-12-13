@@ -1,12 +1,9 @@
-/// Photo Detail Screen
-/// 
-/// Screen untuk melihat foto full screen dengan hero animation
-/// Location: lib/presentation/screens/gallery/photo_detail_screen.dart
 library;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../../domain/entities/photo_entity.dart';
 import '../../providers/photo_provider.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
@@ -15,10 +12,9 @@ import '../../widgets/dialogs/info_dialog.dart';
 class PhotoDetailScreen extends StatelessWidget {
 
   const PhotoDetailScreen({
-    super.key,
-    required this.photo,
-    required this.heroTag,
+    required this.photo, required this.heroTag, super.key,
   });
+  
   final PhotoEntity photo;
   final String heroTag;
 
@@ -44,7 +40,7 @@ class PhotoDetailScreen extends StatelessWidget {
                 tag: heroTag,
                 child: InteractiveViewer(
                   minScale: 0.5,
-                  maxScale: 4.0,
+                  maxScale: 4,
                   child: CachedNetworkImage(
                     imageUrl: photo.downloadUrl,
                     fit: BoxFit.contain,
@@ -150,12 +146,16 @@ class PhotoDetailScreen extends StatelessWidget {
       message: 'Foto yang dihapus tidak dapat dikembalikan.',
     );
 
-    if (!confirmed || !context.mounted) return;
+    if (!confirmed || !context.mounted) {
+      return;
+    }
 
     final provider = context.read<PhotoProvider>();
     final success = await provider.deletePhoto(photo.id);
 
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
 
     if (success) {
       Navigator.pop(context);

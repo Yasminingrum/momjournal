@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/color_constants.dart';
-import '../../core/constants/text_constants.dart';
+import '/core/constants/color_constants.dart';
+import '/core/constants/text_constants.dart';
 
 /// Loading Indicator Widget
 /// Provides consistent loading states across the app
 class LoadingIndicator extends StatelessWidget {
   
   const LoadingIndicator({
-    Key? key,
+    super.key,
     this.message,
     this.color,
     this.size = 40,
-  }) : super(key: key);
+  });
   final String? message;
   final Color? color;
   final double size;
@@ -50,9 +50,9 @@ class LoadingIndicator extends StatelessWidget {
 class SmallLoadingIndicator extends StatelessWidget {
   
   const SmallLoadingIndicator({
-    Key? key,
+    super.key,
     this.color,
-  }) : super(key: key);
+  });
   final Color? color;
   
   @override
@@ -72,11 +72,9 @@ class SmallLoadingIndicator extends StatelessWidget {
 class LoadingOverlay extends StatelessWidget {
   
   const LoadingOverlay({
-    Key? key,
-    required this.isLoading,
-    required this.child,
+    required this.isLoading, required this.child, super.key,
     this.message,
-  }) : super(key: key);
+  });
   final bool isLoading;
   final Widget child;
   final String? message;
@@ -101,12 +99,12 @@ class LoadingOverlay extends StatelessWidget {
 class LinearLoadingIndicator extends StatelessWidget {
   
   const LinearLoadingIndicator({
-    Key? key,
+    super.key,
     this.value,
     this.backgroundColor,
     this.valueColor,
     this.height = 4,
-  }) : super(key: key);
+  });
   final double? value;
   final Color? backgroundColor;
   final Color? valueColor;
@@ -127,18 +125,17 @@ class LinearLoadingIndicator extends StatelessWidget {
 
 /// Shimmer Loading (for skeleton screens)
 class ShimmerLoading extends StatefulWidget {
-  final Widget child;
-  final bool isLoading;
-  final Color? baseColor;
-  final Color? highlightColor;
   
   const ShimmerLoading({
-    super.key,
-    required this.child,
+    required this.child, super.key,
     this.isLoading = true,
     this.baseColor,
     this.highlightColor,
   });
+  final Widget child;
+  final bool isLoading;
+  final Color? baseColor;
+  final Color? highlightColor;
   
   @override
   State<ShimmerLoading> createState() => _ShimmerLoadingState();
@@ -172,8 +169,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => ShaderMask(
-          shaderCallback: (bounds) {
-            return LinearGradient(
+          shaderCallback: (bounds) => LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
               colors: [
@@ -186,8 +182,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
                 _controller.value,
                 _controller.value + 0.3,
               ],
-            ).createShader(bounds);
-          },
+            ).createShader(bounds),
           child: widget.child,
         ),
     );
@@ -198,11 +193,11 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 class SkeletonLoadingCard extends StatelessWidget {
   
   const SkeletonLoadingCard({
-    Key? key,
+    super.key,
     this.height = 100,
     this.width,
     this.borderRadius = 12,
-  }) : super(key: key);
+  });
   final double height;
   final double? width;
   final double borderRadius;
@@ -224,11 +219,11 @@ class SkeletonLoadingCard extends StatelessWidget {
 class SkeletonLoadingList extends StatelessWidget {
   
   const SkeletonLoadingList({
-    Key? key,
+    super.key,
     this.itemCount = 5,
     this.itemHeight = 80,
     this.spacing = 16,
-  }) : super(key: key);
+  });
   final int itemCount;
   final double itemHeight;
   final double spacing;
@@ -238,9 +233,7 @@ class SkeletonLoadingList extends StatelessWidget {
       itemCount: itemCount,
       padding: const EdgeInsets.all(16),
       separatorBuilder: (context, index) => SizedBox(height: spacing),
-      itemBuilder: (context, index) {
-        return SkeletonLoadingCard(height: itemHeight);
-      },
+      itemBuilder: (context, index) => SkeletonLoadingCard(height: itemHeight),
     );
 }
 
@@ -248,11 +241,11 @@ class SkeletonLoadingList extends StatelessWidget {
 class PulsingDotIndicator extends StatefulWidget {
   
   const PulsingDotIndicator({
-    Key? key,
+    super.key,
     this.color,
     this.size = 8,
     this.dotCount = 3,
-  }) : super(key: key);
+  });
   final Color? color;
   final double size;
   final int dotCount;
@@ -283,8 +276,7 @@ class _PulsingDotIndicatorState extends State<PulsingDotIndicator>
   @override
   Widget build(BuildContext context) => Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(widget.dotCount, (index) {
-        return AnimatedBuilder(
+      children: List.generate(widget.dotCount, (index) => AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
             final delay = index * 0.2;
@@ -306,8 +298,7 @@ class _PulsingDotIndicatorState extends State<PulsingDotIndicator>
               ),
             );
           },
-        );
-      }),
+        ),),
     );
 }
 
@@ -315,11 +306,9 @@ class _PulsingDotIndicatorState extends State<PulsingDotIndicator>
 class CustomRefreshIndicator extends StatelessWidget {
   
   const CustomRefreshIndicator({
-    Key? key,
-    required this.child,
-    required this.onRefresh,
+    required this.child, required this.onRefresh, super.key,
     this.color,
-  }) : super(key: key);
+  });
   final Widget child;
   final Future<void> Function() onRefresh;
   final Color? color;

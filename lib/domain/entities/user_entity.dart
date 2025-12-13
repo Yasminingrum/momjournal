@@ -9,15 +9,12 @@ class UserEntity extends HiveObject {
     required this.id,
     required this.email,
     required this.displayName,
-    this.photoUrl,
+    required this.createdAt, required this.updatedAt, this.photoUrl,
     this.childName,
     this.childDateOfBirth,
-    required this.createdAt,
-    required this.updatedAt,
   });
 
-  factory UserEntity.fromJson(Map<String, dynamic> json) {
-    return UserEntity(
+  factory UserEntity.fromJson(Map<String, dynamic> json) => UserEntity(
       id: json['id'] as String,
       email: json['email'] as String,
       displayName: json['displayName'] as String,
@@ -29,7 +26,6 @@ class UserEntity extends HiveObject {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
-  }
   @HiveField(0)
   final String id;
   

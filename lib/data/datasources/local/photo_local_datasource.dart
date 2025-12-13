@@ -1,6 +1,7 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import '/core/errors/exceptions.dart';
 import '../../models/photo_model.dart';
 
@@ -168,10 +169,10 @@ class PhotoLocalDataSource {
   /// Returns photos marked as milestones, sorted by date descending
   List<PhotoModel> getMilestonePhotos() {
     try {
-      final photos = _photoBox.values.where((photo) => photo.isMilestone).toList();
+      final photos = _photoBox.values.where((photo) => photo.isMilestone).toList()
 
       // Sort by date descending
-      photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return photos;
     } catch (e) {
@@ -189,10 +190,10 @@ class PhotoLocalDataSource {
   List<PhotoModel> getPhotosByTag(String tag) {
     try {
       final lowerTag = tag.toLowerCase();
-      final photos = _photoBox.values.where((photo) => photo.tags?.any((t) => t.toLowerCase() == lowerTag) ?? false).toList();
+      final photos = _photoBox.values.where((photo) => photo.tags?.any((t) => t.toLowerCase() == lowerTag) ?? false).toList()
 
       // Sort by date descending
-      photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return photos;
     } catch (e) {

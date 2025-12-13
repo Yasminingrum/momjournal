@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../core/constants/color_constants.dart';
-import '../../core/constants/text_constants.dart';
+import '/core/constants/color_constants.dart';
+import '/core/constants/text_constants.dart';
 import 'custom_button.dart';
 
 /// Error Widget
 /// Displays error states with retry option
 class ErrorDisplayWidget extends StatelessWidget {
-  final String? message;
-  final String? title;
-  final IconData? icon;
-  final VoidCallback? onRetry;
-  final String? retryButtonText;
   
   const ErrorDisplayWidget({
     super.key,
@@ -20,6 +15,11 @@ class ErrorDisplayWidget extends StatelessWidget {
     this.onRetry,
     this.retryButtonText,
   });
+  final String? message;
+  final String? title;
+  final IconData? icon;
+  final VoidCallback? onRetry;
+  final String? retryButtonText;
   
   @override
   Widget build(BuildContext context) => Center(
@@ -67,12 +67,12 @@ class ErrorDisplayWidget extends StatelessWidget {
 
 /// Network Error Widget
 class NetworkErrorWidget extends StatelessWidget {
-  final VoidCallback? onRetry;
   
   const NetworkErrorWidget({
     super.key,
     this.onRetry,
   });
+  final VoidCallback? onRetry;
   
   @override
   Widget build(BuildContext context) => ErrorDisplayWidget(
@@ -87,11 +87,11 @@ class NetworkErrorWidget extends StatelessWidget {
 class NotFoundErrorWidget extends StatelessWidget {
   
   const NotFoundErrorWidget({
-    Key? key,
+    super.key,
     this.message,
     this.onAction,
     this.actionText,
-  }) : super(key: key);
+  });
   final String? message;
   final VoidCallback? onAction;
   final String? actionText;
@@ -108,14 +108,14 @@ class NotFoundErrorWidget extends StatelessWidget {
 
 /// Permission Denied Widget
 class PermissionDeniedWidget extends StatelessWidget {
-  final String? message;
-  final VoidCallback? onSettings;
   
   const PermissionDeniedWidget({
     super.key,
     this.message,
     this.onSettings,
   });
+  final String? message;
+  final VoidCallback? onSettings;
   
   @override
   Widget build(BuildContext context) => ErrorDisplayWidget(
@@ -129,14 +129,13 @@ class PermissionDeniedWidget extends StatelessWidget {
 
 /// Inline Error Message
 class InlineErrorMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback? onDismiss;
   
   const InlineErrorMessage({
-    super.key,
-    required this.message,
+    required this.message, super.key,
     this.onDismiss,
   });
+  final String message;
+  final VoidCallback? onDismiss;
   
   @override
   Widget build(BuildContext context) => Container(
@@ -179,14 +178,13 @@ class InlineErrorMessage extends StatelessWidget {
 
 /// Inline Success Message
 class InlineSuccessMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback? onDismiss;
   
   const InlineSuccessMessage({
-    super.key,
-    required this.message,
+    required this.message, super.key,
     this.onDismiss,
   });
+  final String message;
+  final VoidCallback? onDismiss;
   
   @override
   Widget build(BuildContext context) => Container(
@@ -231,10 +229,9 @@ class InlineSuccessMessage extends StatelessWidget {
 class InlineWarningMessage extends StatelessWidget {
   
   const InlineWarningMessage({
-    Key? key,
-    required this.message,
+    required this.message, super.key,
     this.onDismiss,
-  }) : super(key: key);
+  });
   final String message;
   final VoidCallback? onDismiss;
   
@@ -281,10 +278,9 @@ class InlineWarningMessage extends StatelessWidget {
 class InlineInfoMessage extends StatelessWidget {
   
   const InlineInfoMessage({
-    Key? key,
-    required this.message,
+    required this.message, super.key,
     this.onDismiss,
-  }) : super(key: key);
+  });
   final String message;
   final VoidCallback? onDismiss;
   

@@ -1,26 +1,20 @@
-/// Add Schedule Screen
-/// 
-/// Screen untuk menambah schedule baru
-/// Location: lib/presentation/screens/schedule/add_schedule_screen.dart
-library;
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../../../core/constants/color_constants.dart';
 import '../../../domain/entities/schedule_entity.dart';
 import '../../providers/schedule_provider.dart';
-import '../../widgets/common/custom_button.dart';
-import '../../widgets/common/custom_text_field.dart';
 import '../../widgets/bottom_sheets/category_bottom_sheet.dart';
 import '../../widgets/bottom_sheets/time_picker_bottom_sheet.dart';
-import '../../widgets/dialogs/info_dialog.dart';
-import '../../../core/constants/color_constants.dart';
+import '../../widgets/common/custom_button.dart';
+import '../../widgets/common/custom_text_field.dart';
 
 class AddScheduleScreen extends StatefulWidget {
-
   const AddScheduleScreen({
     super.key,
     this.selectedDate,
   });
+
   final DateTime? selectedDate;
 
   @override
@@ -66,9 +60,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           children: [
             // Title field
             CustomTextField(
-              label: 'Judul Jadwal',
               controller: _titleController,
-              hintText: 'Contoh: Imunisasi DPT',
+              label: 'Judul Jadwal',
+              hint: 'Contoh: Imunisasi DPT',
               prefixIcon: Icons.title,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
@@ -85,9 +79,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
             // Description field
             CustomTextField(
-              label: 'Deskripsi (Opsional)',
               controller: _descriptionController,
-              hintText: 'Tambahkan catatan...',
+              label: 'Deskripsi (Opsional)',
+              hint: 'Tambahkan catatan...',
               prefixIcon: Icons.notes,
               maxLines: 3,
             ),
@@ -112,8 +106,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             // Save button
             CustomButton(
               onPressed: _isLoading ? null : _handleSave,
-              label: _isLoading ? 'Menyimpan...' : 'Simpan Jadwal',
-              type: ButtonType.primary,
+              text: _isLoading ? 'Menyimpan...' : 'Simpan Jadwal',
+              type: ButtonType.elevated,
               isFullWidth: true,
             ),
           ],
@@ -370,39 +364,35 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       _isLoading = true;
     });
 
-    final schedule = ScheduleEntity.create(
+    final scheduleProvider = context.read<ScheduleProvider>();
+    final success = await scheduleProvider.createSchedule(
       title: _titleController.text.trim(),
-      description: _descriptionController.text.trim(),
-      dateTime: _selectedDateTime!,
       category: _selectedCategory,
-      isReminderEnabled: _reminderEnabled,
-      reminderMinutesBefore: _reminderMinutes,
+      dateTime: _selectedDateTime!,
+      notes: _descriptionController.text.trim().isEmpty 
+          ? null 
+          : _descriptionController.text.trim(),
+      hasReminder: _reminderEnabled,
+      reminderMinutes: _reminderEnabled ? _reminderMinutes : null,
     );
 
-    final scheduleProvider = context.read<ScheduleProvider>();
-    final success = await scheduleProvider.createSchedule(schedule);
-
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (success) {
-      await showSuccessDialog(
-        context,
-        title: 'Berhasil',
-        message: 'Jadwal berhasil ditambahkan',
-        onPressed: () => Navigator.pop(context),
-      );
+      Navigator.pop(context);
     } else {
       setState(() {
         _isLoading = false;
       });
 
-      await showErrorDialog(
-        context,
-        title: 'Gagal',
-        message: scheduleProvider.errorMessage ?? 'Terjadi kesalahan',
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(scheduleProvider.error ?? 'Terjadi kesalahan'),
+          backgroundColor: Colors.red,
+        ),
       );
-
-      scheduleProvider.clearError();
     }
   }
 
@@ -410,8 +400,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     switch (_selectedCategory) {
       case ScheduleCategory.feeding:
         return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleeping:
-        return ColorConstants.categorySleeping;
+      case ScheduleCategory.sleep:
+        return ColorConstants.categorySleep;
       case ScheduleCategory.health:
         return ColorConstants.categoryHealth;
       case ScheduleCategory.milestone:
@@ -425,7 +415,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     switch (_selectedCategory) {
       case ScheduleCategory.feeding:
         return Icons.restaurant;
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return Icons.bedtime;
       case ScheduleCategory.health:
         return Icons.medical_services;
@@ -440,7 +430,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     switch (_selectedCategory) {
       case ScheduleCategory.feeding:
         return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleeping:
+      case ScheduleCategory.sleep:
         return 'Tidur';
       case ScheduleCategory.health:
         return 'Kesehatan';

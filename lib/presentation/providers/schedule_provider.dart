@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/schedule_repository.dart';
 import '/domain/entities/schedule_entity.dart';
 
@@ -8,10 +7,9 @@ import '/domain/entities/schedule_entity.dart';
 /// Manages schedule state and business logic using Provider pattern
 class ScheduleProvider extends ChangeNotifier {
 
-  ScheduleProvider(this._hiveDatabase);
+  ScheduleProvider();
   final ScheduleRepository _repository = ScheduleRepository();
   final Uuid _uuid = const Uuid();
-  final HiveDatabase _hiveDatabase;
 
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];

@@ -1,5 +1,7 @@
 
 
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -101,7 +103,9 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       throw AuthenticationException (FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error during Google Sign-In: $e');
-      if (e is AuthenticationException) rethrow;
+      if (e is AuthenticationException) {
+        rethrow;
+      }
       throw AuthenticationException ('Gagal masuk dengan Google: $e');
     }
   }
@@ -323,7 +327,9 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       print('✅ Re-authenticated successfully');
     } catch (e) {
       print('❌ Re-authentication failed: $e');
-      if (e is AuthenticationException) rethrow;
+      if (e is AuthenticationException) {
+        rethrow;
+      }
       throw AuthenticationException ('Gagal re-autentikasi: $e');
     }
   }

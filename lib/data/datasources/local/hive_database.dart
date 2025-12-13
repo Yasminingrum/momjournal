@@ -1,12 +1,14 @@
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-import '../../models/user_model.dart';
-import '../../models/schedule_model.dart';
+import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../../models/child_profile_model.dart';
 import '../../models/journal_model.dart';
 import '../../models/photo_model.dart';
-import '../../models/child_profile_model.dart';
+import '../../models/schedule_model.dart';
+import '../../models/user_model.dart';
 
 /// Service untuk inisialisasi dan manajemen Hive database
 /// 
@@ -33,7 +35,7 @@ class HiveDatabase {
   /// Biasanya dipanggil di main() sebelum runApp()
   Future<void> init() async {
     if (_isInitialized) {
-      print('Hive already initialized');
+      debugPrint('Hive already initialized');
       return;
     }
 
@@ -44,15 +46,15 @@ class HiveDatabase {
       // Get application documents directory untuk custom path (optional)
       // Ini berguna untuk testing atau custom storage location
       final appDocDir = await getApplicationDocumentsDirectory();
-      print('Hive storage path: ${appDocDir.path}');
+      debugPrint('Hive storage path: ${appDocDir.path}');
 
       // Register all type adapters
       _registerAdapters();
 
-      print('✓ Hive database initialized successfully');
+      debugPrint('✓ Hive database initialized successfully');
       _isInitialized = true;
     } catch (e) {
-      print('✗ Error initializing Hive: $e');
+      debugPrint('✗ Error initializing Hive: $e');
       rethrow;
     }
   }
@@ -84,7 +86,7 @@ class HiveDatabase {
       Hive.registerAdapter(MoodAdapter());
     }
 
-    print('✓ All Hive adapters registered');
+    debugPrint('✓ All Hive adapters registered');
   }
 
   /// Open all required boxes
@@ -107,9 +109,9 @@ class HiveDatabase {
         _openBox<dynamic>(settingsBoxName), // Settings bisa mixed types
       ]);
 
-      print('✓ All Hive boxes opened successfully');
+      debugPrint('✓ All Hive boxes opened successfully');
     } catch (e) {
-      print('✗ Error opening Hive boxes: $e');
+      debugPrint('✗ Error opening Hive boxes: $e');
       rethrow;
     }
   }
@@ -122,7 +124,7 @@ class HiveDatabase {
       }
       return Hive.box<T>(boxName);
     } catch (e) {
-      print('✗ Error opening box $boxName: $e');
+      debugPrint('✗ Error opening box $boxName: $e');
       rethrow;
     }
   }
@@ -164,9 +166,9 @@ class HiveDatabase {
     try {
       await Hive.close();
       _isInitialized = false;
-      print('✓ All Hive boxes closed');
+      debugPrint('✓ All Hive boxes closed');
     } catch (e) {
-      print('✗ Error closing Hive boxes: $e');
+      debugPrint('✗ Error closing Hive boxes: $e');
       rethrow;
     }
   }
@@ -177,12 +179,13 @@ class HiveDatabase {
   Future<void> deleteBox(String boxName) async {
     try {
       if (Hive.isBoxOpen(boxName)) {
-        await Hive.box(boxName).close();
+        final Box<dynamic> boxToClose = Hive.box(boxName);
+        await boxToClose.close();
       }
       await Hive.deleteBoxFromDisk(boxName);
-      print('✓ Box $boxName deleted');
+      debugPrint('✓ Box $boxName deleted');
     } catch (e) {
-      print('✗ Error deleting box $boxName: $e');
+      debugPrint('✗ Error deleting box $boxName: $e');
       rethrow;
     }
   }
@@ -201,9 +204,9 @@ class HiveDatabase {
         childProfileBox.clear(),
         settingsBox.clear(),
       ]);
-      print('✓ All data cleared from Hive');
+      debugPrint('✓ All data cleared from Hive');
     } catch (e) {
-      print('✗ Error clearing data: $e');
+      debugPrint('✗ Error clearing data: $e');
       rethrow;
     }
   }
@@ -215,10 +218,10 @@ class HiveDatabase {
       final appDocDir = await getApplicationDocumentsDirectory();
       final hiveDir = Directory(appDocDir.path);
 
-      if (await hiveDir.exists()) {
-        await for (final entity in hiveDir.list(recursive: true)) {
+      if (hiveDir.existsSync()) {
+        for (final entity in hiveDir.listSync(recursive: true)) {
           if (entity is File && entity.path.endsWith('.hive')) {
-            final stat = await entity.stat();
+            final stat = entity.statSync();
             totalSize += stat.size;
           }
         }
@@ -226,7 +229,7 @@ class HiveDatabase {
 
       return totalSize;
     } catch (e) {
-      print('✗ Error calculating box size: $e');
+      debugPrint('✗ Error calculating box size: $e');
       return 0;
     }
   }
@@ -259,9 +262,9 @@ class HiveDatabase {
         childProfileBox.compact(),
         settingsBox.compact(),
       ]);
-      print('✓ All boxes compacted');
+      debugPrint('✓ All boxes compacted');
     } catch (e) {
-      print('✗ Error compacting boxes: $e');
+      debugPrint('✗ Error compacting boxes: $e');
       rethrow;
     }
   }
@@ -271,14 +274,14 @@ class HiveDatabase {
 
   /// Debug info: Print semua box statistics
   Future<void> printBoxStats() async {
-    print('\n=== Hive Box Statistics ===');
-    print('User box: ${userBox.length} entries');
-    print('Schedule box: ${scheduleBox.length} entries');
-    print('Journal box: ${journalBox.length} entries');
-    print('Photo box: ${photoBox.length} entries');
-    print('Child Profile box: ${childProfileBox.length} entries');
-    print('Settings box: ${settingsBox.length} entries');
-    print('Total size: ${await getReadableTotalSize()}');
-    print('==========================\n');
+    debugPrint('\n=== Hive Box Statistics ===');
+    debugPrint('User box: ${userBox.length} entries');
+    debugPrint('Schedule box: ${scheduleBox.length} entries');
+    debugPrint('Journal box: ${journalBox.length} entries');
+    debugPrint('Photo box: ${photoBox.length} entries');
+    debugPrint('Child Profile box: ${childProfileBox.length} entries');
+    debugPrint('Settings box: ${settingsBox.length} entries');
+    debugPrint('Total size: ${await getReadableTotalSize()}');
+    debugPrint('==========================\n');
   }
 }

@@ -4,8 +4,8 @@
 /// Location: lib/domain/usecases/schedule/delete_schedule.dart
 library;
 
-import '../../../data/repositories/schedule_repository.dart';
 import '../../../core/errors/exceptions.dart';
+import '../../../data/repositories/schedule_repository.dart';
 
 class DeleteScheduleUseCase {
 

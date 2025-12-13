@@ -1,4 +1,7 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/errors/exceptions.dart';
 import '../../../domain/entities/schedule_entity.dart';
 import 'firebase_service.dart';
@@ -51,13 +54,15 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .doc(schedule.id)
           .set(scheduleData);
 
-      print('✅ Schedule created in Firestore: ${schedule.id}');
+      debugPrint('✅ Schedule created in Firestore: ${schedule.id}');
     } on FirebaseException catch (e) {
-      print('❌ Firebase error creating schedule: ${e.code}');
+      debugPrint('❌ Firebase error creating schedule: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error creating schedule: $e');
-      if (e is AuthorizationException) rethrow;
+      debugPrint('❌ Error creating schedule: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
       throw DatabaseException('Gagal membuat jadwal: $e');
     }
   }
@@ -77,14 +82,16 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .map(_scheduleFromFirestore)
           .toList();
 
-      print('✅ Fetched ${schedules.length} schedules from Firestore');
+      debugPrint('✅ Fetched ${schedules.length} schedules from Firestore');
       return schedules;
     } on FirebaseException catch (e) {
-      print('❌ Firebase error getting schedules: ${e.code}');
+      debugPrint('❌ Firebase error getting schedules: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error getting schedules: $e');
-      if (e is AuthorizationException) rethrow;
+      debugPrint('❌ Error getting schedules: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
       throw DatabaseException('Gagal mengambil jadwal: $e');
     }
   }
@@ -109,14 +116,16 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .map(_scheduleFromFirestore)
           .toList();
 
-      print('✅ Fetched ${schedules.length} schedules for date range');
+      debugPrint('✅ Fetched ${schedules.length} schedules for date range');
       return schedules;
     } on FirebaseException catch (e) {
-      print('❌ Firebase error getting schedules by date: ${e.code}');
+      debugPrint('❌ Firebase error getting schedules by date: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error getting schedules by date: $e');
-      if (e is AuthorizationException) rethrow;
+      debugPrint('❌ Error getting schedules by date: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
       throw DatabaseException('Gagal mengambil jadwal: $e');
     }
   }
@@ -135,13 +144,15 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .doc(schedule.id)
           .update(scheduleData);
 
-      print('✅ Schedule updated in Firestore: ${schedule.id}');
+      debugPrint('✅ Schedule updated in Firestore: ${schedule.id}');
     } on FirebaseException catch (e) {
-      print('❌ Firebase error updating schedule: ${e.code}');
+      debugPrint('❌ Firebase error updating schedule: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error updating schedule: $e');
-      if (e is AuthorizationException) rethrow;
+      debugPrint('❌ Error updating schedule: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
       throw DatabaseException('Gagal memperbarui jadwal: $e');
     }
   }
@@ -155,13 +166,15 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
 
       await _schedulesCollection!.doc(scheduleId).delete();
 
-      print('✅ Schedule deleted from Firestore: $scheduleId');
+      debugPrint('✅ Schedule deleted from Firestore: $scheduleId');
     } on FirebaseException catch (e) {
-      print('❌ Firebase error deleting schedule: ${e.code}');
+      debugPrint('❌ Firebase error deleting schedule: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error deleting schedule: $e');
-      if (e is AuthorizationException) rethrow;
+      debugPrint('❌ Error deleting schedule: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
       throw DatabaseException('Gagal menghapus jadwal: $e');
     }
   }
@@ -176,9 +189,9 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         .orderBy('dateTime', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-          .map((doc) => _scheduleFromFirestore(doc))
-          .toList()).handleError((error) {
-      print('❌ Error in schedules stream: $error');
+          .map(_scheduleFromFirestore)
+          .toList(),).handleError((Object error) {
+      debugPrint('❌ Error in schedules stream: $error');
       if (error is FirebaseException) {
         throw DatabaseException(FirebaseErrorHandler.getErrorMessage(error));
       }

@@ -21,9 +21,8 @@ import 'package:flutter/services.dart';
 class MoodSelector extends StatefulWidget {
 
   const MoodSelector({
-    super.key,
+    required this.onMoodSelected, super.key,
     this.selectedMood,
-    required this.onMoodSelected,
     this.size = 56,
     this.showLabels = true,
     this.enableHaptics = true,
@@ -70,9 +69,7 @@ class _MoodSelectorState extends State<MoodSelector>
         // Mood buttons
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: MoodLevel.values.map((mood) {
-            return _buildMoodButton(mood);
-          }).toList(),
+          children: MoodLevel.values.map(_buildMoodButton).toList(),
         ),
         // Selected mood label
         if (widget.showLabels && widget.selectedMood != null) ...[
@@ -224,9 +221,8 @@ enum MoodLevel {
 class CompactMoodSelector extends StatelessWidget {
 
   const CompactMoodSelector({
-    super.key,
+    required this.onMoodSelected, super.key,
     this.selectedMood,
-    required this.onMoodSelected,
   });
   final MoodLevel? selectedMood;
   final Function(MoodLevel) onMoodSelected;
@@ -276,8 +272,7 @@ class CompactMoodSelector extends StatelessWidget {
 class MoodIndicator extends StatelessWidget {
 
   const MoodIndicator({
-    super.key,
-    required this.mood,
+    required this.mood, super.key,
     this.size = 40,
     this.showLabel = true,
   });

@@ -112,7 +112,7 @@ class NetworkInfo extends ChangeNotifier {
     } catch (e) {
       debugPrint('⏰ Timeout waiting for connection');
     } finally {
-      subscription.cancel();
+      await subscription.cancel();
     }
   }
 

@@ -1,5 +1,5 @@
-/// Validation Utilities
-/// Helper functions for input validation
+// ignore_for_file: lines_longer_than_80_chars
+
 class ValidationUtils {
   
   // Private constructor to prevent instantiation
@@ -12,13 +12,17 @@ class ValidationUtils {
   
   /// Validate minimum length
   static bool hasMinLength(String? value, int minLength) {
-    if (value == null) return false;
+    if (value == null) {
+      return false;
+    }
     return value.trim().length >= minLength;
   }
   
   /// Validate maximum length
   static bool hasMaxLength(String? value, int maxLength) {
-    if (value == null) return true;
+    if (value == null) {
+      return true;
+    }
     return value.trim().length <= maxLength;
   }
   
@@ -27,7 +31,9 @@ class ValidationUtils {
   
   /// Validate email format
   static bool isValidEmail(String? email) {
-    if (email == null || email.isEmpty) return false;
+    if (email == null || email.isEmpty) {
+      return false;
+    }
     
     final emailRegex = RegExp(
       r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -38,7 +44,9 @@ class ValidationUtils {
   
   /// Validate phone number (Indonesian format)
   static bool isValidPhoneNumber(String? phone) {
-    if (phone == null || phone.isEmpty) return false;
+    if (phone == null || phone.isEmpty) {
+      return false;
+    }
     
     // Remove spaces and dashes
     final cleanPhone = phone.replaceAll(RegExp(r'[\s-]'), '');
@@ -53,7 +61,9 @@ class ValidationUtils {
   
   /// Validate URL format
   static bool isValidUrl(String? url) {
-    if (url == null || url.isEmpty) return false;
+    if (url == null || url.isEmpty) {
+      return false;
+    }
     
     final urlRegex = RegExp(
       r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$',
@@ -64,21 +74,27 @@ class ValidationUtils {
   
   /// Validate date is not in future
   static bool isNotFutureDate(DateTime? date) {
-    if (date == null) return false;
+    if (date == null) {
+      return false;
+    }
     return date.isBefore(DateTime.now()) || 
            _isSameDay(date, DateTime.now());
   }
   
   /// Validate date is not in past
   static bool isNotPastDate(DateTime? date) {
-    if (date == null) return false;
+    if (date == null) {
+      return false;
+    }
     return date.isAfter(DateTime.now()) || 
            _isSameDay(date, DateTime.now());
   }
   
   /// Validate date is within range
   static bool isDateInRange(DateTime? date, DateTime start, DateTime end) {
-    if (date == null) return false;
+    if (date == null) {
+      return false;
+    }
     return date.isAfter(start) && date.isBefore(end) ||
            _isSameDay(date, start) || _isSameDay(date, end);
   }
@@ -91,43 +107,61 @@ class ValidationUtils {
   
   /// Validate number is within range
   static bool isInRange(num? value, num min, num max) {
-    if (value == null) return false;
+    if (value == null) {
+      return false;
+    }
     return value >= min && value <= max;
   }
   
   /// Validate string contains only letters
   static bool isAlphabetic(String? value) {
-    if (value == null || value.isEmpty) return false;
+    if (value == null || value.isEmpty) {
+      return false;
+    }
     return RegExp(r'^[a-zA-Z\s]+$').hasMatch(value);
   }
   
   /// Validate string contains only numbers
   static bool isNumeric(String? value) {
-    if (value == null || value.isEmpty) return false;
+    if (value == null || value.isEmpty) {
+      return false;
+    }
     return RegExp(r'^[0-9]+$').hasMatch(value);
   }
   
   /// Validate string is alphanumeric
   static bool isAlphanumeric(String? value) {
-    if (value == null || value.isEmpty) return false;
+    if (value == null || value.isEmpty) {
+      return false;
+    }
     return RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value);
   }
   
   /// Validate password strength (minimum requirements)
   static bool isStrongPassword(String? password) {
-    if (password == null || password.isEmpty) return false;
+    if (password == null || password.isEmpty) {
+      return false;
+    }
     
     // At least 8 characters
-    if (password.length < 8) return false;
+    if (password.length < 8) {
+      return false;
+    }
     
     // Contains at least one uppercase letter
-    if (!RegExp('[A-Z]').hasMatch(password)) return false;
+    if (!RegExp('[A-Z]').hasMatch(password)) {
+      return false;
+    }
     
     // Contains at least one lowercase letter
-    if (!RegExp('[a-z]').hasMatch(password)) return false;
+    if (!RegExp('[a-z]').hasMatch(password)) {
+      return false;
+    }
     
     // Contains at least one number
-    if (!RegExp('[0-9]').hasMatch(password)) return false;
+    if (!RegExp('[0-9]').hasMatch(password)) {
+      return false;
+    }
     
     return true;
   }
@@ -300,13 +334,17 @@ class ValidationUtils {
   
   /// Sanitize input (remove extra spaces, trim)
   static String sanitize(String? input) {
-    if (input == null) return '';
+    if (input == null) {
+      return '';
+    }
     return input.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
   
   /// Check if string contains profanity (basic implementation)
   static bool containsProfanity(String? value) {
-    if (value == null || value.isEmpty) return false;
+    if (value == null || value.isEmpty) {
+      return false;
+    }
     
     // Basic profanity list (extend as needed)
     final profanityList = [

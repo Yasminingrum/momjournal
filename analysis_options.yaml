@@ -19,6 +19,7 @@ analyzer:
     invalid_assignment: error
     # Dead code is a warning
     dead_code: warning
+    lines_longer_than_80_chars: ignore
 
   language:
     strict-casts: true

@@ -23,8 +23,8 @@ class JournalRepository {
   /// Get all journals
   Future<List<JournalEntity>> getAllJournals() async {
     await init();
-    final journals = _box!.values.toList();
-    journals.sort((a, b) => b.date.compareTo(a.date)); // Most recent first
+    final journals = _box!.values.toList()
+    ..sort((a, b) => b.date.compareTo(a.date)); // Most recent first
     return journals;
   }
 
@@ -48,9 +48,9 @@ class JournalRepository {
       DateTime start, DateTime end,) async {
     await init();
     final journals = _box!.values.where((journal) => journal.date.isAfter(start.subtract(const Duration(days: 1))) &&
-          journal.date.isBefore(end.add(const Duration(days: 1)))).toList();
+          journal.date.isBefore(end.add(const Duration(days: 1))),).toList()
     
-    journals.sort((a, b) => b.date.compareTo(a.date));
+    ..sort((a, b) => b.date.compareTo(a.date));
     return journals;
   }
 
@@ -99,8 +99,8 @@ class JournalRepository {
   /// Get recent journals (last N entries)
   Future<List<JournalEntity>> getRecentJournals(int count) async {
     await init();
-    final journals = _box!.values.toList();
-    journals.sort((a, b) => b.date.compareTo(a.date));
+    final journals = _box!.values.toList()
+    ..sort((a, b) => b.date.compareTo(a.date));
     return journals.take(count).toList();
   }
 

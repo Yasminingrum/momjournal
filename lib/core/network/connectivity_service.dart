@@ -53,7 +53,9 @@ class ConnectivityService extends ChangeNotifier {
 
   /// Connection quality estimation
   ConnectionQuality get connectionQuality {
-    if (!_isConnected) return ConnectionQuality.none;
+    if (!_isConnected) {
+      return ConnectionQuality.none;
+    }
     
     switch (_currentConnection) {
       case ConnectivityResult.wifi:
@@ -69,7 +71,9 @@ class ConnectivityService extends ChangeNotifier {
 
   /// Connection status as string
   String get statusText {
-    if (!_isConnected) return 'Offline';
+    if (!_isConnected) {
+      return 'Offline';
+    }
     
     switch (_currentConnection) {
       case ConnectivityResult.wifi:
@@ -101,7 +105,7 @@ class ConnectivityService extends ChangeNotifier {
     _connectivitySubscription = 
         _connectivity.onConnectivityChanged.listen(
       _handleConnectivityChange,
-      onError: (error) {
+      onError: (Object error) {
         debugPrint('❌ Connectivity stream error: $error');
       },
     );
@@ -271,7 +275,9 @@ class ConnectivityService extends ChangeNotifier {
   Future<bool> waitForConnection({
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    if (_isConnected) return true;
+    if (_isConnected) {
+      return true;
+    }
 
     debugPrint(
         '⏳ Waiting for connection '
@@ -308,7 +314,7 @@ class ConnectivityService extends ChangeNotifier {
       return result;
     } catch (e) {
       debugPrint('❌ Error waiting for connection: $e');
-      subscription.cancel();
+      await subscription.cancel();
       return false;
     }
   }
@@ -324,14 +330,18 @@ class ConnectivityService extends ChangeNotifier {
 
   /// Get uptime (time since last disconnection)
   Duration? get uptime {
-    if (_lastConnectedTime == null) return null;
-    return DateTime.now().difference(_lastConnectedTime!);
+    if (_lastConnectedTime == null) {
+      return null;
+    }
+    final DateTime connectedTime = _lastConnectedTime!;
+    return DateTime.now().difference(connectedTime);
   }
 
   /// Get downtime (time since last connection)
   Duration? get downtime {
     if (!_isConnected && _lastDisconnectedTime != null) {
-      return DateTime.now().difference(_lastDisconnectedTime!);
+      final DateTime disconnectedTime = _lastDisconnectedTime!;
+      return DateTime.now().difference(disconnectedTime);
     }
     return null;
   }
@@ -357,7 +367,9 @@ class ConnectivityEvent {
   final DateTime timestamp;
 
   String get description {
-    if (!isConnected) return 'Disconnected';
+    if (!isConnected) {
+      return 'Disconnected';
+    }
     
     switch (connectionType) {
       case ConnectivityResult.wifi:

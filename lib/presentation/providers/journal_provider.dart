@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
-import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/journal_repository.dart';
 import '/domain/entities/journal_entity.dart';
 
@@ -8,10 +7,9 @@ import '/domain/entities/journal_entity.dart';
 /// Manages journal state and business logic using Provider pattern
 class JournalProvider extends ChangeNotifier {
 
-  JournalProvider(this._hiveDatabase);
+  JournalProvider();
   final JournalRepository _repository = JournalRepository();
   final Uuid _uuid = const Uuid();
-  final HiveDatabase _hiveDatabase;
 
   List<JournalEntity> _journals = [];
   JournalEntity? _todayEntry;

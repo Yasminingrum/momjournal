@@ -1,5 +1,7 @@
 /// Custom Exceptions
 /// Defines custom exception classes for error handling
+// ignore_for_file: lines_longer_than_80_chars
+
 library;
 
 /// Base exception class

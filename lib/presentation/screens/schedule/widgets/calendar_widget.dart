@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -15,12 +17,8 @@ import 'package:table_calendar/table_calendar.dart';
 class CalendarWidget extends StatefulWidget {
 
   const CalendarWidget({
-    super.key,
-    required this.focusedDay,
+    required this.focusedDay, required this.events, required this.onDaySelected, required this.onPageChanged, super.key,
     this.selectedDay,
-    required this.events,
-    required this.onDaySelected,
-    required this.onPageChanged,
     this.initialFormat = CalendarFormat.month,
   });
   final DateTime focusedDay;
@@ -72,9 +70,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             });
           },
           onPageChanged: widget.onPageChanged,
-          eventLoader: (day) {
-            return widget.events[_normalizeDate(day)] ?? [];
-          },
+          eventLoader: (day) => widget.events[_normalizeDate(day)] ?? [],
           // Styling
           calendarStyle: CalendarStyle(
             // Today
@@ -142,7 +138,9 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           // Builders
           calendarBuilders: CalendarBuilders(
             markerBuilder: (context, date, events) {
-              if (events.isEmpty) return const SizedBox.shrink();
+              if (events.isEmpty) {
+                return const SizedBox.shrink();
+              }
 
               // Get unique category colors
               final eventList = events.cast<CalendarEvent>();
@@ -156,8 +154,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                 bottom: 1,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: colors.map((color) {
-                    return Container(
+                  children: colors.map((color) => Container(
                       width: 7,
                       height: 7,
                       margin: const EdgeInsets.symmetric(horizontal: 1),
@@ -165,8 +162,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
                         color: color,
                         shape: BoxShape.circle,
                       ),
-                    );
-                  }).toList(),
+                    ),).toList(),
                 ),
               );
             },
@@ -199,8 +195,7 @@ class CalendarEvent {
 class CalendarLegend extends StatelessWidget {
 
   const CalendarLegend({
-    super.key,
-    required this.categories,
+    required this.categories, super.key,
   });
   final List<CalendarCategory> categories;
 
@@ -212,8 +207,7 @@ class CalendarLegend extends StatelessWidget {
         child: Wrap(
           spacing: 12,
           runSpacing: 8,
-          children: categories.map((category) {
-            return Row(
+          children: categories.map((category) => Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
@@ -230,8 +224,7 @@ class CalendarLegend extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-            );
-          }).toList(),
+            ),).toList(),
         ),
       ),
     );
@@ -256,9 +249,7 @@ class CalendarCategory {
 class CompactCalendar extends StatelessWidget {
 
   const CompactCalendar({
-    super.key,
-    required this.selectedDate,
-    required this.onDateSelected,
+    required this.selectedDate, required this.onDateSelected, super.key,
     this.minDate,
     this.maxDate,
   });
@@ -277,11 +268,11 @@ class CompactCalendar extends StatelessWidget {
       onDaySelected: (selectedDay, focusedDay) {
         onDateSelected(selectedDay);
       },
-      headerStyle: HeaderStyle(
+      headerStyle: const HeaderStyle(
         formatButtonVisible: false,
         titleCentered: true,
-        leftChevronIcon: const Icon(Icons.chevron_left),
-        rightChevronIcon: const Icon(Icons.chevron_right),
+        leftChevronIcon: Icon(Icons.chevron_left),
+        rightChevronIcon: Icon(Icons.chevron_right),
       ),
       calendarStyle: CalendarStyle(
         todayDecoration: BoxDecoration(

@@ -57,19 +57,23 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _checkAuthAndNavigate() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     final authProvider = context.read<AuthProvider>();
     final isAuthenticated = authProvider.checkAuthStatus();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     if (isAuthenticated) {
       // User sudah login, ke home
-      Navigator.pushReplacementNamed(context, Routes.home);
+      await Navigator.pushReplacementNamed(context, Routes.home);
     } else {
       // User belum login, ke login screen
-      Navigator.pushReplacementNamed(context, Routes.login);
+      await Navigator.pushReplacementNamed(context, Routes.login);
     }
   }
 

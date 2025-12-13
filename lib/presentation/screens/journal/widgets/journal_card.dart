@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 
 /// JournalCard
@@ -14,11 +16,7 @@ import 'package:flutter/material.dart';
 class JournalCard extends StatelessWidget {
 
   const JournalCard({
-    super.key,
-    required this.id,
-    required this.date,
-    required this.mood,
-    required this.content,
+    required this.id, required this.date, required this.mood, required this.content, super.key,
     this.maxPreviewLines = 3,
     this.onTap,
     this.onEdit,
@@ -40,7 +38,7 @@ class JournalCard extends StatelessWidget {
       secondaryBackground: _buildSwipeBackground(context, isLeft: false),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart && onDelete != null) {
-          return await _confirmDelete(context);
+          return _confirmDelete(context);
         } else if (direction == DismissDirection.startToEnd && onEdit != null) {
           onEdit!();
           return false;
@@ -258,12 +256,7 @@ enum MoodLevel {
 class JournalListSection extends StatelessWidget {
 
   const JournalListSection({
-    super.key,
-    required this.monthYear,
-    required this.journals,
-    required this.onJournalTap,
-    required this.onJournalEdit,
-    required this.onJournalDelete,
+    required this.monthYear, required this.journals, required this.onJournalTap, required this.onJournalEdit, required this.onJournalDelete, super.key,
   });
   final String monthYear;
   final List<JournalCardData> journals;
@@ -294,7 +287,7 @@ class JournalListSection extends StatelessWidget {
               onTap: () => onJournalTap(journal.id),
               onEdit: () => onJournalEdit(journal.id),
               onDelete: () => onJournalDelete(journal.id),
-            )),
+            ),),
       ],
     );
 }
@@ -320,10 +313,7 @@ class JournalCardData {
 class CompactJournalCard extends StatelessWidget {
 
   const CompactJournalCard({
-    super.key,
-    required this.date,
-    required this.mood,
-    required this.content,
+    required this.date, required this.mood, required this.content, super.key,
     this.onTap,
   });
   final DateTime date;

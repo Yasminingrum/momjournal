@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 Future<int?> showTimePickerBottomSheet(
   BuildContext context, {
   int? selectedMinutes,
-}) async => await showModalBottomSheet<int>(
+}) async => showModalBottomSheet<int>(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -111,10 +111,7 @@ class TimePickerBottomSheet extends StatelessWidget {
 class TimeOptionTile extends StatelessWidget {
 
   const TimeOptionTile({
-    super.key,
-    required this.minutes,
-    required this.isSelected,
-    required this.onTap,
+    required this.minutes, required this.isSelected, required this.onTap, super.key,
   });
   final int minutes;
   final bool isSelected;

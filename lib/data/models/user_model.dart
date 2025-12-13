@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:hive/hive.dart';
 
 part 'user_model.g.dart';
@@ -12,10 +14,8 @@ class UserModel extends HiveObject {
   UserModel({
     required this.uid,
     required this.email,
-    this.displayName,
+    required this.createdAt, required this.lastLoginAt, this.displayName,
     this.photoUrl,
-    required this.createdAt,
-    required this.lastLoginAt,
     this.childName,
     this.childBirthDate,
     this.childGender,
@@ -27,8 +27,7 @@ class UserModel extends HiveObject {
 
   /// Factory constructor untuk membuat UserModel dari JSON
   /// Digunakan saat fetching data dari Firestore
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
       uid: json['uid'] as String,
       email: json['email'] as String,
       displayName: json['displayName'] as String?,
@@ -51,7 +50,6 @@ class UserModel extends HiveObject {
       quietHoursStart: json['quietHoursStart'] as String? ?? '22:00',
       quietHoursEnd: json['quietHoursEnd'] as String? ?? '06:00',
     );
-  }
   /// ID unik user dari Firebase Auth
   @HiveField(0)
   final String uid;
@@ -159,7 +157,9 @@ class UserModel extends HiveObject {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is UserModel &&
         other.uid == uid &&

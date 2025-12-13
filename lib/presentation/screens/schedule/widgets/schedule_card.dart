@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 
 /// ScheduleCard
@@ -14,12 +16,7 @@ import 'package:flutter/material.dart';
 class ScheduleCard extends StatelessWidget {
 
   const ScheduleCard({
-    super.key,
-    required this.id,
-    required this.title,
-    required this.dateTime,
-    required this.category,
-    required this.categoryColor,
+    required this.id, required this.title, required this.dateTime, required this.category, required this.categoryColor, super.key,
     this.notes,
     this.hasReminder = false,
     this.isCompleted = false,
@@ -249,7 +246,9 @@ class ScheduleCard extends StatelessWidget {
   }
 
   String _getTimeOfDay(DateTime time) {
-    if (time.hour < 12) return 'AM';
+    if (time.hour < 12) {
+      return 'AM';
+    }
     return 'PM';
   }
 }
@@ -259,13 +258,7 @@ class ScheduleCard extends StatelessWidget {
 class ScheduleListSection extends StatelessWidget {
 
   const ScheduleListSection({
-    super.key,
-    required this.date,
-    required this.schedules,
-    required this.onScheduleTap,
-    required this.onScheduleEdit,
-    required this.onScheduleDelete,
-    required this.onCompletedChanged,
+    required this.date, required this.schedules, required this.onScheduleTap, required this.onScheduleEdit, required this.onScheduleDelete, required this.onCompletedChanged, super.key,
   });
   final DateTime date;
   final List<ScheduleCardData> schedules;
@@ -306,7 +299,7 @@ class ScheduleListSection extends StatelessWidget {
               onDelete: () => onScheduleDelete(schedule.id),
               onCompletedChanged: (value) =>
                   onCompletedChanged(schedule.id, value ?? false),
-            )),
+            ),),
       ],
     );
 

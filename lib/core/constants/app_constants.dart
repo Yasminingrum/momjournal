@@ -1,4 +1,5 @@
-/// App-wide constants and configuration
+// ignore_for_file: lines_longer_than_80_chars
+
 class AppConstants {
   // App Info
   static const String appName = 'MomJournal';

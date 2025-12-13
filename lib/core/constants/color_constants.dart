@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'package:flutter/material.dart';
 
 /// Color constants for the app theme
@@ -23,6 +25,7 @@ class ColorConstants {
   static const Color textPrimary = Color(0xFF1C1B1F);
   static const Color textSecondary = Color(0xFF49454F);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
+  static const Color white = Color(0xFFFFFFFF);
   
   // Category Colors
   static const Color categoryFeeding = Color(0xFF2196F3);      // Blue
@@ -44,8 +47,24 @@ class ColorConstants {
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF2196F3);
   
+  // Status Light Colors (for backgrounds)
+  static const Color successLight = Color(0xFFE8F5E9);   // Light green background
+  static const Color warningLight = Color(0xFFFFF3E0);   // Light orange background
+  static const Color errorLight = Color(0xFFFFEBEE);     // Light red background
+  static const Color infoLight = Color(0xFFE3F2FD);      // Light blue background
+  
   // UI Elements
   static const Color divider = Color(0xFFE0E0E0);
   static const Color disabled = Color(0xFFBDBDBD);
   static const Color shadow = Color(0x1F000000);
+  
+  // Grey Shades
+  static const Color grey100 = Color(0xFFF5F5F5);
+  static const Color grey200 = Color(0xFFEEEEEE);
+  static const Color grey300 = Color(0xFFE0E0E0);
+  static const Color grey400 = Color(0xFFBDBDBD);
+  
+  // Shimmer Colors
+  static const Color shimmerBase = Color(0xFFE0E0E0);
+  static const Color shimmerHighlight = Color(0xFFF5F5F5);
 }

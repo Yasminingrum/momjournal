@@ -31,9 +31,7 @@ Future<void> showInfoDialog(
 class InfoDialog extends StatelessWidget {
 
   const InfoDialog({
-    super.key,
-    required this.title,
-    required this.message,
+    required this.title, required this.message, super.key,
     this.buttonText = 'OK',
     this.icon,
     this.onPressed,

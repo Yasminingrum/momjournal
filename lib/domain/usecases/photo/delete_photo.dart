@@ -4,9 +4,9 @@
 /// Location: lib/domain/usecases/photo/delete_photo.dart
 library;
 
+import '../../../core/errors/exceptions.dart';
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
-import '../../../core/errors/exceptions.dart';
 
 class DeletePhotoUseCase {
 
