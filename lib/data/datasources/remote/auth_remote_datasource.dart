@@ -1,12 +1,9 @@
-/// Auth Remote Datasource
-/// 
-/// Handles authentication operations with Firebase
-/// Location: lib/data/datasources/remote/auth_remote_datasource.dart
 
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/errors/exceptions.dart';
+import '/core/errors/exceptions.dart';
 import 'firebase_service.dart';
 
 /// Interface untuk Auth Remote Datasource
@@ -58,7 +55,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       if (googleUser == null) {
         // User canceled the sign-in
         print('❌ User canceled Google Sign-In');
-        throw AuthException('Login dibatalkan');
+        throw AuthenticationException ('Login dibatalkan');
       }
 
       print('✅ Google account selected: ${googleUser.email}');
@@ -67,7 +64,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        throw AuthException('Gagal mendapatkan token autentikasi');
+        throw AuthenticationException ('Gagal mendapatkan token autentikasi');
       }
 
       print('✅ Got authentication tokens');
@@ -82,7 +79,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
 
       if (userCredential.user == null) {
-        throw AuthException('Gagal masuk ke Firebase');
+        throw AuthenticationException ('Gagal masuk ke Firebase');
       }
 
       print('✅ Signed in to Firebase: ${userCredential.user!.uid}');
@@ -101,11 +98,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       return userCredential.user!;
     } on FirebaseAuthException catch (e) {
       print('❌ FirebaseAuthException: ${e.code} - ${e.message}');
-      throw AuthException(FirebaseErrorHandler.getErrorMessage(e));
+      throw AuthenticationException (FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error during Google Sign-In: $e');
-      if (e is AuthException) rethrow;
-      throw AuthException('Gagal masuk dengan Google: $e');
+      if (e is AuthenticationException) rethrow;
+      throw AuthenticationException ('Gagal masuk dengan Google: $e');
     }
   }
 
@@ -123,7 +120,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       print('✅ Signed out successfully');
     } catch (e) {
       print('❌ Error during sign out: $e');
-      throw AuthException('Gagal keluar: $e');
+      throw AuthenticationException ('Gagal keluar: $e');
     }
   }
 
@@ -194,7 +191,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       final User? user = getCurrentUser();
       if (user == null) {
-        throw AuthException('Tidak ada pengguna yang masuk');
+        throw AuthenticationException ('Tidak ada pengguna yang masuk');
       }
 
       print('🗑️ Deleting user account: ${user.uid}');
@@ -213,16 +210,16 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       print('❌ FirebaseAuthException during deletion: ${e.code}');
       
       if (e.code == 'requires-recent-login') {
-        throw AuthException(
+        throw AuthenticationException (
           'Untuk keamanan, silakan login ulang sebelum menghapus akun',
         );
       }
       
-      throw AuthException(FirebaseErrorHandler.getErrorMessage(e));
+      throw AuthenticationException (FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error deleting account: $e');
-      if (e is AuthException) rethrow;
-      throw AuthException('Gagal menghapus akun: $e');
+      if (e is AuthenticationException) rethrow;
+      throw AuthenticationException ('Gagal menghapus akun: $e');
     }
   }
 
@@ -308,7 +305,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        throw AuthException('Re-autentikasi dibatalkan');
+        throw AuthenticationException ('Re-autentikasi dibatalkan');
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -320,7 +317,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
       final User? user = getCurrentUser();
       if (user == null) {
-        throw AuthException('Tidak ada pengguna yang masuk');
+        throw AuthenticationException ('Tidak ada pengguna yang masuk');
       }
 
       await user.reauthenticateWithCredential(credential);
@@ -328,8 +325,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       print('✅ Re-authenticated successfully');
     } catch (e) {
       print('❌ Re-authentication failed: $e');
-      if (e is AuthException) rethrow;
-      throw AuthException('Gagal re-autentikasi: $e');
+      if (e is AuthenticationException) rethrow;
+      throw AuthenticationException ('Gagal re-autentikasi: $e');
     }
   }
 }

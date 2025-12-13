@@ -8,6 +8,54 @@ part 'photo_model.g.dart';
 /// termasuk thumbnail, caption, dan milestone flag
 @HiveType(typeId: 3)
 class PhotoModel extends HiveObject {
+
+  PhotoModel({
+    required this.id,
+    required this.userId,
+    required this.date, required this.createdAt, required this.updatedAt, this.caption,
+    this.imageUrl,
+    this.thumbnailUrl,
+    this.localFilePath,
+    this.isMilestone = false,
+    this.tags,
+    this.fileSizeBytes,
+    this.imageWidth,
+    this.imageHeight,
+    this.isSynced = false,
+    this.uploadStatus = 'pending',
+    this.uploadProgress,
+    this.uploadError,
+  });
+
+  /// Factory constructor dari JSON (Firestore)
+  factory PhotoModel.fromJson(Map<String, dynamic> json) => PhotoModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      caption: json['caption'] as String?,
+      date: json['date'] is DateTime
+          ? json['date'] as DateTime
+          : DateTime.parse(json['date'] as String),
+      imageUrl: json['imageUrl'] as String?,
+      thumbnailUrl: json['thumbnailUrl'] as String?,
+      localFilePath: json['localFilePath'] as String?,
+      isMilestone: json['isMilestone'] as bool? ?? false,
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'] as List)
+          : null,
+      fileSizeBytes: json['fileSizeBytes'] as int?,
+      imageWidth: json['imageWidth'] as int?,
+      imageHeight: json['imageHeight'] as int?,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] is DateTime
+          ? json['updatedAt'] as DateTime
+          : DateTime.parse(json['updatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
+      uploadStatus: json['uploadStatus'] as String? ?? 'completed',
+      uploadProgress: json['uploadProgress'] as int?,
+      uploadError: json['uploadError'] as String?,
+    );
   /// ID unik untuk photo
   @HiveField(0)
   final String id;
@@ -80,62 +128,8 @@ class PhotoModel extends HiveObject {
   @HiveField(17)
   final String? uploadError;
 
-  PhotoModel({
-    required this.id,
-    required this.userId,
-    this.caption,
-    required this.date,
-    this.imageUrl,
-    this.thumbnailUrl,
-    this.localFilePath,
-    this.isMilestone = false,
-    this.tags,
-    this.fileSizeBytes,
-    this.imageWidth,
-    this.imageHeight,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-    this.uploadStatus = 'pending',
-    this.uploadProgress,
-    this.uploadError,
-  });
-
-  /// Factory constructor dari JSON (Firestore)
-  factory PhotoModel.fromJson(Map<String, dynamic> json) {
-    return PhotoModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      caption: json['caption'] as String?,
-      date: json['date'] is DateTime
-          ? json['date'] as DateTime
-          : DateTime.parse(json['date'] as String),
-      imageUrl: json['imageUrl'] as String?,
-      thumbnailUrl: json['thumbnailUrl'] as String?,
-      localFilePath: json['localFilePath'] as String?,
-      isMilestone: json['isMilestone'] as bool? ?? false,
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'] as List)
-          : null,
-      fileSizeBytes: json['fileSizeBytes'] as int?,
-      imageWidth: json['imageWidth'] as int?,
-      imageHeight: json['imageHeight'] as int?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
-      isSynced: json['isSynced'] as bool? ?? false,
-      uploadStatus: json['uploadStatus'] as String? ?? 'completed',
-      uploadProgress: json['uploadProgress'] as int?,
-      uploadError: json['uploadError'] as String?,
-    );
-  }
-
   /// Convert ke JSON untuk Firestore
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'caption': caption,
@@ -155,7 +149,6 @@ class PhotoModel extends HiveObject {
       'uploadProgress': uploadProgress,
       'uploadError': uploadError,
     };
-  }
 
   /// Create copy with updated fields
   PhotoModel copyWith({
@@ -177,8 +170,7 @@ class PhotoModel extends HiveObject {
     String? uploadStatus,
     int? uploadProgress,
     String? uploadError,
-  }) {
-    return PhotoModel(
+  }) => PhotoModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       caption: caption ?? this.caption,
@@ -198,7 +190,6 @@ class PhotoModel extends HiveObject {
       uploadProgress: uploadProgress ?? this.uploadProgress,
       uploadError: uploadError ?? this.uploadError,
     );
-  }
 
   /// Getter untuk display URL (prioritas: imageUrl > thumbnailUrl > localFilePath)
   String? get displayUrl => imageUrl ?? thumbnailUrl ?? localFilePath;
@@ -214,10 +205,12 @@ class PhotoModel extends HiveObject {
 
   /// Getter untuk file size yang readable (KB, MB)
   String get readableFileSize {
-    if (fileSizeBytes == null) return 'Unknown';
+    if (fileSizeBytes == null) {
+      return 'Unknown';
+    }
 
     if (fileSizeBytes! < 1024) {
-      return '${fileSizeBytes} B';
+      return '$fileSizeBytes B';
     } else if (fileSizeBytes! < 1024 * 1024) {
       return '${(fileSizeBytes! / 1024).toStringAsFixed(1)} KB';
     } else {
@@ -264,20 +257,20 @@ class PhotoModel extends HiveObject {
       'Sep',
       'Okt',
       'Nov',
-      'Des'
+      'Des',
     ];
     return months[month - 1];
   }
 
   @override
-  String toString() {
-    return 'PhotoModel(id: $id, caption: $caption, date: $date, '
+  String toString() => 'PhotoModel(id: $id, caption: $caption, date: $date, '
         'isMilestone: $isMilestone, uploadStatus: $uploadStatus, isSynced: $isSynced)';
-  }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is PhotoModel &&
         other.id == id &&
@@ -298,8 +291,7 @@ class PhotoModel extends HiveObject {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
+  int get hashCode => id.hashCode ^
         userId.hashCode ^
         caption.hashCode ^
         date.hashCode ^
@@ -314,5 +306,4 @@ class PhotoModel extends HiveObject {
         updatedAt.hashCode ^
         isSynced.hashCode ^
         uploadStatus.hashCode;
-  }
 }

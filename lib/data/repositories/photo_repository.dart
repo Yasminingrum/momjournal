@@ -23,8 +23,8 @@ class PhotoRepository {
   /// Get all photos
   Future<List<PhotoEntity>> getAllPhotos() async {
     await init();
-    final photos = _box!.values.toList();
-    photos.sort((a, b) => b.dateTaken.compareTo(a.dateTaken)); // Most recent first
+    final photos = _box!.values.toList()
+    ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken)); // Most recent first
     return photos;
   }
 
@@ -45,31 +45,27 @@ class PhotoRepository {
   /// Get milestone photos only
   Future<List<PhotoEntity>> getMilestonePhotos() async {
     await init();
-    final photos = _box!.values.where((photo) => photo.isMilestone).toList();
-    photos.sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
+    final photos = _box!.values.where((photo) => photo.isMilestone).toList()
+    ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
     return photos;
   }
 
   /// Get photos for a specific date
   Future<List<PhotoEntity>> getPhotosByDate(DateTime date) async {
     await init();
-    return _box!.values.where((photo) {
-      return photo.dateTaken.year == date.year &&
+    return _box!.values.where((photo) => photo.dateTaken.year == date.year &&
           photo.dateTaken.month == date.month &&
-          photo.dateTaken.day == date.day;
-    }).toList();
+          photo.dateTaken.day == date.day,).toList();
   }
 
   /// Get photos for a date range
   Future<List<PhotoEntity>> getPhotosByDateRange(
       DateTime start, DateTime end,) async {
     await init();
-    final photos = _box!.values.where((photo) {
-      return photo.dateTaken.isAfter(start.subtract(const Duration(days: 1))) &&
-          photo.dateTaken.isBefore(end.add(const Duration(days: 1)));
-    }).toList();
+    final photos = _box!.values.where((photo) => photo.dateTaken.isAfter(start.subtract(const Duration(days: 1))) &&
+          photo.dateTaken.isBefore(end.add(const Duration(days: 1))),).toList()
     
-    photos.sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
+    ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
     return photos;
   }
 

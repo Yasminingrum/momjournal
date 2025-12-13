@@ -1,14 +1,16 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import '../core/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 
 /// Notification Service
 /// Handles local push notifications for schedules and reminders
 class NotificationService {
-  static final NotificationService _instance = NotificationService._internal();
+  
   factory NotificationService() => _instance;
+  
   NotificationService._internal();
+  static final NotificationService _instance = NotificationService._internal();
   
   final FlutterLocalNotificationsPlugin _notifications = 
       FlutterLocalNotificationsPlugin();
@@ -17,7 +19,9 @@ class NotificationService {
   
   /// Initialize notification service
   Future<void> initialize() async {
-    if (_initialized) return;
+    if (_initialized) {
+      return;
+    }
     
     // Initialize timezone
     tz.initializeTimeZones();
@@ -70,12 +74,9 @@ class NotificationService {
   
   /// Handle notification tap
   void _onNotificationTap(NotificationResponse response) {
-    // TODO: Navigate to appropriate screen based on payload
     final payload = response.payload;
     if (payload != null) {
       print('Notification tapped with payload: $payload');
-      // Parse payload and navigate
-      // Example: {"type": "schedule", "id": "123"}
     }
   }
   
@@ -90,7 +91,7 @@ class NotificationService {
           sound: true,
         );
     
-    return result ?? true; // Android doesn't need runtime permission
+    return result ?? true;
   }
   
   /// Show instant notification
@@ -164,9 +165,7 @@ class NotificationService {
   }
   
   /// Get pending notifications
-  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    return await _notifications.pendingNotificationRequests();
-  }
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async => _notifications.pendingNotificationRequests();
   
   /// Check if notifications are enabled
   Future<bool> areNotificationsEnabled() async {
@@ -188,7 +187,7 @@ class NotificationService {
     required int id,
     required String title,
     required String body,
-    required Time time,
+    required DateTime time,
     String? payload,
   }) async {
     await _notifications.zonedSchedule(
@@ -206,7 +205,7 @@ class NotificationService {
   }
   
   /// Get next instance of time
-  tz.TZDateTime _nextInstanceOfTime(Time time) {
+  tz.TZDateTime _nextInstanceOfTime(DateTime time) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
       tz.local,
@@ -243,8 +242,7 @@ class NotificationService {
   }
   
   /// Get notification details
-  NotificationDetails _notificationDetails() {
-    return const NotificationDetails(
+  NotificationDetails _notificationDetails() => const NotificationDetails(
       android: AndroidNotificationDetails(
         AppConstants.notificationChannelId,
         AppConstants.notificationChannelName,
@@ -261,7 +259,6 @@ class NotificationService {
         presentSound: true,
       ),
     );
-  }
   
   /// Schedule notification for schedule entity
   Future<void> scheduleForScheduleEntity({
@@ -272,8 +269,8 @@ class NotificationService {
     required int reminderMinutes,
   }) async {
     // Use schedule ID hash as notification ID
-    final notificationId = scheduleId.hashCode % 1000000 + 
-        AppConstants.notificationIdSchedule;
+    final notificationId = 
+        scheduleId.hashCode % 1000000 + AppConstants.notificationIdSchedule;
     
     final reminderText = _getReminderText(reminderMinutes);
     
@@ -289,7 +286,7 @@ class NotificationService {
   
   /// Schedule notification for journal reminder
   Future<void> scheduleJournalReminder({
-    required Time time,
+    required DateTime time,
   }) async {
     await scheduleDailyNotification(
       id: AppConstants.notificationIdJournal,

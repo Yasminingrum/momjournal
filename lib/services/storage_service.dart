@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import '../core/core/constants/app_constants.dart';
+import '/core/constants/app_constants.dart';
 
 /// Storage Service
 /// Handles local file storage and cache management
 class StorageService {
-  static final StorageService _instance = StorageService._internal();
   factory StorageService() => _instance;
   StorageService._internal();
+  static final StorageService _instance = StorageService._internal();
   
   Directory? _appDocDir;
   Directory? _tempDir;
@@ -192,9 +192,7 @@ class StorageService {
   }
   
   /// Get cache size
-  Future<int> getCacheSize() async {
-    return await getDirectorySize();
-  }
+  Future<int> getCacheSize() async => getDirectorySize();
   
   /// Clear cache
   Future<bool> clearCache() async {
@@ -275,9 +273,7 @@ class StorageService {
       }
       
       // Sort by last modified date (oldest first)
-      files.sort((a, b) {
-        return a.lastModifiedSync().compareTo(b.lastModifiedSync());
-      });
+      files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
       
       int deletedSize = 0;
       for (final file in files) {

@@ -65,16 +65,16 @@ flutter:
 
   # Assets
   assets:
-    - assets/images/
-    - assets/images/logo/
-    - assets/images/icons/
-    - assets/images/illustrations/
-    - assets/json/
+     - assets/images/
+     - assets/images/logo/
+     - assets/icons/
+     - assets/images/illustrations/
+     - assets/json/
 
-  # Fonts (optional - uncomment jika ada custom fonts)
-  # fonts:
-  #   - family: Poppins
-  #     fonts:
-  #       - asset: assets/fonts/Poppins-Regular.ttf
-  #       - asset: assets/fonts/Poppins-Bold.ttf
-  #         weight: 700
+  # Fonts
+  fonts:
+     - family: Poppins
+       fonts:
+         - asset: assets/fonts/Poppins-Regular.ttf
+         - asset: assets/fonts/Poppins-Bold.ttf
+           weight: 700

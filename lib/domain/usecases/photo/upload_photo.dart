@@ -1,20 +1,17 @@
-/// Upload Photo Use Case
-/// 
-/// Use case untuk upload photo ke storage
-/// Location: lib/domain/usecases/photo/upload_photo.dart
-
 import 'dart:io';
+
+import '../../../core/errors/exceptions.dart';
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
-import '../../../core/errors/exceptions.dart';
 
 class UploadPhotoUseCase {
-  final PhotoRepository repository;
 
   UploadPhotoUseCase(this.repository);
+  final PhotoRepository repository;
 
   Future<PhotoEntity> execute({
     required File photoFile,
+    required String userId,
     String? caption,
     bool isMilestone = false,
     DateTime? capturedAt,
@@ -23,18 +20,28 @@ class UploadPhotoUseCase {
       // Validate file
       _validatePhotoFile(photoFile);
 
+      final now = DateTime.now();
+      final timestamp = capturedAt ?? now;
+      
       // Create photo entity
-      final photo = PhotoEntity.create(
+      final photo = PhotoEntity(
+        id: 'photo_${DateTime.now().millisecondsSinceEpoch}',
+        userId: userId,
+        localPath: photoFile.path,
         caption: caption,
         isMilestone: isMilestone,
-        capturedAt: capturedAt ?? DateTime.now(),
+        dateTaken: timestamp,
+        createdAt: now,
+        updatedAt: now,
+        isSynced: false,
+        isUploaded: false,
       );
 
-      // Upload photo
-      final uploadedPhoto = await repository.uploadPhoto(photoFile, photo);
+      // Upload photo melalui repository
+      await repository.createPhoto(photo);
       
       print('✅ UseCase: Photo uploaded successfully');
-      return uploadedPhoto;
+      return photo;
     } catch (e) {
       print('❌ UseCase: Failed to upload photo: $e');
       rethrow;
@@ -44,7 +51,7 @@ class UploadPhotoUseCase {
   void _validatePhotoFile(File file) {
     // Check if file exists
     if (!file.existsSync()) {
-      throw StorageException('File tidak ditemukan');
+      throw const StorageException('File tidak ditemukan');
     }
 
     // Check file size (max 10MB)
@@ -52,7 +59,7 @@ class UploadPhotoUseCase {
     final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
     
     if (fileSizeInMB > 10) {
-      throw StorageException('Ukuran file maksimal 10MB');
+      throw const StorageException('Ukuran file maksimal 10MB');
     }
 
     // Check file extension
@@ -60,7 +67,7 @@ class UploadPhotoUseCase {
     final validExtensions = ['jpg', 'jpeg', 'png'];
     
     if (!validExtensions.contains(extension)) {
-      throw StorageException('Format file harus JPG, JPEG, atau PNG');
+      throw const StorageException('Format file harus JPG, JPEG, atau PNG');
     }
   }
 }

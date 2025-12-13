@@ -29,24 +29,20 @@ class ScheduleRepository {
   /// Get schedules for a specific date
   Future<List<ScheduleEntity>> getSchedulesByDate(DateTime date) async {
     await init();
-    final schedules = _box!.values.where((schedule) {
-      return schedule.dateTime.year == date.year &&
+    final schedules = _box!.values.where((schedule) => schedule.dateTime.year == date.year &&
           schedule.dateTime.month == date.month &&
-          schedule.dateTime.day == date.day;
-    }).toList();
+          schedule.dateTime.day == date.day,).toList()
     
     // Sort by time
-    schedules.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return schedules;
   }
 
   /// Get schedules for a specific month
   Future<List<ScheduleEntity>> getSchedulesByMonth(int year, int month) async {
     await init();
-    return _box!.values.where((schedule) {
-      return schedule.dateTime.year == year &&
-          schedule.dateTime.month == month;
-    }).toList();
+    return _box!.values.where((schedule) => schedule.dateTime.year == year &&
+          schedule.dateTime.month == month,).toList();
   }
 
   /// Get schedules by category
@@ -60,11 +56,9 @@ class ScheduleRepository {
   Future<List<ScheduleEntity>> getUpcomingSchedules() async {
     await init();
     final now = DateTime.now();
-    final schedules = _box!.values.where((schedule) {
-      return schedule.dateTime.isAfter(now) && !schedule.isCompleted;
-    }).toList();
+    final schedules = _box!.values.where((schedule) => schedule.dateTime.isAfter(now) && !schedule.isCompleted).toList()
     
-    schedules.sort((a, b) => a.dateTime.compareTo(b.dateTime));
+    ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return schedules;
   }
 

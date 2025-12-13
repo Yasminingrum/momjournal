@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/photo_repository.dart';
 import '/domain/entities/photo_entity.dart';
 
@@ -8,6 +9,7 @@ import '/domain/entities/photo_entity.dart';
 class PhotoProvider extends ChangeNotifier {
   final PhotoRepository _repository = PhotoRepository();
   final Uuid _uuid = const Uuid();
+  final HiveDatabase _hiveDatabase;
 
   List<PhotoEntity> _photos = [];
   List<PhotoEntity> _milestonePhotos = [];
@@ -25,6 +27,8 @@ class PhotoProvider extends ChangeNotifier {
   bool get isUploading => _isUploading;
   double get uploadProgress => _uploadProgress;
   String? get error => _error;
+
+  PhotoProvider(this._hiveDatabase);
 
   /// Initialize provider
   Future<void> init() async {

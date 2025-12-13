@@ -5,8 +5,9 @@ import '../constants/color_constants.dart';
 /// Light Theme Configuration
 /// Provides Material 3 light theme for the application
 class LightTheme {
-  static ThemeData get theme {
-    return ThemeData(
+  const LightTheme._();
+  
+  static ThemeData get theme => ThemeData(
       // Use Material 3
       useMaterial3: true,
       
@@ -14,45 +15,43 @@ class LightTheme {
       brightness: Brightness.light,
       
       // Color Scheme
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: ColorConstants.primaryColor,
         primaryContainer: ColorConstants.primaryLight,
         secondary: ColorConstants.secondaryColor,
         secondaryContainer: ColorConstants.secondaryLight,
-        tertiary: ColorConstants.accentColor,
+        tertiary: ColorConstants.primaryColor,
         surface: ColorConstants.surfaceLight,
-        background: ColorConstants.backgroundLight,
-        error: ColorConstants.error,
-        onPrimary: ColorConstants.white,
-        onSecondary: ColorConstants.white,
+        error: Color(0xFFB00020), // Material Design light error color
+        onPrimary: Color(0xFFFFFFFF), // white
+        onSecondary: Color(0xFFFFFFFF), // white
         onSurface: ColorConstants.textPrimary,
-        onBackground: ColorConstants.textPrimary,
-        onError: ColorConstants.white,
+        onError: Color(0xFFFFFFFF), // white
       ),
       
       // Scaffold Background
       scaffoldBackgroundColor: ColorConstants.backgroundLight,
       
       // App Bar Theme
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         elevation: 0,
         centerTitle: false,
         backgroundColor: ColorConstants.surfaceLight,
         foregroundColor: ColorConstants.textPrimary,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: ColorConstants.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: ColorConstants.textPrimary,
         ),
       ),
       
       // Card Theme
-      cardTheme: CardTheme(
-        color: ColorConstants.cardLight,
+      cardTheme: CardThemeData(
+        color: ColorConstants.surfaceLight, 
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -64,7 +63,7 @@ class LightTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: ColorConstants.primaryColor,
-          foregroundColor: ColorConstants.white,
+          foregroundColor: const Color(0xFFFFFFFF), // white
           elevation: 2,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
@@ -110,8 +109,8 @@ class LightTheme {
       
       // Floating Action Button Theme
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: ColorConstants.fabBackground,
-        foregroundColor: ColorConstants.fabIcon,
+        backgroundColor: ColorConstants.primaryColor,
+        foregroundColor: Color(0xFFFFFFFF), 
         elevation: 4,
         shape: CircleBorder(),
       ),
@@ -119,15 +118,15 @@ class LightTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: ColorConstants.grey100,
+        fillColor: const Color(0xFFF5F5F5), // grey100 equivalent
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: ColorConstants.grey300),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)), // grey300
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: ColorConstants.grey300),
+          borderSide: const BorderSide(color: Color(0xFFE0E0E0)), // grey300
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -135,33 +134,33 @@ class LightTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: ColorConstants.error),
+          borderSide: const BorderSide(color: Color(0xFFB00020)), // error
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: ColorConstants.error, width: 2),
+          borderSide: const BorderSide(color: Color(0xFFB00020), width: 2),
         ),
         labelStyle: const TextStyle(
           color: ColorConstants.textSecondary,
           fontSize: 16,
         ),
         hintStyle: const TextStyle(
-          color: ColorConstants.textHint,
+          color: ColorConstants.textSecondary,
           fontSize: 16,
         ),
         errorStyle: const TextStyle(
-          color: ColorConstants.error,
+          color: Color(0xFFB00020), // error
           fontSize: 12,
         ),
       ),
       
       // Checkbox Theme
       checkboxTheme: CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return ColorConstants.primaryColor;
           }
-          return ColorConstants.grey400;
+          return const Color(0xFFBDBDBD); // grey400
         }),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
@@ -170,35 +169,35 @@ class LightTheme {
       
       // Radio Theme
       radioTheme: RadioThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return ColorConstants.primaryColor;
           }
-          return ColorConstants.grey400;
+          return const Color(0xFFBDBDBD); // grey400
         }),
       ),
       
       // Switch Theme
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return ColorConstants.primaryColor;
           }
-          return ColorConstants.grey400;
+          return const Color(0xFFBDBDBD); // grey400
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
             return ColorConstants.primaryLight;
           }
-          return ColorConstants.grey300;
+          return const Color(0xFFE0E0E0); // grey300
         }),
       ),
       
       // Chip Theme
       chipTheme: ChipThemeData(
-        backgroundColor: ColorConstants.grey200,
+        backgroundColor: const Color(0xFFEEEEEE), // grey200
         selectedColor: ColorConstants.primaryLight,
-        disabledColor: ColorConstants.grey100,
+        disabledColor: const Color(0xFFF5F5F5), // grey100
         labelStyle: const TextStyle(
           color: ColorConstants.textPrimary,
           fontSize: 14,
@@ -214,7 +213,7 @@ class LightTheme {
       ),
       
       // Dialog Theme
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: ColorConstants.surfaceLight,
         elevation: 24,
         shape: RoundedRectangleBorder(
@@ -242,9 +241,9 @@ class LightTheme {
       
       // Snack Bar Theme
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: ColorConstants.grey800,
+        backgroundColor: const Color(0xFF424242), // grey800
         contentTextStyle: const TextStyle(
-          color: ColorConstants.white,
+          color: Color(0xFFFFFFFF), // white
           fontSize: 14,
         ),
         behavior: SnackBarBehavior.floating,
@@ -255,9 +254,9 @@ class LightTheme {
       
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: ColorConstants.bottomNavBackground,
-        selectedItemColor: ColorConstants.bottomNavSelected,
-        unselectedItemColor: ColorConstants.bottomNavUnselected,
+        backgroundColor: ColorConstants.surfaceLight, 
+        selectedItemColor: ColorConstants.primaryColor, 
+        unselectedItemColor: ColorConstants.textSecondary, 
         type: BottomNavigationBarType.fixed,
         elevation: 8,
         selectedLabelStyle: TextStyle(
@@ -272,7 +271,7 @@ class LightTheme {
       
       // Divider Theme
       dividerTheme: const DividerThemeData(
-        color: ColorConstants.dividerLight,
+        color: Color(0xFFE0E0E0), // dividerLight equivalent
         thickness: 1,
         space: 1,
       ),
@@ -371,8 +370,4 @@ class LightTheme {
         ),
       ),
     );
-  }
-  
-  // Private constructor to prevent instantiation
-  LightTheme._();
 }

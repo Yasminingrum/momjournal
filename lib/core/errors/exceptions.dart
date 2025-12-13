@@ -228,3 +228,15 @@ class PlatformSpecificException extends AppException {
   @override
   String toString() => 'PlatformSpecificException: $message ${code != null ? '(Code: $code)' : ''}';
 }
+
+/// Platform Exception - untuk error platform-specific
+class DatabaseException extends AppException {
+  const DatabaseException(
+    String message, {
+    String? code,
+    dynamic details,
+  }) : super(message, code: code, details: details);
+  
+  @override
+  String toString() => 'PlatformSpecificException: $message ${code != null ? '(Code: $code)' : ''}';
+}

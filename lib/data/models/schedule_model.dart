@@ -76,6 +76,56 @@ extension ScheduleCategoryExtension on ScheduleCategory {
 /// waktu makan, tidur, kontrol kesehatan, dll
 @HiveType(typeId: 1)
 class ScheduleModel extends HiveObject {
+
+  ScheduleModel({
+    required this.id,
+    required this.userId,
+    required this.title,
+    required this.category, 
+    required this.scheduledTime, 
+    required this.createdAt, 
+    required this.updatedAt, 
+    this.description,
+    this.reminderEnabled = true,
+    this.reminderMinutesBefore = 15,
+    this.isCompleted = false,
+    this.completedAt,
+    this.completionNotes,
+    this.isSynced = false,
+    this.notificationId,
+  });
+
+  /// Factory constructor dari JSON (Firestore)
+  factory ScheduleModel.fromJson(Map<String, dynamic> json) => ScheduleModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      title: json['title'] as String,
+      description: json['description'] as String?,
+      category: ScheduleCategory.values.firstWhere(
+        (e) => e.toString() == 'ScheduleCategory.${json['category']}',
+        orElse: () => ScheduleCategory.other,
+      ),
+      scheduledTime: json['scheduledTime'] is DateTime
+          ? json['scheduledTime'] as DateTime
+          : DateTime.parse(json['scheduledTime'] as String),
+      reminderEnabled: json['reminderEnabled'] as bool? ?? true,
+      reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      completedAt: json['completedAt'] != null
+          ? (json['completedAt'] is DateTime
+              ? json['completedAt'] as DateTime
+              : DateTime.parse(json['completedAt'] as String))
+          : null,
+      completionNotes: json['completionNotes'] as String?,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] is DateTime
+          ? json['updatedAt'] as DateTime
+          : DateTime.parse(json['updatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
+      notificationId: json['notificationId'] as int?,
+    );
   /// ID unik untuk schedule
   @HiveField(0)
   final String id;
@@ -137,61 +187,8 @@ class ScheduleModel extends HiveObject {
   @HiveField(14)
   final int? notificationId;
 
-  ScheduleModel({
-    required this.id,
-    required this.userId,
-    required this.title,
-    this.description,
-    required this.category,
-    required this.scheduledTime,
-    this.reminderEnabled = true,
-    this.reminderMinutesBefore = 15,
-    this.isCompleted = false,
-    this.completedAt,
-    this.completionNotes,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-    this.notificationId,
-  });
-
-  /// Factory constructor dari JSON (Firestore)
-  factory ScheduleModel.fromJson(Map<String, dynamic> json) {
-    return ScheduleModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      category: ScheduleCategory.values.firstWhere(
-        (e) => e.toString() == 'ScheduleCategory.${json['category']}',
-        orElse: () => ScheduleCategory.other,
-      ),
-      scheduledTime: json['scheduledTime'] is DateTime
-          ? json['scheduledTime'] as DateTime
-          : DateTime.parse(json['scheduledTime'] as String),
-      reminderEnabled: json['reminderEnabled'] as bool? ?? true,
-      reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] is DateTime
-              ? json['completedAt'] as DateTime
-              : DateTime.parse(json['completedAt'] as String))
-          : null,
-      completionNotes: json['completionNotes'] as String?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
-      isSynced: json['isSynced'] as bool? ?? false,
-      notificationId: json['notificationId'] as int?,
-    );
-  }
-
   /// Convert ke JSON untuk Firestore
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'title': title,
@@ -208,7 +205,6 @@ class ScheduleModel extends HiveObject {
       'isSynced': isSynced,
       'notificationId': notificationId,
     };
-  }
 
   /// Create copy with updated fields
   ScheduleModel copyWith({
@@ -227,8 +223,7 @@ class ScheduleModel extends HiveObject {
     DateTime? updatedAt,
     bool? isSynced,
     int? notificationId,
-  }) {
-    return ScheduleModel(
+  }) => ScheduleModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       title: title ?? this.title,
@@ -246,7 +241,6 @@ class ScheduleModel extends HiveObject {
       isSynced: isSynced ?? this.isSynced,
       notificationId: notificationId ?? this.notificationId,
     );
-  }
 
   /// Getter untuk cek apakah schedule sudah lewat
   bool get isPast => scheduledTime.isBefore(DateTime.now());
@@ -263,14 +257,14 @@ class ScheduleModel extends HiveObject {
   bool get isUpcoming => !isPast && !isCompleted;
 
   @override
-  String toString() {
-    return 'ScheduleModel(id: $id, title: $title, category: $category, '
+  String toString() => 'ScheduleModel(id: $id, title: $title, category: $category, '
         'scheduledTime: $scheduledTime, isCompleted: $isCompleted)';
-  }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is ScheduleModel &&
         other.id == id &&
@@ -291,8 +285,7 @@ class ScheduleModel extends HiveObject {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
+  int get hashCode => id.hashCode ^
         userId.hashCode ^
         title.hashCode ^
         description.hashCode ^
@@ -307,5 +300,4 @@ class ScheduleModel extends HiveObject {
         updatedAt.hashCode ^
         isSynced.hashCode ^
         notificationId.hashCode;
-  }
 }

@@ -1,15 +1,10 @@
-/// Get Photos Use Case
-/// 
-/// Use case untuk mendapatkan list photos
-/// Location: lib/domain/usecases/photo/get_photos.dart
-
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
 
 class GetPhotosUseCase {
-  final PhotoRepository repository;
 
   GetPhotosUseCase(this.repository);
+  final PhotoRepository repository;
 
   /// Get all photos
   Future<List<PhotoEntity>> execute() async {
@@ -71,7 +66,7 @@ class GetPhotosUseCase {
       final allPhotos = await repository.getAllPhotos();
       
       final photosInMonth = allPhotos.where((photo) {
-        final capturedDate = photo.capturedAt;
+        final capturedDate = photo.createdAt;
         return capturedDate.year == year && capturedDate.month == month;
       }).toList();
       
@@ -92,7 +87,7 @@ class GetPhotosUseCase {
       final allPhotos = await repository.getAllPhotos();
       
       final photosInRange = allPhotos.where((photo) {
-        final capturedDate = photo.capturedAt;
+        final capturedDate = photo.createdAt;
         return capturedDate.isAfter(startDate) && 
                capturedDate.isBefore(endDate);
       }).toList();

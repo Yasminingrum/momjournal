@@ -1,11 +1,6 @@
-/// Schedule Remote Datasource
-/// 
-/// Handles schedule operations with Firestore
-/// Location: lib/data/datasources/remote/schedule_remote_datasource.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../domain/entities/schedule_entity.dart';
 import '../../../core/errors/exceptions.dart';
+import '../../../domain/entities/schedule_entity.dart';
 import 'firebase_service.dart';
 
 /// Interface untuk Schedule Remote Datasource
@@ -47,7 +42,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> createSchedule(ScheduleEntity schedule) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final scheduleData = _scheduleToFirestore(schedule);
@@ -62,7 +57,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error creating schedule: $e');
-      if (e is AuthException) rethrow;
+      if (e is AuthorizationException) rethrow;
       throw DatabaseException('Gagal membuat jadwal: $e');
     }
   }
@@ -71,7 +66,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<List<ScheduleEntity>> getAllSchedules() async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
@@ -89,7 +84,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error getting schedules: $e');
-      if (e is AuthException) rethrow;
+      if (e is AuthorizationException) rethrow;
       throw DatabaseException('Gagal mengambil jadwal: $e');
     }
   }
@@ -101,7 +96,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   ) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
@@ -121,7 +116,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error getting schedules by date: $e');
-      if (e is AuthException) rethrow;
+      if (e is AuthorizationException) rethrow;
       throw DatabaseException('Gagal mengambil jadwal: $e');
     }
   }
@@ -130,7 +125,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> updateSchedule(ScheduleEntity schedule) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final scheduleData = _scheduleToFirestore(schedule);
@@ -146,7 +141,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error updating schedule: $e');
-      if (e is AuthException) rethrow;
+      if (e is AuthorizationException) rethrow;
       throw DatabaseException('Gagal memperbarui jadwal: $e');
     }
   }
@@ -155,7 +150,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> deleteSchedule(String scheduleId) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       await _schedulesCollection!.doc(scheduleId).delete();
@@ -166,7 +161,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
       print('❌ Error deleting schedule: $e');
-      if (e is AuthException) rethrow;
+      if (e is AuthorizationException) rethrow;
       throw DatabaseException('Gagal menghapus jadwal: $e');
     }
   }
@@ -174,7 +169,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   @override
   Stream<List<ScheduleEntity>> watchSchedules() {
     if (_schedulesCollection == null) {
-      return Stream.error(AuthException('User tidak login'));
+      return Stream.error(AuthorizationException ('User tidak login'));
     }
 
     return _schedulesCollection!
@@ -198,11 +193,11 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     return {
       'id': schedule.id,
       'title': schedule.title,
-      'description': schedule.description,
+      'notes': schedule.notes,
       'dateTime': Timestamp.fromDate(schedule.dateTime),
       'category': schedule.category.name,
-      'isReminderEnabled': schedule.isReminderEnabled,
-      'reminderMinutesBefore': schedule.reminderMinutesBefore,
+      'hasReminder': schedule.hasReminder,
+      'reminderMinutes': schedule.reminderMinutes,
       'isCompleted': schedule.isCompleted,
       'createdAt': Timestamp.fromDate(schedule.createdAt),
       'updatedAt': Timestamp.fromDate(schedule.updatedAt),
@@ -215,15 +210,16 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     
     return ScheduleEntity(
       id: data['id'] as String,
+      userId: data['userId'] as String,
       title: data['title'] as String,
-      description: data['description'] as String?,
+      notes: data['notes'] as String?,
       dateTime: (data['dateTime'] as Timestamp).toDate(),
       category: ScheduleCategory.values.firstWhere(
         (e) => e.name == data['category'],
         orElse: () => ScheduleCategory.other,
       ),
-      isReminderEnabled: data['isReminderEnabled'] as bool? ?? false,
-      reminderMinutesBefore: data['reminderMinutesBefore'] as int? ?? 15,
+      hasReminder: data['hasReminder'] as bool? ?? false,
+      reminderMinutes: data['reminderMinutes'] as int? ?? 15,
       isCompleted: data['isCompleted'] as bool? ?? false,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),

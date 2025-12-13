@@ -9,9 +9,9 @@ import 'core/themes/app_theme.dart';
 import 'data/datasources/local/hive_database.dart';
 
 // Presentation Layer - Providers
-import 'presentation/providers/schedule_provider.dart';
 import 'presentation/providers/journal_provider.dart';
 import 'presentation/providers/photo_provider.dart';
+import 'presentation/providers/schedule_provider.dart';
 
 // Presentation Layer - Screens
 import 'presentation/screens/home/home_screen.dart';
@@ -65,11 +65,6 @@ class MomJournalApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => PhotoProvider(hiveDatabase),
         ),
-
-        // TODO: Add more providers as they are created
-        // - AuthProvider
-        // - SyncProvider
-        // - NotificationProvider
       ],
       child: Consumer<ScheduleProvider>(
         builder: (context, scheduleProvider, _) {
@@ -86,9 +81,6 @@ class MomJournalApp extends StatelessWidget {
 
             // Initial route
             home: const HomeScreen(),
-
-            // TODO: Add route configuration when route_generator is ready
-            // onGenerateRoute: RouteGenerator.generateRoute,
 
             // Error handling
             builder: (context, child) {

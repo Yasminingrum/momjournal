@@ -92,6 +92,44 @@ extension MoodExtension on Mood {
 /// untuk monitoring kesehatan mental
 @HiveType(typeId: 2)
 class JournalModel extends HiveObject {
+
+  JournalModel({
+    required this.id,
+    required this.userId,
+    required this.date,
+    required this.mood,
+    required this.content,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isSynced = false,
+    this.tags,
+    this.isFavorite = false,
+  });
+
+  /// Factory constructor dari JSON (Firestore)
+  factory JournalModel.fromJson(Map<String, dynamic> json) => JournalModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      date: json['date'] is DateTime
+          ? json['date'] as DateTime
+          : DateTime.parse(json['date'] as String),
+      mood: Mood.values.firstWhere(
+        (e) => e.toString() == 'Mood.${json['mood']}',
+        orElse: () => Mood.neutral,
+      ),
+      content: json['content'] as String,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] is DateTime
+          ? json['updatedAt'] as DateTime
+          : DateTime.parse(json['updatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'] as List)
+          : null,
+      isFavorite: json['isFavorite'] as bool? ?? false,
+    );
   /// ID unik untuk journal entry
   @HiveField(0)
   final String id;
@@ -132,49 +170,8 @@ class JournalModel extends HiveObject {
   @HiveField(9)
   final bool isFavorite;
 
-  JournalModel({
-    required this.id,
-    required this.userId,
-    required this.date,
-    required this.mood,
-    required this.content,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-    this.tags,
-    this.isFavorite = false,
-  });
-
-  /// Factory constructor dari JSON (Firestore)
-  factory JournalModel.fromJson(Map<String, dynamic> json) {
-    return JournalModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      date: json['date'] is DateTime
-          ? json['date'] as DateTime
-          : DateTime.parse(json['date'] as String),
-      mood: Mood.values.firstWhere(
-        (e) => e.toString() == 'Mood.${json['mood']}',
-        orElse: () => Mood.neutral,
-      ),
-      content: json['content'] as String,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
-      isSynced: json['isSynced'] as bool? ?? false,
-      tags: json['tags'] != null
-          ? List<String>.from(json['tags'] as List)
-          : null,
-      isFavorite: json['isFavorite'] as bool? ?? false,
-    );
-  }
-
   /// Convert ke JSON untuk Firestore
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'date': date.toIso8601String(),
@@ -186,7 +183,6 @@ class JournalModel extends HiveObject {
       'tags': tags,
       'isFavorite': isFavorite,
     };
-  }
 
   /// Create copy with updated fields
   JournalModel copyWith({
@@ -200,8 +196,7 @@ class JournalModel extends HiveObject {
     bool? isSynced,
     List<String>? tags,
     bool? isFavorite,
-  }) {
-    return JournalModel(
+  }) => JournalModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       date: date ?? this.date,
@@ -213,11 +208,12 @@ class JournalModel extends HiveObject {
       tags: tags ?? this.tags,
       isFavorite: isFavorite ?? this.isFavorite,
     );
-  }
 
   /// Getter untuk preview content (first 100 chars)
   String get contentPreview {
-    if (content.length <= 100) return content;
+    if (content.length <= 100) {
+      return content;
+    }
     return '${content.substring(0, 97)}...';
   }
 
@@ -259,7 +255,7 @@ class JournalModel extends HiveObject {
       'Kamis',
       'Jumat',
       'Sabtu',
-      'Minggu'
+      'Minggu',
     ];
     return weekdays[weekday - 1];
   }
@@ -277,20 +273,20 @@ class JournalModel extends HiveObject {
       'Sep',
       'Okt',
       'Nov',
-      'Des'
+      'Des',
     ];
     return months[month - 1];
   }
 
   @override
-  String toString() {
-    return 'JournalModel(id: $id, date: $date, mood: $mood, '
+  String toString() => 'JournalModel(id: $id, date: $date, mood: $mood, '
         'contentLength: ${content.length}, isSynced: $isSynced)';
-  }
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
+    if (identical(this, other)) {
+      return true;
+    }
 
     return other is JournalModel &&
         other.id == id &&
@@ -305,8 +301,7 @@ class JournalModel extends HiveObject {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
+  int get hashCode => id.hashCode ^
         userId.hashCode ^
         date.hashCode ^
         mood.hashCode ^
@@ -315,5 +310,4 @@ class JournalModel extends HiveObject {
         updatedAt.hashCode ^
         isSynced.hashCode ^
         isFavorite.hashCode;
-  }
 }

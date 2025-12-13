@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Color constants for the app theme
 class ColorConstants {
+  ColorConstants._();
+  
   // Primary Colors
   static const Color primaryColor = Color(0xFF6750A4);
   static const Color primaryLight = Color(0xFFEADDFF);

@@ -1,11 +1,6 @@
-/// Journal Remote Datasource
-/// 
-/// Handles journal operations with Firestore
-/// Location: lib/data/datasources/remote/journal_remote_datasource.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../domain/entities/journal_entity.dart';
 import '../../../core/errors/exceptions.dart';
+import '../../../domain/entities/journal_entity.dart';
 import 'firebase_service.dart';
 
 /// Interface untuk Journal Remote Datasource
@@ -35,7 +30,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   Future<void> createJournal(JournalEntity journal) async {
     try {
       if (_journalsCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       await _journalsCollection!
@@ -53,7 +48,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   Future<List<JournalEntity>> getAllJournals() async {
     try {
       if (_journalsCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final snapshot = await _journalsCollection!
@@ -73,7 +68,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   ) async {
     try {
       if (_journalsCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final snapshot = await _journalsCollection!
@@ -92,7 +87,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   Future<void> updateJournal(JournalEntity journal) async {
     try {
       if (_journalsCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final data = _journalToFirestore(journal);
@@ -109,7 +104,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   Future<void> deleteJournal(String journalId) async {
     try {
       if (_journalsCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       await _journalsCollection!.doc(journalId).delete();
@@ -122,7 +117,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
   @override
   Stream<List<JournalEntity>> watchJournals() {
     if (_journalsCollection == null) {
-      return Stream.error(AuthException('User tidak login'));
+      return Stream.error(AuthorizationException('User tidak login'));
     }
 
     return _journalsCollection!
@@ -133,23 +128,26 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
     });
   }
 
-  Map<String, dynamic> _journalToFirestore(JournalEntity journal) {
-    return {
+  Map<String, dynamic> _journalToFirestore(JournalEntity journal) => {
       'id': journal.id,
+      'userId': journal.userId,
       'content': journal.content,
       'mood': journal.mood.name,
       'date': Timestamp.fromDate(journal.date),
       'createdAt': Timestamp.fromDate(journal.createdAt),
       'updatedAt': Timestamp.fromDate(journal.updatedAt),
     };
-  }
 
   JournalEntity _journalFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return JournalEntity(
-      id: data['id'],
-      content: data['content'],
-      mood: Mood.values.firstWhere((e) => e.name == data['mood']),
+      id: data['id'] as String,
+      userId: data['userId'] as String? ?? '',
+      content: data['content'] as String,
+      mood: MoodType.values.firstWhere(
+        (e) => e.name == data['mood'],
+        orElse: () => MoodType.neutral,
+      ),
       date: (data['date'] as Timestamp).toDate(),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),

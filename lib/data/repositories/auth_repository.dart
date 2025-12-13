@@ -4,8 +4,9 @@
 /// Location: lib/data/repositories/auth_repository.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
+import '/core/errors/exceptions.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
-import '../../core/errors/exceptions.dart';
+
 
 /// Interface untuk Auth Repository
 abstract class AuthRepository {
@@ -46,11 +47,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final user = await _remoteDatasource.signInWithGoogle();
       print('✅ Repository: Sign-In successful');
       return user;
-    } on AuthException {
+    } on AuthorizationException {
       rethrow;
     } catch (e) {
       print('❌ Repository: Sign-In failed: $e');
-      throw AuthException('Gagal masuk: $e');
+      throw AuthorizationException('Gagal masuk: $e');
     }
   }
 
@@ -60,11 +61,11 @@ class AuthRepositoryImpl implements AuthRepository {
       print('🚪 Repository: Signing out...');
       await _remoteDatasource.signOut();
       print('✅ Repository: Sign-Out successful');
-    } on AuthException {
+    } on AuthorizationException {
       rethrow;
     } catch (e) {
       print('❌ Repository: Sign-Out failed: $e');
-      throw AuthException('Gagal keluar: $e');
+      throw AuthorizationException('Gagal keluar: $e');
     }
   }
 
@@ -89,11 +90,11 @@ class AuthRepositoryImpl implements AuthRepository {
       print('🗑️ Repository: Deleting account...');
       await _remoteDatasource.deleteUserAccount();
       print('✅ Repository: Account deleted');
-    } on AuthException {
+    } on AuthorizationException {
       rethrow;
     } catch (e) {
       print('❌ Repository: Failed to delete account: $e');
-      throw AuthException('Gagal menghapus akun: $e');
+      throw AuthorizationException('Gagal menghapus akun: $e');
     }
   }
 

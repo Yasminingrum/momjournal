@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:momjournal/data/models/journal_model.dart';
+import 'package:momjournal/data/models/schedule_model.dart';
 import 'package:provider/provider.dart';
+import '/core/constants/app_constants.dart';
 import '/core/constants/color_constants.dart';
 import '/core/constants/text_constants.dart';
-import '/core/constants/app_constants.dart';
-import '/presentation/providers/schedule_provider.dart';
 import '/presentation/providers/journal_provider.dart';
 import '/presentation/providers/photo_provider.dart';
-import '/presentation/screens/schedule/schedule_screen.dart';
-import '/presentation/screens/journal/journal_screen.dart';
+import '/presentation/providers/schedule_provider.dart';
 import '/presentation/screens/gallery/gallery_screen.dart';
+import '/presentation/screens/journal/journal_screen.dart';
+import '/presentation/screens/schedule/schedule_screen.dart';
 import '/presentation/screens/settings/settings_screen.dart';
 
 /// Home Screen with bottom navigation and dashboard

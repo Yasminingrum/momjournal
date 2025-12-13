@@ -4,10 +4,12 @@
 /// Location: lib/data/datasources/remote/photo_remote_datasource.dart
 
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import '../../../domain/entities/photo_entity.dart';
+
 import '../../../core/errors/exceptions.dart';
+import '../../../domain/entities/photo_entity.dart';
 import 'firebase_service.dart';
 
 /// Interface untuk Photo Remote Datasource
@@ -36,7 +38,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<String> uploadPhoto(File photoFile, String photoId) async {
     try {
       if (_userPhotosRef == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       print('📤 Uploading photo: $photoId');
@@ -65,7 +67,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> createPhotoMetadata(PhotoEntity photo) async {
     try {
       if (_photosCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       await _photosCollection!
@@ -82,11 +84,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<List<PhotoEntity>> getAllPhotos() async {
     try {
       if (_photosCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final snapshot = await _photosCollection!
-          .orderBy('capturedAt', descending: true)
+          .orderBy('dateTaken', descending: true)
           .get();
 
       return snapshot.docs.map(_photoFromFirestore).toList();
@@ -99,7 +101,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> updatePhoto(PhotoEntity photo) async {
     try {
       if (_photosCollection == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       final data = _photoToFirestore(photo);
@@ -116,7 +118,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> deletePhoto(String photoId, String downloadUrl) async {
     try {
       if (_photosCollection == null || _userPhotosRef == null) {
-        throw AuthException('User tidak login');
+        throw AuthorizationException('User tidak login');
       }
 
       // Delete from Storage
@@ -142,11 +144,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   @override
   Stream<List<PhotoEntity>> watchPhotos() {
     if (_photosCollection == null) {
-      return Stream.error(AuthException('User tidak login'));
+      return Stream.error(AuthorizationException('User tidak login'));
     }
 
     return _photosCollection!
-        .orderBy('capturedAt', descending: true)
+        .orderBy('dateTaken', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map(_photoFromFirestore).toList();
@@ -156,10 +158,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Map<String, dynamic> _photoToFirestore(PhotoEntity photo) {
     return {
       'id': photo.id,
-      'downloadUrl': photo.downloadUrl,
+      'userId': photo.userId,
+      'cloudUrl': photo.cloudUrl,
       'caption': photo.caption,
       'isMilestone': photo.isMilestone,
-      'capturedAt': Timestamp.fromDate(photo.capturedAt),
+      'dateTaken': Timestamp.fromDate(photo.dateTaken),
       'createdAt': Timestamp.fromDate(photo.createdAt),
       'updatedAt': Timestamp.fromDate(photo.updatedAt),
     };
@@ -168,11 +171,12 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   PhotoEntity _photoFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return PhotoEntity(
-      id: data['id'],
-      downloadUrl: data['downloadUrl'],
-      caption: data['caption'],
-      isMilestone: data['isMilestone'],
-      capturedAt: (data['capturedAt'] as Timestamp).toDate(),
+      id: data['id'] as String,
+      userId: data['userId'] as String,
+      cloudUrl: data['cloudUrl'] as String,
+      caption: data['caption'] as String? ?? '',
+      isMilestone: data['isMilestone'] as bool,
+      dateTaken: (data['dateTaken'] as Timestamp).toDate(),
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );

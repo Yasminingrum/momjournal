@@ -1,12 +1,7 @@
-/// Auth Provider
-/// 
-/// State management untuk authentication
-/// Location: lib/presentation/providers/auth_provider.dart
-
-import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../data/repositories/auth_repository.dart';
-import '../../core/errors/exceptions.dart';
 
 /// Enum untuk auth state
 enum AuthState {
@@ -19,13 +14,13 @@ enum AuthState {
 
 /// Auth Provider using ChangeNotifier
 class AuthProvider with ChangeNotifier {
-  final AuthRepository _authRepository;
 
   AuthProvider({
     required AuthRepository authRepository,
   }) : _authRepository = authRepository {
     _initialize();
   }
+  final AuthRepository _authRepository;
 
   // State
   AuthState _state = AuthState.initial;
@@ -70,9 +65,9 @@ class AuthProvider with ChangeNotifier {
       
       print('✅ Provider: Sign-In successful');
       return true;
-    } on AuthException catch (e) {
-      print('❌ Provider: AuthException: ${e.message}');
-      _errorMessage = e.message;
+    } on Exception catch (e) {
+      print('❌ Provider: AuthException: $e');
+      _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {
@@ -97,9 +92,9 @@ class AuthProvider with ChangeNotifier {
       
       print('✅ Provider: Sign-Out successful');
       return true;
-    } on AuthException catch (e) {
-      print('❌ Provider: Sign-Out failed: ${e.message}');
-      _errorMessage = e.message;
+    } on Exception catch (e) {
+      print('❌ Provider: Sign-Out failed: $e');
+      _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {
@@ -124,9 +119,9 @@ class AuthProvider with ChangeNotifier {
       
       print('✅ Provider: Account deleted');
       return true;
-    } on AuthException catch (e) {
-      print('❌ Provider: Delete account failed: ${e.message}');
-      _errorMessage = e.message;
+    } on Exception catch (e) {
+      print('❌ Provider: Delete account failed: $e');
+      _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {

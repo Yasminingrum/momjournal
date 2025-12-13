@@ -4,6 +4,7 @@
 /// Location: lib/presentation/providers/notification_provider.dart
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../../services/notification_service.dart';
 
 class NotificationProvider with ChangeNotifier {
@@ -41,7 +42,7 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
     
     if (!enabled) {
-      await _notificationService.cancelAll();
+      await _notifications.cancelAll();
       print('🔕 All notifications cancelled');
     } else {
       print('🔔 Notifications enabled');

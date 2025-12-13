@@ -18,6 +18,31 @@ enum MoodType {
 
 @HiveType(typeId: 4)
 class JournalEntity extends HiveObject {
+
+  JournalEntity({
+    required this.id,
+    required this.userId,
+    required this.date,
+    required this.mood,
+    required this.content,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isSynced = false,
+  });
+
+  factory JournalEntity.fromJson(Map<String, dynamic> json) => JournalEntity(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      date: DateTime.parse(json['date'] as String),
+      mood: MoodType.values.firstWhere(
+        (e) => e.name == json['mood'],
+        orElse: () => MoodType.neutral,
+      ),
+      content: json['content'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      isSynced: true,
+    );
   @HiveField(0)
   final String id;
   
@@ -42,17 +67,6 @@ class JournalEntity extends HiveObject {
   @HiveField(7)
   final bool isSynced;
 
-  JournalEntity({
-    required this.id,
-    required this.userId,
-    required this.date,
-    required this.mood,
-    required this.content,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-  });
-
   JournalEntity copyWith({
     String? id,
     String? userId,
@@ -62,8 +76,7 @@ class JournalEntity extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isSynced,
-  }) {
-    return JournalEntity(
+  }) => JournalEntity(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       date: date ?? this.date,
@@ -73,10 +86,8 @@ class JournalEntity extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'date': date.toIso8601String(),
@@ -85,23 +96,6 @@ class JournalEntity extends HiveObject {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
-  }
-
-  factory JournalEntity.fromJson(Map<String, dynamic> json) {
-    return JournalEntity(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      date: DateTime.parse(json['date'] as String),
-      mood: MoodType.values.firstWhere(
-        (e) => e.name == json['mood'],
-        orElse: () => MoodType.neutral,
-      ),
-      content: json['content'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      isSynced: true,
-    );
-  }
 
   // Helper method to get mood emoji
   String get moodEmoji {

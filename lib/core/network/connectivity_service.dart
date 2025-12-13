@@ -3,8 +3,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
 /// ConnectivityService
-/// Advanced connectivity monitoring service with retry logic and status tracking.
-/// Provides real-time connection status updates and automatic reconnection handling.
+/// 
+/// Advanced connectivity monitoring service with retry logic and status 
+/// tracking. Provides real-time connection status updates and automatic 
+/// reconnection handling.
 ///
 /// Features:
 /// - Real-time connectivity monitoring
@@ -12,6 +14,7 @@ import 'package:flutter/foundation.dart';
 /// - Retry logic with exponential backoff
 /// - Connection quality estimation
 /// - Event notifications for connectivity changes
+
 class ConnectivityService extends ChangeNotifier {
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
@@ -39,7 +42,8 @@ class ConnectivityService extends ChangeNotifier {
   DateTime? get lastConnectedTime => _lastConnectedTime;
   DateTime? get lastDisconnectedTime => _lastDisconnectedTime;
   int get disconnectionCount => _disconnectionCount;
-  List<ConnectivityEvent> get connectionHistory => List.unmodifiable(_connectionHistory);
+  List<ConnectivityEvent> get connectionHistory => 
+      List.unmodifiable(_connectionHistory);
   bool get isRetrying => _retryTimer?.isActive ?? false;
   int get retryAttempts => _retryAttempts;
 
@@ -84,7 +88,7 @@ class ConnectivityService extends ChangeNotifier {
   }
 
   /// Initialize connectivity monitoring
-  void _initialize() async {
+  Future<void> _initialize() async {
     // Check initial connectivity
     await checkConnectivity();
 
@@ -94,7 +98,8 @@ class ConnectivityService extends ChangeNotifier {
 
   /// Start connectivity monitoring
   void _startMonitoring() {
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+    _connectivitySubscription = 
+        _connectivity.onConnectivityChanged.listen(
       (ConnectivityResult result) {
         _handleConnectivityChange(result);
       },
@@ -136,7 +141,9 @@ class ConnectivityService extends ChangeNotifier {
     }
 
     // Connection type changed
-    if (wasConnected && _isConnected && previousConnection != _currentConnection) {
+    if (wasConnected && 
+        _isConnected && 
+        previousConnection != _currentConnection) {
       _onConnectionTypeChanged(previousConnection, _currentConnection);
     }
 
@@ -147,7 +154,7 @@ class ConnectivityService extends ChangeNotifier {
       timestamp: DateTime.now(),
     ));
 
-    debugPrint('📡 Connectivity: ${statusText}');
+    debugPrint('📡 Connectivity: $statusText');
     notifyListeners();
   }
 
@@ -157,7 +164,7 @@ class ConnectivityService extends ChangeNotifier {
     _retryAttempts = 0;
     _retryTimer?.cancel();
 
-    debugPrint('✅ Connection restored: ${statusText}');
+    debugPrint('✅ Connection restored: $statusText');
   }
 
   /// Handle connection lost
@@ -176,7 +183,10 @@ class ConnectivityService extends ChangeNotifier {
     ConnectivityResult from,
     ConnectivityResult to,
   ) {
-    debugPrint('🔄 Connection type changed: ${_connectionTypeToString(from)} → ${_connectionTypeToString(to)}');
+    debugPrint(
+        '🔄 Connection type changed: '
+        '${_connectionTypeToString(from)} → ${_connectionTypeToString(to)}'
+    );
   }
 
   /// Start retry logic with exponential backoff
@@ -197,20 +207,26 @@ class ConnectivityService extends ChangeNotifier {
     // Exponential backoff: 2s, 4s, 8s, 16s, 32s
     final delay = _initialRetryDelay * (1 << _retryAttempts);
     
-    debugPrint('🔄 Scheduling retry #${_retryAttempts + 1} in ${delay.inSeconds}s');
+    debugPrint(
+        '🔄 Scheduling retry #${_retryAttempts + 1} '
+        'in ${delay.inSeconds}s'
+    );
 
-    _retryTimer = Timer(delay, () async {
-      _retryAttempts++;
-      notifyListeners();
-
-      final connected = await checkConnectivity();
-      
-      if (!connected) {
-        _scheduleRetry();
-      }
-    });
+    _retryTimer = Timer(delay, _performRetry);
 
     notifyListeners();
+  }
+
+  /// Perform retry attempt
+  Future<void> _performRetry() async {
+    _retryAttempts++;
+    notifyListeners();
+
+    final connected = await checkConnectivity();
+    
+    if (!connected) {
+      _scheduleRetry();
+    }
   }
 
   /// Cancel retry logic
@@ -226,7 +242,10 @@ class ConnectivityService extends ChangeNotifier {
     
     // Keep only last N events
     if (_connectionHistory.length > _maxHistoryLength) {
-      _connectionHistory.removeRange(_maxHistoryLength, _connectionHistory.length);
+      _connectionHistory.removeRange(
+          _maxHistoryLength, 
+          _connectionHistory.length
+      );
     }
   }
 
@@ -256,7 +275,10 @@ class ConnectivityService extends ChangeNotifier {
   }) async {
     if (_isConnected) return true;
 
-    debugPrint('⏳ Waiting for connection (timeout: ${timeout.inSeconds}s)...');
+    debugPrint(
+        '⏳ Waiting for connection '
+        '(timeout: ${timeout.inSeconds}s)...'
+    );
 
     final completer = Completer<bool>();
     StreamSubscription<ConnectivityResult>? subscription;

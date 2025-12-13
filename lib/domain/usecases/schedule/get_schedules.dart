@@ -1,15 +1,10 @@
-/// Get Schedules Use Case
-/// 
-/// Use case untuk mendapatkan list schedules
-/// Location: lib/domain/usecases/schedule/get_schedules.dart
-
 import '../../../data/repositories/schedule_repository.dart';
 import '../../entities/schedule_entity.dart';
 
 class GetSchedulesUseCase {
-  final ScheduleRepository repository;
 
   GetSchedulesUseCase(this.repository);
+  final ScheduleRepository repository;
 
   /// Get all schedules
   Future<List<ScheduleEntity>> execute() async {
@@ -26,13 +21,7 @@ class GetSchedulesUseCase {
   /// Get schedules by date
   Future<List<ScheduleEntity>> executeByDate(DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
-      final endOfDay = startOfDay.add(const Duration(days: 1));
-      
-      final schedules = await repository.getSchedulesByDateRange(
-        startOfDay,
-        endOfDay,
-      );
+      final schedules = await repository.getSchedulesByDate(date);
       
       print('✅ UseCase: Retrieved ${schedules.length} schedules for ${date.toString()}');
       return schedules;
@@ -45,13 +34,7 @@ class GetSchedulesUseCase {
   /// Get schedules by month
   Future<List<ScheduleEntity>> executeByMonth(int year, int month) async {
     try {
-      final startOfMonth = DateTime(year, month, 1);
-      final endOfMonth = DateTime(year, month + 1, 0, 23, 59, 59);
-      
-      final schedules = await repository.getSchedulesByDateRange(
-        startOfMonth,
-        endOfMonth,
-      );
+      final schedules = await repository.getSchedulesByMonth(year, month);
       
       print('✅ UseCase: Retrieved ${schedules.length} schedules for $year-$month');
       return schedules;
@@ -67,18 +50,17 @@ class GetSchedulesUseCase {
       final now = DateTime.now();
       final future = now.add(Duration(days: days));
       
-      final schedules = await repository.getSchedulesByDateRange(now, future);
+      // Get all upcoming schedules from repository
+      final allUpcoming = await repository.getUpcomingSchedules();
       
-      // Filter only incomplete schedules
-      final upcoming = schedules
-          .where((s) => !s.isCompleted && s.dateTime.isAfter(now))
+      // Filter by date range (within specified days)
+      final schedules = allUpcoming
+          .where((s) => s.dateTime.isBefore(future) || s.dateTime.isAtSameMomentAs(future))
           .toList();
       
-      // Sort by date
-      upcoming.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-      
-      print('✅ UseCase: Retrieved ${upcoming.length} upcoming schedules');
-      return upcoming;
+      // Already sorted by repository
+      print('✅ UseCase: Retrieved ${schedules.length} upcoming schedules');
+      return schedules;
     } catch (e) {
       print('❌ UseCase: Failed to get upcoming schedules: $e');
       rethrow;
@@ -86,7 +68,5 @@ class GetSchedulesUseCase {
   }
 
   /// Get today's schedules
-  Future<List<ScheduleEntity>> executeToday() async {
-    return executeByDate(DateTime.now());
-  }
+  Future<List<ScheduleEntity>> executeToday() async => executeByDate(DateTime.now());
 }

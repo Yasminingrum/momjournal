@@ -1,15 +1,24 @@
-/// Sync Repository
-/// 
-/// Repository untuk sync data antara local dan remote
-/// Location: lib/data/repositories/sync_repository.dart
+import 'package:flutter/foundation.dart';
 
-import '../datasources/local/schedule_local_datasource.dart';
+import '../../core/errors/exceptions.dart';
+import '../../domain/entities/journal_entity.dart';
+import '../../domain/entities/photo_entity.dart';
+import '../../domain/entities/schedule_entity.dart' as schedule_entity;
 import '../datasources/local/journal_local_datasource.dart';
 import '../datasources/local/photo_local_datasource.dart';
-import '../datasources/remote/schedule_remote_datasource.dart';
+import '../datasources/local/schedule_local_datasource.dart';
 import '../datasources/remote/journal_remote_datasource.dart';
 import '../datasources/remote/photo_remote_datasource.dart';
-import '../../core/errors/exceptions.dart';
+import '../datasources/remote/schedule_remote_datasource.dart';
+import '../models/journal_model.dart';
+import '../models/photo_model.dart';
+import '../models/schedule_model.dart';
+
+/// HYBRID SYNC REPOSITORY
+/// 
+/// Handles the case where:
+/// - Local datasources work with MODEL types (Hive)
+/// - Remote datasources work with ENTITY types (Firestore)
 
 enum SyncStatus {
   idle,
@@ -19,10 +28,6 @@ enum SyncStatus {
 }
 
 class SyncResult {
-  final int schedulessynced;
-  final int journalsSynced;
-  final int photosSynced;
-  final List<String> errors;
 
   SyncResult({
     required this.schedulessynced,
@@ -30,6 +35,10 @@ class SyncResult {
     required this.photosSynced,
     required this.errors,
   });
+  final int schedulessynced;
+  final int journalsSynced;
+  final int photosSynced;
+  final List<String> errors;
 
   bool get hasErrors => errors.isNotEmpty;
   int get totalSynced => schedulessynced + journalsSynced + photosSynced;
@@ -43,12 +52,6 @@ abstract class SyncRepository {
 }
 
 class SyncRepositoryImpl implements SyncRepository {
-  final ScheduleLocalDatasource scheduleLocal;
-  final ScheduleRemoteDatasource scheduleRemote;
-  final JournalLocalDatasource journalLocal;
-  final JournalRemoteDatasource journalRemote;
-  final PhotoLocalDatasource photoLocal;
-  final PhotoRemoteDatasource photoRemote;
 
   SyncRepositoryImpl({
     required this.scheduleLocal,
@@ -58,44 +61,47 @@ class SyncRepositoryImpl implements SyncRepository {
     required this.photoLocal,
     required this.photoRemote,
   });
+  final ScheduleLocalDataSource scheduleLocal;
+  final ScheduleRemoteDatasource scheduleRemote;
+  final JournalLocalDataSource journalLocal;
+  final JournalRemoteDatasource journalRemote;
+  final PhotoLocalDataSource photoLocal;
+  final PhotoRemoteDatasource photoRemote;
 
   @override
   Future<SyncResult> syncAll() async {
-    print('🔄 Starting full sync...');
-    
+    debugPrint('🔄 Starting full sync...');
+
     int schedulesCount = 0;
     int journalsCount = 0;
     int photosCount = 0;
     final List<String> errors = [];
 
-    // Sync schedules
     try {
       await syncSchedules();
-      final schedules = await scheduleLocal.getAllSchedules();
+      final schedules = scheduleLocal.getAllSchedules();
       schedulesCount = schedules.length;
     } catch (e) {
       errors.add('Schedules: $e');
-      print('❌ Schedule sync failed: $e');
+      debugPrint('❌ Schedule sync failed: $e');
     }
 
-    // Sync journals
     try {
       await syncJournals();
-      final journals = await journalLocal.getAllJournals();
+      final journals = journalLocal.getAllJournals();
       journalsCount = journals.length;
     } catch (e) {
       errors.add('Journals: $e');
-      print('❌ Journal sync failed: $e');
+      debugPrint('❌ Journal sync failed: $e');
     }
 
-    // Sync photos
     try {
       await syncPhotos();
-      final photos = await photoLocal.getAllPhotos();
+      final photos = photoLocal.getAllPhotos();
       photosCount = photos.length;
     } catch (e) {
       errors.add('Photos: $e');
-      print('❌ Photo sync failed: $e');
+      debugPrint('❌ Photo sync failed: $e');
     }
 
     final result = SyncResult(
@@ -106,9 +112,9 @@ class SyncRepositoryImpl implements SyncRepository {
     );
 
     if (errors.isEmpty) {
-      print('✅ Full sync completed: ${result.totalSynced} items');
+      debugPrint('✅ Full sync completed: ${result.totalSynced} items');
     } else {
-      print('⚠️ Sync completed with errors: ${errors.length} errors');
+      debugPrint('⚠️ Sync completed with errors: ${errors.length} errors');
     }
 
     return result;
@@ -117,47 +123,48 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncSchedules() async {
     try {
-      print('🔄 Syncing schedules...');
+      debugPrint('🔄 Syncing schedules...');
+
+      // Remote returns List<ScheduleEntity>
+      final remoteEntities = await scheduleRemote.getAllSchedules();
       
-      // Get remote schedules
-      final remoteSchedules = await scheduleRemote.getAllSchedules();
-      
-      // Get local schedules
-      final localSchedules = await scheduleLocal.getAllSchedules();
-      
-      // Create maps for easier lookup
-      final remoteMap = {for (var s in remoteSchedules) s.id: s};
-      final localMap = {for (var s in localSchedules) s.id: s};
-      
-      // Sync remote -> local (download)
-      for (var remote in remoteSchedules) {
-        final local = localMap[remote.id];
-        
-        if (local == null) {
-          // New from remote, add to local
-          await scheduleLocal.createSchedule(remote);
-        } else if (remote.updatedAt.isAfter(local.updatedAt)) {
-          // Remote is newer, update local
-          await scheduleLocal.updateSchedule(remote);
+      // Local returns List<ScheduleModel>
+      final localModels = scheduleLocal.getAllSchedules();
+
+      // Convert remote entities to models for comparison
+      final remoteModels = remoteEntities.map<ScheduleModel>(_entityToModel).toList();
+
+      // Create maps
+      final remoteMap = {for (final s in remoteModels) s.id: s};
+      final localMap = {for (final s in localModels) s.id: s};
+
+      // Sync remote -> local (Entity → Model)
+      for (final remoteModel in remoteModels) {
+        final localModel = localMap[remoteModel.id];
+
+        if (localModel == null) {
+          await scheduleLocal.addSchedule(remoteModel);
+        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
+          await scheduleLocal.updateSchedule(remoteModel);
         }
       }
-      
-      // Sync local -> remote (upload)
-      for (var local in localSchedules) {
-        final remote = remoteMap[local.id];
-        
-        if (remote == null) {
-          // New from local, add to remote
-          await scheduleRemote.createSchedule(local);
-        } else if (local.updatedAt.isAfter(remote.updatedAt)) {
-          // Local is newer, update remote
-          await scheduleRemote.updateSchedule(local);
+
+      // Sync local -> remote (Model → Entity)
+      for (final localModel in localModels) {
+        final remoteModel = remoteMap[localModel.id];
+
+        if (remoteModel == null) {
+          final entity = _modelToEntity(localModel);
+          await scheduleRemote.createSchedule(entity);
+        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
+          final entity = _modelToEntity(localModel);
+          await scheduleRemote.updateSchedule(entity);
         }
       }
-      
-      print('✅ Schedules synced successfully');
+
+      debugPrint('✅ Schedules synced successfully');
     } catch (e) {
-      print('❌ Schedule sync failed: $e');
+      debugPrint('❌ Schedule sync failed: $e');
       throw SyncException('Gagal sync schedules: $e');
     }
   }
@@ -165,39 +172,43 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncJournals() async {
     try {
-      print('🔄 Syncing journals...');
-      
-      final remoteJournals = await journalRemote.getAllJournals();
-      final localJournals = await journalLocal.getAllJournals();
-      
-      final remoteMap = {for (var j in remoteJournals) j.id: j};
-      final localMap = {for (var j in localJournals) j.id: j};
-      
+      debugPrint('🔄 Syncing journals...');
+
+      final remoteEntities = await journalRemote.getAllJournals();
+      final localModels = journalLocal.getAllJournals();
+
+      final remoteModels = remoteEntities.map(_journalEntityToModel).toList();
+
+      final remoteMap = {for (final j in remoteModels) j.id: j};
+      final localMap = {for (final j in localModels) j.id: j};
+
       // Sync remote -> local
-      for (var remote in remoteJournals) {
-        final local = localMap[remote.id];
-        
-        if (local == null) {
-          await journalLocal.createJournal(remote);
-        } else if (remote.updatedAt.isAfter(local.updatedAt)) {
-          await journalLocal.updateJournal(remote);
+      for (final remoteModel in remoteModels) {
+        final localModel = localMap[remoteModel.id];
+
+        if (localModel == null) {
+          await journalLocal.createJournal(remoteModel);
+        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
+          await journalLocal.updateJournal(remoteModel);
         }
       }
-      
+
       // Sync local -> remote
-      for (var local in localJournals) {
-        final remote = remoteMap[local.id];
-        
-        if (remote == null) {
-          await journalRemote.createJournal(local);
-        } else if (local.updatedAt.isAfter(remote.updatedAt)) {
-          await journalRemote.updateJournal(local);
+      for (final localModel in localModels) {
+        final remoteModel = remoteMap[localModel.id];
+
+        if (remoteModel == null) {
+          final entity = _journalModelToEntity(localModel);
+          await journalRemote.createJournal(entity);
+        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
+          final entity = _journalModelToEntity(localModel);
+          await journalRemote.updateJournal(entity);
         }
       }
-      
-      print('✅ Journals synced successfully');
+
+      debugPrint('✅ Journals synced successfully');
     } catch (e) {
-      print('❌ Journal sync failed: $e');
+      debugPrint('❌ Journal sync failed: $e');
       throw SyncException('Gagal sync journals: $e');
     }
   }
@@ -205,40 +216,193 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncPhotos() async {
     try {
-      print('🔄 Syncing photos...');
-      
-      final remotePhotos = await photoRemote.getAllPhotos();
-      final localPhotos = await photoLocal.getAllPhotos();
-      
-      final remoteMap = {for (var p in remotePhotos) p.id: p};
-      final localMap = {for (var p in localPhotos) p.id: p};
-      
-      // Sync remote -> local (metadata only)
-      for (var remote in remotePhotos) {
-        final local = localMap[remote.id];
-        
-        if (local == null) {
-          await photoLocal.createPhoto(remote);
-        } else if (remote.updatedAt.isAfter(local.updatedAt)) {
-          await photoLocal.updatePhoto(remote);
+      debugPrint('🔄 Syncing photos...');
+
+      final remoteEntities = await photoRemote.getAllPhotos();
+      final localModels = photoLocal.getAllPhotos();
+
+      final remoteModels = remoteEntities.map(_photoEntityToModel).toList();
+
+      final remoteMap = {for (final p in remoteModels) p.id: p};
+      final localMap = {for (final p in localModels) p.id: p};
+
+      // Sync remote -> local
+      for (final remoteModel in remoteModels) {
+        final localModel = localMap[remoteModel.id];
+
+        if (localModel == null) {
+          await photoLocal.createPhoto(remoteModel);
+        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
+          await photoLocal.updatePhoto(remoteModel);
         }
       }
-      
-      // Sync local -> remote (metadata only, actual upload happens separately)
-      for (var local in localPhotos) {
-        final remote = remoteMap[local.id];
-        
-        if (remote == null && local.downloadUrl.isNotEmpty) {
-          await photoRemote.createPhotoMetadata(local);
-        } else if (remote != null && local.updatedAt.isAfter(remote.updatedAt)) {
-          await photoRemote.updatePhoto(local);
+
+      // Sync local -> remote
+      for (final localModel in localModels) {
+        final remoteModel = remoteMap[localModel.id];
+
+        final hasImageUrl = localModel.imageUrl != null && localModel.imageUrl!.isNotEmpty;
+
+        if (remoteModel == null && hasImageUrl) {
+          final entity = _photoModelToEntity(localModel);
+          await photoRemote.createPhotoMetadata(entity);
+        } else if (remoteModel != null &&
+            localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
+          final entity = _photoModelToEntity(localModel);
+          await photoRemote.updatePhoto(entity);
         }
       }
-      
-      print('✅ Photos synced successfully');
+
+      debugPrint('✅ Photos synced successfully');
     } catch (e) {
-      print('❌ Photo sync failed: $e');
+      debugPrint('❌ Photo sync failed: $e');
       throw SyncException('Gagal sync photos: $e');
+    }
+  }
+
+  // ==================== SCHEDULE CONVERTERS ====================
+
+  /// Convert ScheduleEntity (from remote) to ScheduleModel (for local)
+  ScheduleModel _entityToModel(schedule_entity.ScheduleEntity entity) => ScheduleModel(
+      id: entity.id,
+      userId: entity.userId,
+      title: entity.title,
+      description: entity.notes,
+      category: _mapEntityCategoryToModel(entity.category),
+      scheduledTime: entity.dateTime,
+      reminderEnabled: entity.hasReminder,
+      reminderMinutesBefore: entity.reminderMinutes,
+      isCompleted: entity.isCompleted,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: true,
+    );
+
+  /// Convert ScheduleModel (from local) to ScheduleEntity (for remote)
+  schedule_entity.ScheduleEntity _modelToEntity(ScheduleModel model) => schedule_entity.ScheduleEntity(
+      id: model.id,
+      userId: model.userId,
+      title: model.title,
+      category: _mapCategoryToEntity(model.category),
+      dateTime: model.scheduledTime,
+      notes: model.description,
+      hasReminder: model.reminderEnabled,
+      reminderMinutes: model.reminderMinutesBefore,
+      isCompleted: model.isCompleted,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+
+  // ==================== JOURNAL CONVERTERS ====================
+
+  JournalModel _journalEntityToModel(JournalEntity entity) => JournalModel(
+      id: entity.id,
+      userId: entity.userId,
+      date: entity.date,
+      mood: _mapMoodToModel(entity.mood),
+      content: entity.content,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: true, // From remote = already synced
+    );
+
+  JournalEntity _journalModelToEntity(JournalModel model) => JournalEntity(
+      id: model.id,
+      userId: model.userId,
+      date: model.date,
+      mood: _mapMoodToEntity(model.mood),
+      content: model.content,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+
+  // ==================== PHOTO CONVERTERS ====================
+
+  PhotoModel _photoEntityToModel(PhotoEntity entity) => PhotoModel(
+      id: entity.id,
+      userId: entity.userId,
+      localFilePath: entity.localPath ?? '',
+      imageUrl: entity.cloudUrl,
+      caption: entity.caption,
+      isMilestone: entity.isMilestone,
+      date: entity.dateTaken,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: true, // From remote = already synced
+      uploadStatus: 'completed', // From remote = already uploaded
+    );
+
+  PhotoEntity _photoModelToEntity(PhotoModel model) => PhotoEntity(
+      id: model.id,
+      userId: model.userId,
+      localPath: model.localFilePath,
+      cloudUrl: model.imageUrl,
+      caption: model.caption,
+      isMilestone: model.isMilestone,
+      dateTaken: model.date,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+    );
+
+  // ==================== ENUM MAPPERS ====================
+
+  schedule_entity.ScheduleCategory _mapCategoryToEntity(ScheduleCategory modelCategory) {
+    switch (modelCategory) {
+      case ScheduleCategory.feeding:
+        return schedule_entity.ScheduleCategory.feeding;
+      case ScheduleCategory.sleeping:
+        return schedule_entity.ScheduleCategory.sleep;
+      case ScheduleCategory.health:
+        return schedule_entity.ScheduleCategory.health;
+      case ScheduleCategory.milestone:
+        return schedule_entity.ScheduleCategory.milestone;
+      case ScheduleCategory.other:
+        return schedule_entity.ScheduleCategory.other;
+    }
+  }
+
+  ScheduleCategory _mapEntityCategoryToModel(schedule_entity.ScheduleCategory entityCategory) {
+    switch (entityCategory) {
+      case schedule_entity.ScheduleCategory.feeding:
+        return ScheduleCategory.feeding;
+      case schedule_entity.ScheduleCategory.sleep:
+        return ScheduleCategory.sleeping;
+      case schedule_entity.ScheduleCategory.health:
+        return ScheduleCategory.health;
+      case schedule_entity.ScheduleCategory.milestone:
+        return ScheduleCategory.milestone;
+      case schedule_entity.ScheduleCategory.other:
+        return ScheduleCategory.other;
+    }
+  }
+
+  MoodType _mapMoodToEntity(Mood modelMood) {
+    switch (modelMood) {
+      case Mood.veryHappy:
+        return MoodType.veryHappy;
+      case Mood.happy:
+        return MoodType.happy;
+      case Mood.neutral:
+        return MoodType.neutral;
+      case Mood.sad:
+        return MoodType.sad;
+      case Mood.verySad:
+        return MoodType.verySad;
+    }
+  }
+
+  Mood _mapMoodToModel(MoodType entityMood) {
+    switch (entityMood) {
+      case MoodType.veryHappy:
+        return Mood.veryHappy;
+      case MoodType.happy:
+        return Mood.happy;
+      case MoodType.neutral:
+        return Mood.neutral;
+      case MoodType.sad:
+        return Mood.sad;
+      case MoodType.verySad:
+        return Mood.verySad;
     }
   }
 }

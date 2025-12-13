@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/journal_repository.dart';
 import '/domain/entities/journal_entity.dart';
 
@@ -8,6 +9,7 @@ import '/domain/entities/journal_entity.dart';
 class JournalProvider extends ChangeNotifier {
   final JournalRepository _repository = JournalRepository();
   final Uuid _uuid = const Uuid();
+  final HiveDatabase _hiveDatabase;
 
   List<JournalEntity> _journals = [];
   JournalEntity? _todayEntry;
@@ -21,6 +23,8 @@ class JournalProvider extends ChangeNotifier {
   Map<MoodType, int> get moodStats => _moodStats;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  JournalProvider(this._hiveDatabase);
 
   /// Initialize provider
   Future<void> init() async {

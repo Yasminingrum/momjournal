@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
+import '/data/datasources/local/hive_database.dart';
 import '/data/repositories/schedule_repository.dart';
 import '/domain/entities/schedule_entity.dart';
 
@@ -8,6 +9,9 @@ import '/domain/entities/schedule_entity.dart';
 class ScheduleProvider extends ChangeNotifier {
   final ScheduleRepository _repository = ScheduleRepository();
   final Uuid _uuid = const Uuid();
+  final HiveDatabase _hiveDatabase;
+
+  ScheduleProvider(this._hiveDatabase);
 
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];

@@ -18,6 +18,39 @@ enum ScheduleCategory {
 
 @HiveType(typeId: 2)
 class ScheduleEntity extends HiveObject {
+
+  ScheduleEntity({
+    required this.id,
+    required this.userId,
+    required this.title,
+    required this.category,
+    required this.dateTime,
+    required this.createdAt, 
+    required this.updatedAt, 
+    this.notes,
+    this.hasReminder = false,
+    this.reminderMinutes,
+    this.isCompleted = false,
+    this.isSynced = false,
+  });
+
+  factory ScheduleEntity.fromJson(Map<String, dynamic> json) => ScheduleEntity(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      title: json['title'] as String,
+      category: ScheduleCategory.values.firstWhere(
+        (e) => e.name == json['category'],
+        orElse: () => ScheduleCategory.other,
+      ),
+      dateTime: DateTime.parse(json['dateTime'] as String),
+      notes: json['notes'] as String?,
+      hasReminder: json['hasReminder'] as bool? ?? false,
+      reminderMinutes: json['reminderMinutes'] as int?,
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      isSynced: true,
+    );
   @HiveField(0)
   final String id;
   
@@ -54,21 +87,6 @@ class ScheduleEntity extends HiveObject {
   @HiveField(11)
   final bool isSynced;
 
-  ScheduleEntity({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.category,
-    required this.dateTime,
-    this.notes,
-    this.hasReminder = false,
-    this.reminderMinutes,
-    this.isCompleted = false,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-  });
-
   ScheduleEntity copyWith({
     String? id,
     String? userId,
@@ -82,8 +100,7 @@ class ScheduleEntity extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isSynced,
-  }) {
-    return ScheduleEntity(
+  }) => ScheduleEntity(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       title: title ?? this.title,
@@ -97,10 +114,8 @@ class ScheduleEntity extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'title': title,
@@ -113,25 +128,4 @@ class ScheduleEntity extends HiveObject {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
-  }
-
-  factory ScheduleEntity.fromJson(Map<String, dynamic> json) {
-    return ScheduleEntity(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      title: json['title'] as String,
-      category: ScheduleCategory.values.firstWhere(
-        (e) => e.name == json['category'],
-        orElse: () => ScheduleCategory.other,
-      ),
-      dateTime: DateTime.parse(json['dateTime'] as String),
-      notes: json['notes'] as String?,
-      hasReminder: json['hasReminder'] as bool? ?? false,
-      reminderMinutes: json['reminderMinutes'] as int?,
-      isCompleted: json['isCompleted'] as bool? ?? false,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      isSynced: true,
-    );
-  }
 }

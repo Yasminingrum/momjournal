@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
 /// NetworkInfo
+/// 
 /// Provides network connectivity information and monitoring.
 /// Used to determine if device has active internet connection.
 ///
@@ -15,6 +17,11 @@ class NetworkInfo extends ChangeNotifier {
   
   ConnectivityResult _currentStatus = ConnectivityResult.none;
   bool _isConnected = false;
+
+  // Constructor
+  NetworkInfo() {
+    _initialize();
+  }
 
   // Getters
   ConnectivityResult get currentStatus => _currentStatus;
@@ -43,19 +50,13 @@ class NetworkInfo extends ChangeNotifier {
     }
   }
 
-  NetworkInfo() {
-    _initialize();
-  }
-
   /// Initialize network monitoring
-  void _initialize() async {
+  Future<void> _initialize() async {
     // Check initial connectivity
     await checkConnectivity();
 
     // Listen to connectivity changes
-    _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
-      _handleConnectivityChange(result);
-    });
+    _connectivity.onConnectivityChanged.listen(_handleConnectivityChange);
   }
 
   /// Check current connectivity status
@@ -78,20 +79,28 @@ class NetworkInfo extends ChangeNotifier {
     _currentStatus = result;
     _isConnected = result != ConnectivityResult.none;
 
-    debugPrint('📡 Connectivity changed: ${connectionType} (Connected: $_isConnected)');
+    debugPrint(
+        '📡 Connectivity changed: $connectionType '
+        '(Connected: $_isConnected)'
+    );
     
     notifyListeners();
   }
 
   /// Wait for connection to become available
-  Future<void> waitForConnection({Duration timeout = const Duration(seconds: 30)}) async {
-    if (_isConnected) return;
+  Future<void> waitForConnection({
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    if (_isConnected) {
+      return;
+    }
 
     debugPrint('⏳ Waiting for connection...');
 
     final completer = Completer<void>();
     
-    final subscription = _connectivity.onConnectivityChanged.listen((result) {
+    final subscription = _connectivity.onConnectivityChanged
+        .listen((result) {
       if (result != ConnectivityResult.none && !completer.isCompleted) {
         completer.complete();
       }
@@ -103,17 +112,15 @@ class NetworkInfo extends ChangeNotifier {
     } catch (e) {
       debugPrint('⏰ Timeout waiting for connection');
     } finally {
-      await subscription.cancel();
+      subscription.cancel();
     }
   }
 
   /// Get connectivity status as enum
-  Future<ConnectivityResult> getConnectivityResult() async {
-    return await _connectivity.checkConnectivity();
-  }
+  Future<ConnectivityResult> getConnectivityResult() =>
+      _connectivity.checkConnectivity();
 
   /// Check if specific connection type is available
-  bool hasConnectionType(ConnectivityResult type) {
-    return _currentStatus == type;
-  }
+  bool hasConnectionType(ConnectivityResult type) =>
+      _currentStatus == type;
 }
