@@ -6,12 +6,12 @@ import 'hive_database.dart';
 /// 
 /// Menyediakan CRUD operations dan query methods untuk jadwal
 class ScheduleLocalDataSource {
-  final HiveDatabase _hiveDatabase;
-  late final Box<ScheduleModel> _scheduleBox;
 
   ScheduleLocalDataSource(this._hiveDatabase) {
     _scheduleBox = _hiveDatabase.scheduleBox;
   }
+  final HiveDatabase _hiveDatabase;
+  late final Box<ScheduleModel> _scheduleBox;
 
   // ==================== CREATE ====================
 
@@ -30,7 +30,7 @@ class ScheduleLocalDataSource {
   Future<void> addSchedules(List<ScheduleModel> schedules) async {
     try {
       final Map<String, ScheduleModel> entries = {
-        for (var schedule in schedules) schedule.id: schedule
+        for (final schedule in schedules) schedule.id: schedule,
       };
       await _scheduleBox.putAll(entries);
       print('✓ ${schedules.length} schedules added to local DB');
@@ -124,7 +124,7 @@ class ScheduleLocalDataSource {
     try {
       return _scheduleBox.values
           .where((schedule) =>
-              schedule.userId == userId && schedule.category == category)
+              schedule.userId == userId && schedule.category == category,)
           .toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
@@ -185,7 +185,7 @@ class ScheduleLocalDataSource {
     try {
       return _scheduleBox.values
           .where((schedule) =>
-              schedule.userId == userId && schedule.reminderEnabled)
+              schedule.userId == userId && schedule.reminderEnabled,)
           .toList();
     } catch (e) {
       print('✗ Error getting schedules with reminder: $e');
@@ -371,19 +371,13 @@ class ScheduleLocalDataSource {
   // ==================== UTILITY ====================
 
   /// Get total count of schedules
-  int getScheduleCount(String userId) {
-    return getSchedulesByUserId(userId).length;
-  }
+  int getScheduleCount(String userId) => getSchedulesByUserId(userId).length;
 
   /// Get count by category
-  int getCountByCategory(ScheduleCategory category, String userId) {
-    return getSchedulesByCategory(category, userId).length;
-  }
+  int getCountByCategory(ScheduleCategory category, String userId) => getSchedulesByCategory(category, userId).length;
 
   /// Check if schedule exists
-  bool scheduleExists(String id) {
-    return _scheduleBox.containsKey(id);
-  }
+  bool scheduleExists(String id) => _scheduleBox.containsKey(id);
 
   /// Get unsynced schedules (untuk cloud sync)
   List<ScheduleModel> getUnsyncedSchedules(String userId) {

@@ -2,20 +2,21 @@
 /// 
 /// Use case untuk menghapus photo
 /// Location: lib/domain/usecases/photo/delete_photo.dart
+library;
 
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
 import '../../../core/errors/exceptions.dart';
 
 class DeletePhotoUseCase {
-  final PhotoRepository repository;
 
   DeletePhotoUseCase(this.repository);
+  final PhotoRepository repository;
 
   Future<void> execute(PhotoEntity photo) async {
     try {
       if (photo.id.isEmpty) {
-        throw ValidationException('Photo ID tidak boleh kosong');
+        throw const ValidationException('Photo ID tidak boleh kosong');
       }
 
       await repository.deletePhoto(photo.id);
@@ -30,7 +31,7 @@ class DeletePhotoUseCase {
   /// Delete multiple photos
   Future<void> executeMultiple(List<PhotoEntity> photos) async {
     try {
-      for (var photo in photos) {
+      for (final photo in photos) {
         await repository.deletePhoto(photo.id);
       }
       

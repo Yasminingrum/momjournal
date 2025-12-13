@@ -12,14 +12,6 @@ import 'package:flutter/material.dart';
 /// - Tap to read full entry
 /// - Visual mood color
 class JournalCard extends StatelessWidget {
-  final String id;
-  final DateTime date;
-  final MoodLevel mood;
-  final String content;
-  final int maxPreviewLines;
-  final VoidCallback? onTap;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
 
   const JournalCard({
     super.key,
@@ -32,10 +24,17 @@ class JournalCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
   });
+  final String id;
+  final DateTime date;
+  final MoodLevel mood;
+  final String content;
+  final int maxPreviewLines;
+  final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
-  Widget build(BuildContext context) {
-    return Dismissible(
+  Widget build(BuildContext context) => Dismissible(
       key: Key(id),
       background: _buildSwipeBackground(context, isLeft: true),
       secondaryBackground: _buildSwipeBackground(context, isLeft: false),
@@ -111,10 +110,8 @@ class JournalCard extends StatelessWidget {
         ),
       ),
     );
-  }
 
-  Widget _buildMoodIndicator() {
-    return Container(
+  Widget _buildMoodIndicator() => Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: mood.color.withOpacity(0.1),
@@ -140,10 +137,8 @@ class JournalCard extends StatelessWidget {
         ],
       ),
     );
-  }
 
-  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) {
-    return Container(
+  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) => Container(
       alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
@@ -156,10 +151,8 @@ class JournalCard extends StatelessWidget {
         size: 28,
       ),
     );
-  }
 
-  Future<bool> _confirmDelete(BuildContext context) async {
-    return await showDialog<bool>(
+  Future<bool> _confirmDelete(BuildContext context) async => await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Delete Journal Entry'),
@@ -182,7 +175,6 @@ class JournalCard extends StatelessWidget {
           ),
         ) ??
         false;
-  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -209,7 +201,7 @@ class JournalCard extends StatelessWidget {
   String _formatFullDate(DateTime date) {
     final months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -264,11 +256,6 @@ enum MoodLevel {
 /// JournalListSection
 /// Grouped journal list by month
 class JournalListSection extends StatelessWidget {
-  final String monthYear;
-  final List<JournalCardData> journals;
-  final Function(String) onJournalTap;
-  final Function(String) onJournalEdit;
-  final Function(String) onJournalDelete;
 
   const JournalListSection({
     super.key,
@@ -278,10 +265,14 @@ class JournalListSection extends StatelessWidget {
     required this.onJournalEdit,
     required this.onJournalDelete,
   });
+  final String monthYear;
+  final List<JournalCardData> journals;
+  final Function(String) onJournalTap;
+  final Function(String) onJournalEdit;
+  final Function(String) onJournalDelete;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Month header
@@ -306,16 +297,11 @@ class JournalListSection extends StatelessWidget {
             )),
       ],
     );
-  }
 }
 
 /// JournalCardData
 /// Data model for journal card
 class JournalCardData {
-  final String id;
-  final DateTime date;
-  final MoodLevel mood;
-  final String content;
 
   const JournalCardData({
     required this.id,
@@ -323,15 +309,15 @@ class JournalCardData {
     required this.mood,
     required this.content,
   });
+  final String id;
+  final DateTime date;
+  final MoodLevel mood;
+  final String content;
 }
 
 /// CompactJournalCard
 /// Smaller journal card for dashboard/preview
 class CompactJournalCard extends StatelessWidget {
-  final DateTime date;
-  final MoodLevel mood;
-  final String content;
-  final VoidCallback? onTap;
 
   const CompactJournalCard({
     super.key,
@@ -340,10 +326,13 @@ class CompactJournalCard extends StatelessWidget {
     required this.content,
     this.onTap,
   });
+  final DateTime date;
+  final MoodLevel mood;
+  final String content;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: InkWell(
         onTap: onTap,
@@ -397,7 +386,6 @@ class CompactJournalCard extends StatelessWidget {
         ),
       ),
     );
-  }
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
@@ -409,7 +397,7 @@ class CompactJournalCard extends StatelessWidget {
     } else {
       final months = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
       ];
       return '${months[date.month - 1]} ${date.day}';
     }

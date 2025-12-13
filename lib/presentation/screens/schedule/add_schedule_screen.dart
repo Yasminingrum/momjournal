@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk menambah schedule baru
 /// Location: lib/presentation/screens/schedule/add_schedule_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,12 +16,12 @@ import '../../widgets/dialogs/info_dialog.dart';
 import '../../../core/constants/color_constants.dart';
 
 class AddScheduleScreen extends StatefulWidget {
-  final DateTime? selectedDate;
 
   const AddScheduleScreen({
     super.key,
     this.selectedDate,
   });
+  final DateTime? selectedDate;
 
   @override
   State<AddScheduleScreen> createState() => _AddScheduleScreenState();
@@ -121,8 +122,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  Widget _buildCategorySelector(ThemeData theme) {
-    return Card(
+  Widget _buildCategorySelector(ThemeData theme) => Card(
       child: InkWell(
         onTap: _selectCategory,
         borderRadius: BorderRadius.circular(12),
@@ -169,10 +169,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         ),
       ),
     );
-  }
 
-  Widget _buildDateTimeSelector(ThemeData theme) {
-    return Card(
+  Widget _buildDateTimeSelector(ThemeData theme) => Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -232,10 +230,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         ),
       ),
     );
-  }
 
-  Widget _buildReminderSection(ThemeData theme) {
-    return Card(
+  Widget _buildReminderSection(ThemeData theme) => Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -298,7 +294,6 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         ),
       ),
     );
-  }
 
   Future<void> _selectCategory() async {
     final category = await showCategoryBottomSheet(
@@ -459,14 +454,12 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   String _formatDate(DateTime date) {
     final months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
+  String _formatTime(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
   String _formatReminderTime() {
     if (_reminderMinutes < 60) {

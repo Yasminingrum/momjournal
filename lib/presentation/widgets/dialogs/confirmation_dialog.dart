@@ -2,6 +2,7 @@
 /// 
 /// Reusable confirmation dialog untuk berbagai aksi
 /// Location: lib/presentation/widgets/dialogs/confirmation_dialog.dart
+library;
 
 import 'package:flutter/material.dart';
 
@@ -34,12 +35,6 @@ Future<bool> showConfirmationDialog(
 
 /// Confirmation Dialog Widget
 class ConfirmationDialog extends StatelessWidget {
-  final String title;
-  final String message;
-  final String confirmText;
-  final String cancelText;
-  final bool isDangerous;
-  final Widget? icon;
 
   const ConfirmationDialog({
     super.key,
@@ -50,6 +45,12 @@ class ConfirmationDialog extends StatelessWidget {
     this.isDangerous = false,
     this.icon,
   });
+  final String title;
+  final String message;
+  final String confirmText;
+  final String cancelText;
+  final bool isDangerous;
+  final Widget? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +97,7 @@ Future<bool> showDeleteConfirmation(
   BuildContext context, {
   required String itemName,
   String message = 'Data yang dihapus tidak dapat dikembalikan.',
-}) {
-  return showConfirmationDialog(
+}) => showConfirmationDialog(
     context,
     title: 'Hapus $itemName?',
     message: message,
@@ -110,11 +110,9 @@ Future<bool> showDeleteConfirmation(
       color: Colors.red,
     ),
   );
-}
 
 /// Logout Confirmation Dialog (preset)
-Future<bool> showLogoutConfirmation(BuildContext context) {
-  return showConfirmationDialog(
+Future<bool> showLogoutConfirmation(BuildContext context) => showConfirmationDialog(
     context,
     title: 'Keluar dari Akun?',
     message: 'Anda akan logout dari aplikasi.',
@@ -126,11 +124,9 @@ Future<bool> showLogoutConfirmation(BuildContext context) {
       color: Colors.orange,
     ),
   );
-}
 
 /// Discard Changes Confirmation
-Future<bool> showDiscardChangesConfirmation(BuildContext context) {
-  return showConfirmationDialog(
+Future<bool> showDiscardChangesConfirmation(BuildContext context) => showConfirmationDialog(
     context,
     title: 'Buang Perubahan?',
     message: 'Perubahan yang belum disimpan akan hilang.',
@@ -138,4 +134,3 @@ Future<bool> showDiscardChangesConfirmation(BuildContext context) {
     cancelText: 'Batal',
     isDangerous: true,
   );
-}

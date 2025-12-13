@@ -2,6 +2,7 @@
 /// 
 /// Handles Firebase initialization and provides utilities for Firebase operations
 /// Location: lib/data/datasources/remote/firebase_service.dart
+library;
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,10 +11,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 /// Service untuk mengelola koneksi dan instance Firebase
 class FirebaseService {
-  // Singleton pattern
-  static final FirebaseService _instance = FirebaseService._internal();
   factory FirebaseService() => _instance;
   FirebaseService._internal();
+  // Singleton pattern
+  static final FirebaseService _instance = FirebaseService._internal();
 
   // Firebase instances
   FirebaseAuth? _auth;
@@ -80,9 +81,7 @@ class FirebaseService {
   bool get isUserLoggedIn => _auth?.currentUser != null;
 
   /// Get user collection reference
-  CollectionReference get usersCollection {
-    return firestore.collection('users');
-  }
+  CollectionReference get usersCollection => firestore.collection('users');
 
   /// Get schedules collection reference for current user
   CollectionReference? get schedulesCollection {
@@ -118,16 +117,12 @@ class FirebaseService {
   }
 
   /// Batch write helper
-  WriteBatch getBatch() {
-    return firestore.batch();
-  }
+  WriteBatch getBatch() => firestore.batch();
 
   /// Transaction helper
   Future<T> runTransaction<T>(
     TransactionHandler<T> transactionHandler,
-  ) async {
-    return firestore.runTransaction(transactionHandler);
-  }
+  ) async => firestore.runTransaction(transactionHandler);
 
   /// Enable/disable network for Firestore
   Future<void> enableNetwork() async {
@@ -244,14 +239,12 @@ class FirebaseErrorHandler {
 
 /// Firebase Connection Monitor
 class FirebaseConnectionMonitor {
-  static Stream<bool> get connectionStream {
-    return FirebaseService()
+  static Stream<bool> get connectionStream => FirebaseService()
         .firestore
         .collection('.info')
         .doc('connected')
         .snapshots()
         .map((snapshot) => snapshot.exists && snapshot.data()?['connected'] == true);
-  }
 
   static Future<bool> checkConnection() async {
     try {

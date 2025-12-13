@@ -16,6 +16,10 @@ import 'package:flutter/foundation.dart';
 /// - Event notifications for connectivity changes
 
 class ConnectivityService extends ChangeNotifier {
+
+  ConnectivityService() {
+    _initialize();
+  }
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
@@ -83,10 +87,6 @@ class ConnectivityService extends ChangeNotifier {
     }
   }
 
-  ConnectivityService() {
-    _initialize();
-  }
-
   /// Initialize connectivity monitoring
   Future<void> _initialize() async {
     // Check initial connectivity
@@ -100,9 +100,7 @@ class ConnectivityService extends ChangeNotifier {
   void _startMonitoring() {
     _connectivitySubscription = 
         _connectivity.onConnectivityChanged.listen(
-      (ConnectivityResult result) {
-        _handleConnectivityChange(result);
-      },
+      _handleConnectivityChange,
       onError: (error) {
         debugPrint('❌ Connectivity stream error: $error');
       },
@@ -152,7 +150,7 @@ class ConnectivityService extends ChangeNotifier {
       connectionType: result,
       isConnected: _isConnected,
       timestamp: DateTime.now(),
-    ));
+    ),);
 
     debugPrint('📡 Connectivity: $statusText');
     notifyListeners();
@@ -244,7 +242,7 @@ class ConnectivityService extends ChangeNotifier {
     if (_connectionHistory.length > _maxHistoryLength) {
       _connectionHistory.removeRange(
           _maxHistoryLength, 
-          _connectionHistory.length
+          _connectionHistory.length,
       );
     }
   }
@@ -310,7 +308,7 @@ class ConnectivityService extends ChangeNotifier {
       return result;
     } catch (e) {
       debugPrint('❌ Error waiting for connection: $e');
-      subscription?.cancel();
+      subscription.cancel();
       return false;
     }
   }
@@ -348,15 +346,15 @@ class ConnectivityService extends ChangeNotifier {
 
 /// Connectivity event model
 class ConnectivityEvent {
-  final ConnectivityResult connectionType;
-  final bool isConnected;
-  final DateTime timestamp;
 
   ConnectivityEvent({
     required this.connectionType,
     required this.isConnected,
     required this.timestamp,
   });
+  final ConnectivityResult connectionType;
+  final bool isConnected;
+  final DateTime timestamp;
 
   String get description {
     if (!isConnected) return 'Disconnected';

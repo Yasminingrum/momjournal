@@ -40,16 +40,15 @@ void main() async {
 
 /// Root widget aplikasi MomJournal
 class MomJournalApp extends StatelessWidget {
-  final HiveDatabase hiveDatabase;
 
   const MomJournalApp({
     super.key,
     required this.hiveDatabase,
   });
+  final HiveDatabase hiveDatabase;
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  Widget build(BuildContext context) => MultiProvider(
       providers: [
         // Schedule Provider
         ChangeNotifierProvider(
@@ -95,18 +94,16 @@ class MomJournalApp extends StatelessWidget {
         },
       ),
     );
-  }
 }
 
 /// Error screen yang ditampilkan saat terjadi error
 class _ErrorScreen extends StatelessWidget {
-  final FlutterErrorDetails errorDetails;
 
   const _ErrorScreen({required this.errorDetails});
+  final FlutterErrorDetails errorDetails;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -189,5 +186,4 @@ class _ErrorScreen extends StatelessWidget {
         ),
       ),
     );
-  }
 }

@@ -12,6 +12,8 @@ import '../../models/child_profile_model.dart';
 /// 
 /// Mengatur setup boxes, registrasi adapters, dan lifecycle management
 class HiveDatabase {
+  factory HiveDatabase() => _instance;
+  HiveDatabase._internal();
   // Box names
   static const String userBoxName = 'users';
   static const String scheduleBoxName = 'schedules';
@@ -22,8 +24,6 @@ class HiveDatabase {
 
   // Singleton pattern
   static final HiveDatabase _instance = HiveDatabase._internal();
-  factory HiveDatabase() => _instance;
-  HiveDatabase._internal();
 
   bool _isInitialized = false;
 

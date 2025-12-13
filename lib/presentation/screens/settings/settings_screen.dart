@@ -4,8 +4,7 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
       ),
@@ -44,5 +43,4 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
 }

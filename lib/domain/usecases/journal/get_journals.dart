@@ -2,14 +2,15 @@
 /// 
 /// Use case untuk mendapatkan list journals
 /// Location: lib/domain/usecases/journal/get_journals.dart
+library;
 
 import '../../../data/repositories/journal_repository.dart';
 import '../../entities/journal_entity.dart';
 
 class GetJournalsUseCase {
-  final JournalRepository repository;
 
   GetJournalsUseCase(this.repository);
+  final JournalRepository repository;
 
   /// Get all journals
   Future<List<JournalEntity>> execute() async {

@@ -57,7 +57,7 @@ class JournalLocalDataSource {
   Future<void> createJournalsBatch(List<JournalModel> journals) async {
     try {
       final Map<String, JournalModel> journalMap = {
-        for (var journal in journals) journal.id: journal,
+        for (final journal in journals) journal.id: journal,
       };
       await _journalBox.putAll(journalMap);
     } catch (e) {
@@ -404,9 +404,7 @@ class JournalLocalDataSource {
   /// Returns the number of journals deleted
   Future<int> deleteJournalsOlderThan(DateTime date) async {
     try {
-      final oldJournals = _journalBox.values.where((journal) {
-        return journal.date.isBefore(date);
-      }).toList();
+      final oldJournals = _journalBox.values.where((journal) => journal.date.isBefore(date)).toList();
 
       int deletedCount = 0;
       for (final journal in oldJournals) {

@@ -2,6 +2,7 @@
 /// 
 /// Dialog untuk menampilkan informasi ke user
 /// Location: lib/presentation/widgets/dialogs/info_dialog.dart
+library;
 
 import 'package:flutter/material.dart';
 
@@ -28,11 +29,6 @@ Future<void> showInfoDialog(
 
 /// Info Dialog Widget
 class InfoDialog extends StatelessWidget {
-  final String title;
-  final String message;
-  final String buttonText;
-  final Widget? icon;
-  final VoidCallback? onPressed;
 
   const InfoDialog({
     super.key,
@@ -42,6 +38,11 @@ class InfoDialog extends StatelessWidget {
     this.icon,
     this.onPressed,
   });
+  final String title;
+  final String message;
+  final String buttonText;
+  final Widget? icon;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +83,7 @@ Future<void> showSuccessDialog(
   required String title,
   required String message,
   VoidCallback? onPressed,
-}) {
-  return showInfoDialog(
+}) => showInfoDialog(
     context,
     title: title,
     message: message,
@@ -94,7 +94,6 @@ Future<void> showSuccessDialog(
     ),
     onPressed: onPressed,
   );
-}
 
 /// Error Dialog (preset)
 Future<void> showErrorDialog(
@@ -102,8 +101,7 @@ Future<void> showErrorDialog(
   required String title,
   required String message,
   VoidCallback? onPressed,
-}) {
-  return showInfoDialog(
+}) => showInfoDialog(
     context,
     title: title,
     message: message,
@@ -115,7 +113,6 @@ Future<void> showErrorDialog(
     ),
     onPressed: onPressed,
   );
-}
 
 /// Warning Dialog (preset)
 Future<void> showWarningDialog(
@@ -123,8 +120,7 @@ Future<void> showWarningDialog(
   required String title,
   required String message,
   VoidCallback? onPressed,
-}) {
-  return showInfoDialog(
+}) => showInfoDialog(
     context,
     title: title,
     message: message,
@@ -135,4 +131,3 @@ Future<void> showWarningDialog(
     ),
     onPressed: onPressed,
   );
-}

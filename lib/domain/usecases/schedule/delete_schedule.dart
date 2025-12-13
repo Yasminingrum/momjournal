@@ -2,19 +2,20 @@
 /// 
 /// Use case untuk menghapus schedule
 /// Location: lib/domain/usecases/schedule/delete_schedule.dart
+library;
 
 import '../../../data/repositories/schedule_repository.dart';
 import '../../../core/errors/exceptions.dart';
 
 class DeleteScheduleUseCase {
-  final ScheduleRepository repository;
 
   DeleteScheduleUseCase(this.repository);
+  final ScheduleRepository repository;
 
   Future<void> execute(String scheduleId) async {
     try {
       if (scheduleId.isEmpty) {
-        throw ValidationException('Schedule ID tidak boleh kosong');
+        throw const ValidationException('Schedule ID tidak boleh kosong');
       }
 
       await repository.deleteSchedule(scheduleId);

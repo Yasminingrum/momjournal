@@ -19,11 +19,6 @@ import 'package:flutter/services.dart';
 /// - Label display
 /// - Customizable size
 class MoodSelector extends StatefulWidget {
-  final MoodLevel? selectedMood;
-  final Function(MoodLevel) onMoodSelected;
-  final double size;
-  final bool showLabels;
-  final bool enableHaptics;
 
   const MoodSelector({
     super.key,
@@ -33,6 +28,11 @@ class MoodSelector extends StatefulWidget {
     this.showLabels = true,
     this.enableHaptics = true,
   });
+  final MoodLevel? selectedMood;
+  final Function(MoodLevel) onMoodSelected;
+  final double size;
+  final bool showLabels;
+  final bool enableHaptics;
 
   @override
   State<MoodSelector> createState() => _MoodSelectorState();
@@ -51,7 +51,7 @@ class _MoodSelectorState extends State<MoodSelector>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: 1.2).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
   }
@@ -63,8 +63,7 @@ class _MoodSelectorState extends State<MoodSelector>
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -90,7 +89,6 @@ class _MoodSelectorState extends State<MoodSelector>
         ],
       ],
     );
-  }
 
   Widget _buildMoodButton(MoodLevel mood) {
     final isSelected = widget.selectedMood == mood;
@@ -224,18 +222,17 @@ enum MoodLevel {
 /// CompactMoodSelector
 /// Smaller horizontal mood selector for forms
 class CompactMoodSelector extends StatelessWidget {
-  final MoodLevel? selectedMood;
-  final Function(MoodLevel) onMoodSelected;
 
   const CompactMoodSelector({
     super.key,
     this.selectedMood,
     required this.onMoodSelected,
   });
+  final MoodLevel? selectedMood;
+  final Function(MoodLevel) onMoodSelected;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -272,15 +269,11 @@ class CompactMoodSelector extends StatelessWidget {
         }).toList(),
       ),
     );
-  }
 }
 
 /// MoodIndicator
 /// Read-only mood display
 class MoodIndicator extends StatelessWidget {
-  final MoodLevel mood;
-  final double size;
-  final bool showLabel;
 
   const MoodIndicator({
     super.key,
@@ -288,10 +281,12 @@ class MoodIndicator extends StatelessWidget {
     this.size = 40,
     this.showLabel = true,
   });
+  final MoodLevel mood;
+  final double size;
+  final bool showLabel;
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
@@ -321,15 +316,11 @@ class MoodIndicator extends StatelessWidget {
         ],
       ],
     );
-  }
 }
 
 /// MoodSelectorDialog
 /// Full-screen dialog for mood selection
 class MoodSelectorDialog extends StatefulWidget {
-  final MoodLevel? initialMood;
-  final String? title;
-  final String? subtitle;
 
   const MoodSelectorDialog({
     super.key,
@@ -337,6 +328,9 @@ class MoodSelectorDialog extends StatefulWidget {
     this.title,
     this.subtitle,
   });
+  final MoodLevel? initialMood;
+  final String? title;
+  final String? subtitle;
 
   @override
   State<MoodSelectorDialog> createState() => _MoodSelectorDialogState();
@@ -352,8 +346,7 @@ class _MoodSelectorDialogState extends State<MoodSelectorDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Dialog(
+  Widget build(BuildContext context) => Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -414,15 +407,13 @@ class _MoodSelectorDialogState extends State<MoodSelectorDialog> {
         ),
       ),
     );
-  }
 
   static Future<MoodLevel?> show(
     BuildContext context, {
     MoodLevel? initialMood,
     String? title,
     String? subtitle,
-  }) {
-    return showDialog<MoodLevel>(
+  }) => showDialog<MoodLevel>(
       context: context,
       builder: (context) => MoodSelectorDialog(
         initialMood: initialMood,
@@ -430,5 +421,4 @@ class _MoodSelectorDialogState extends State<MoodSelectorDialog> {
         subtitle: subtitle,
       ),
     );
-  }
 }

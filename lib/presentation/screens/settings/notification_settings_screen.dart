@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk mengatur notification settings
 /// Location: lib/presentation/screens/settings/notification_settings_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +20,7 @@ class NotificationSettingsScreen extends StatelessWidget {
         title: const Text('Pengaturan Notifikasi'),
       ),
       body: Consumer<NotificationProvider>(
-        builder: (context, provider, child) {
-          return ListView(
+        builder: (context, provider, child) => ListView(
             children: [
               // Enable notifications
               SwitchListTile(
@@ -137,8 +137,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                   ),
                 ),
             ],
-          );
-        },
+          ),
       ),
     );
   }

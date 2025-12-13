@@ -13,17 +13,16 @@ class ErrorDisplayWidget extends StatelessWidget {
   final String? retryButtonText;
   
   const ErrorDisplayWidget({
-    Key? key,
+    super.key,
     this.message,
     this.title,
     this.icon,
     this.onRetry,
     this.retryButtonText,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return Center(
+  Widget build(BuildContext context) => Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
@@ -64,7 +63,6 @@ class ErrorDisplayWidget extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Network Error Widget
@@ -72,26 +70,21 @@ class NetworkErrorWidget extends StatelessWidget {
   final VoidCallback? onRetry;
   
   const NetworkErrorWidget({
-    Key? key,
+    super.key,
     this.onRetry,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return ErrorDisplayWidget(
+  Widget build(BuildContext context) => ErrorDisplayWidget(
       icon: Icons.wifi_off,
       title: 'Tidak Ada Koneksi',
       message: TextConstants.errorNoInternet,
       onRetry: onRetry,
     );
-  }
 }
 
 /// Not Found Error Widget
 class NotFoundErrorWidget extends StatelessWidget {
-  final String? message;
-  final VoidCallback? onAction;
-  final String? actionText;
   
   const NotFoundErrorWidget({
     Key? key,
@@ -99,17 +92,18 @@ class NotFoundErrorWidget extends StatelessWidget {
     this.onAction,
     this.actionText,
   }) : super(key: key);
+  final String? message;
+  final VoidCallback? onAction;
+  final String? actionText;
   
   @override
-  Widget build(BuildContext context) {
-    return ErrorDisplayWidget(
+  Widget build(BuildContext context) => ErrorDisplayWidget(
       icon: Icons.search_off,
       title: 'Tidak Ditemukan',
       message: message ?? 'Data yang Anda cari tidak ditemukan',
       onRetry: onAction,
       retryButtonText: actionText,
     );
-  }
 }
 
 /// Permission Denied Widget
@@ -118,21 +112,19 @@ class PermissionDeniedWidget extends StatelessWidget {
   final VoidCallback? onSettings;
   
   const PermissionDeniedWidget({
-    Key? key,
+    super.key,
     this.message,
     this.onSettings,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return ErrorDisplayWidget(
+  Widget build(BuildContext context) => ErrorDisplayWidget(
       icon: Icons.block,
       title: 'Izin Ditolak',
       message: message ?? TextConstants.errorPermissionDenied,
       onRetry: onSettings,
       retryButtonText: 'Buka Pengaturan',
     );
-  }
 }
 
 /// Inline Error Message
@@ -141,14 +133,13 @@ class InlineErrorMessage extends StatelessWidget {
   final VoidCallback? onDismiss;
   
   const InlineErrorMessage({
-    Key? key,
+    super.key,
     required this.message,
     this.onDismiss,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: ColorConstants.errorLight,
@@ -184,7 +175,6 @@ class InlineErrorMessage extends StatelessWidget {
         ],
       ),
     );
-  }
 }
 
 /// Inline Success Message
@@ -193,14 +183,13 @@ class InlineSuccessMessage extends StatelessWidget {
   final VoidCallback? onDismiss;
   
   const InlineSuccessMessage({
-    Key? key,
+    super.key,
     required this.message,
     this.onDismiss,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: ColorConstants.successLight,
@@ -236,23 +225,21 @@ class InlineSuccessMessage extends StatelessWidget {
         ],
       ),
     );
-  }
 }
 
 /// Inline Warning Message
 class InlineWarningMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback? onDismiss;
   
   const InlineWarningMessage({
     Key? key,
     required this.message,
     this.onDismiss,
   }) : super(key: key);
+  final String message;
+  final VoidCallback? onDismiss;
   
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: ColorConstants.warningLight,
@@ -288,23 +275,21 @@ class InlineWarningMessage extends StatelessWidget {
         ],
       ),
     );
-  }
 }
 
 /// Inline Info Message
 class InlineInfoMessage extends StatelessWidget {
-  final String message;
-  final VoidCallback? onDismiss;
   
   const InlineInfoMessage({
     Key? key,
     required this.message,
     this.onDismiss,
   }) : super(key: key);
+  final String message;
+  final VoidCallback? onDismiss;
   
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: ColorConstants.infoLight,
@@ -340,7 +325,6 @@ class InlineInfoMessage extends StatelessWidget {
         ],
       ),
     );
-  }
 }
 
 /// Snackbar Helper

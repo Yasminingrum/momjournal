@@ -5,9 +5,6 @@ import '../../core/constants/text_constants.dart';
 /// Loading Indicator Widget
 /// Provides consistent loading states across the app
 class LoadingIndicator extends StatelessWidget {
-  final String? message;
-  final Color? color;
-  final double size;
   
   const LoadingIndicator({
     Key? key,
@@ -15,10 +12,12 @@ class LoadingIndicator extends StatelessWidget {
     this.color,
     this.size = 40,
   }) : super(key: key);
+  final String? message;
+  final Color? color;
+  final double size;
   
   @override
-  Widget build(BuildContext context) {
-    return Center(
+  Widget build(BuildContext context) => Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -45,21 +44,19 @@ class LoadingIndicator extends StatelessWidget {
         ],
       ),
     );
-  }
 }
 
 /// Small Loading Indicator
 class SmallLoadingIndicator extends StatelessWidget {
-  final Color? color;
   
   const SmallLoadingIndicator({
     Key? key,
     this.color,
   }) : super(key: key);
+  final Color? color;
   
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  Widget build(BuildContext context) => SizedBox(
       width: 20,
       height: 20,
       child: CircularProgressIndicator(
@@ -69,14 +66,10 @@ class SmallLoadingIndicator extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Loading Overlay (covers entire screen)
 class LoadingOverlay extends StatelessWidget {
-  final bool isLoading;
-  final Widget child;
-  final String? message;
   
   const LoadingOverlay({
     Key? key,
@@ -84,10 +77,12 @@ class LoadingOverlay extends StatelessWidget {
     required this.child,
     this.message,
   }) : super(key: key);
+  final bool isLoading;
+  final Widget child;
+  final String? message;
   
   @override
-  Widget build(BuildContext context) {
-    return Stack(
+  Widget build(BuildContext context) => Stack(
       children: [
         child,
         if (isLoading)
@@ -100,15 +95,10 @@ class LoadingOverlay extends StatelessWidget {
           ),
       ],
     );
-  }
 }
 
 /// Linear Loading Indicator (for progress)
 class LinearLoadingIndicator extends StatelessWidget {
-  final double? value;
-  final Color? backgroundColor;
-  final Color? valueColor;
-  final double height;
   
   const LinearLoadingIndicator({
     Key? key,
@@ -117,10 +107,13 @@ class LinearLoadingIndicator extends StatelessWidget {
     this.valueColor,
     this.height = 4,
   }) : super(key: key);
+  final double? value;
+  final Color? backgroundColor;
+  final Color? valueColor;
+  final double height;
   
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  Widget build(BuildContext context) => SizedBox(
       height: height,
       child: LinearProgressIndicator(
         value: value,
@@ -130,7 +123,6 @@ class LinearLoadingIndicator extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Shimmer Loading (for skeleton screens)
@@ -141,12 +133,12 @@ class ShimmerLoading extends StatefulWidget {
   final Color? highlightColor;
   
   const ShimmerLoading({
-    Key? key,
+    super.key,
     required this.child,
     this.isLoading = true,
     this.baseColor,
     this.highlightColor,
-  }) : super(key: key);
+  });
   
   @override
   State<ShimmerLoading> createState() => _ShimmerLoadingState();
@@ -179,8 +171,7 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
     
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return ShaderMask(
+      builder: (context, child) => ShaderMask(
           shaderCallback: (bounds) {
             return LinearGradient(
               begin: Alignment.centerLeft,
@@ -198,17 +189,13 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
             ).createShader(bounds);
           },
           child: widget.child,
-        );
-      },
+        ),
     );
   }
 }
 
 /// Skeleton Loading Card
 class SkeletonLoadingCard extends StatelessWidget {
-  final double height;
-  final double? width;
-  final double borderRadius;
   
   const SkeletonLoadingCard({
     Key? key,
@@ -216,10 +203,12 @@ class SkeletonLoadingCard extends StatelessWidget {
     this.width,
     this.borderRadius = 12,
   }) : super(key: key);
+  final double height;
+  final double? width;
+  final double borderRadius;
   
   @override
-  Widget build(BuildContext context) {
-    return ShimmerLoading(
+  Widget build(BuildContext context) => ShimmerLoading(
       child: Container(
         height: height,
         width: width ?? double.infinity,
@@ -229,14 +218,10 @@ class SkeletonLoadingCard extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Skeleton Loading List
 class SkeletonLoadingList extends StatelessWidget {
-  final int itemCount;
-  final double itemHeight;
-  final double spacing;
   
   const SkeletonLoadingList({
     Key? key,
@@ -244,10 +229,12 @@ class SkeletonLoadingList extends StatelessWidget {
     this.itemHeight = 80,
     this.spacing = 16,
   }) : super(key: key);
+  final int itemCount;
+  final double itemHeight;
+  final double spacing;
   
   @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
+  Widget build(BuildContext context) => ListView.separated(
       itemCount: itemCount,
       padding: const EdgeInsets.all(16),
       separatorBuilder: (context, index) => SizedBox(height: spacing),
@@ -255,14 +242,10 @@ class SkeletonLoadingList extends StatelessWidget {
         return SkeletonLoadingCard(height: itemHeight);
       },
     );
-  }
 }
 
 /// Pulsing Dot Loading Indicator
 class PulsingDotIndicator extends StatefulWidget {
-  final Color? color;
-  final double size;
-  final int dotCount;
   
   const PulsingDotIndicator({
     Key? key,
@@ -270,6 +253,9 @@ class PulsingDotIndicator extends StatefulWidget {
     this.size = 8,
     this.dotCount = 3,
   }) : super(key: key);
+  final Color? color;
+  final double size;
+  final int dotCount;
   
   @override
   State<PulsingDotIndicator> createState() => _PulsingDotIndicatorState();
@@ -295,8 +281,7 @@ class _PulsingDotIndicatorState extends State<PulsingDotIndicator>
   }
   
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context) => Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(widget.dotCount, (index) {
         return AnimatedBuilder(
@@ -324,14 +309,10 @@ class _PulsingDotIndicatorState extends State<PulsingDotIndicator>
         );
       }),
     );
-  }
 }
 
 /// Refresh Indicator Wrapper
 class CustomRefreshIndicator extends StatelessWidget {
-  final Widget child;
-  final Future<void> Function() onRefresh;
-  final Color? color;
   
   const CustomRefreshIndicator({
     Key? key,
@@ -339,13 +320,14 @@ class CustomRefreshIndicator extends StatelessWidget {
     required this.onRefresh,
     this.color,
   }) : super(key: key);
+  final Widget child;
+  final Future<void> Function() onRefresh;
+  final Color? color;
   
   @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
+  Widget build(BuildContext context) => RefreshIndicator(
       onRefresh: onRefresh,
       color: color ?? ColorConstants.primaryColor,
       child: child,
     );
-  }
 }

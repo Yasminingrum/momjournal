@@ -2,6 +2,7 @@
 /// 
 /// Repository layer for authentication operations
 /// Location: lib/data/repositories/auth_repository.dart
+library;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import '/core/errors/exceptions.dart';
@@ -34,11 +35,11 @@ abstract class AuthRepository {
 
 /// Implementation dari Auth Repository
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDatasource _remoteDatasource;
 
   AuthRepositoryImpl({
     required AuthRemoteDatasource remoteDatasource,
   }) : _remoteDatasource = remoteDatasource;
+  final AuthRemoteDatasource _remoteDatasource;
 
   @override
   Future<User> signInWithGoogle() async {
@@ -70,19 +71,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  User? getCurrentUser() {
-    return _remoteDatasource.getCurrentUser();
-  }
+  User? getCurrentUser() => _remoteDatasource.getCurrentUser();
 
   @override
-  bool isUserLoggedIn() {
-    return getCurrentUser() != null;
-  }
+  bool isUserLoggedIn() => getCurrentUser() != null;
 
   @override
-  String? getUserId() {
-    return getCurrentUser()?.uid;
-  }
+  String? getUserId() => getCurrentUser()?.uid;
 
   @override
   Future<void> deleteAccount() async {

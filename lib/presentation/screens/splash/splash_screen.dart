@@ -3,6 +3,7 @@
 /// Screen pertama yang muncul saat app dibuka
 /// Melakukan auth check dan navigate ke screen yang sesuai
 /// Location: lib/presentation/screens/splash/splash_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,17 +33,17 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1500),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        curve: const Interval(0, 0.5, curve: Curves.easeIn),
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+        curve: const Interval(0, 0.5, curve: Curves.easeOut),
       ),
     );
 
@@ -88,8 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
       body: Center(
         child: AnimatedBuilder(
           animation: _animationController,
-          builder: (context, child) {
-            return FadeTransition(
+          builder: (context, child) => FadeTransition(
               opacity: _fadeAnimation,
               child: ScaleTransition(
                 scale: _scaleAnimation,
@@ -155,8 +155,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ],
                 ),
               ),
-            );
-          },
+            ),
         ),
       ),
     );

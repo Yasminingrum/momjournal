@@ -13,15 +13,15 @@ import 'package:flutter/foundation.dart';
 /// - Determine connection type (WiFi, Mobile, None)
 /// - Reactive connectivity stream
 class NetworkInfo extends ChangeNotifier {
-  final Connectivity _connectivity = Connectivity();
-  
-  ConnectivityResult _currentStatus = ConnectivityResult.none;
-  bool _isConnected = false;
 
   // Constructor
   NetworkInfo() {
     _initialize();
   }
+  final Connectivity _connectivity = Connectivity();
+  
+  ConnectivityResult _currentStatus = ConnectivityResult.none;
+  bool _isConnected = false;
 
   // Getters
   ConnectivityResult get currentStatus => _currentStatus;

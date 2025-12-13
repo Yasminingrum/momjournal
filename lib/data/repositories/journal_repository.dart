@@ -47,10 +47,8 @@ class JournalRepository {
   Future<List<JournalEntity>> getJournalsByDateRange(
       DateTime start, DateTime end,) async {
     await init();
-    final journals = _box!.values.where((journal) {
-      return journal.date.isAfter(start.subtract(const Duration(days: 1))) &&
-          journal.date.isBefore(end.add(const Duration(days: 1)));
-    }).toList();
+    final journals = _box!.values.where((journal) => journal.date.isAfter(start.subtract(const Duration(days: 1))) &&
+          journal.date.isBefore(end.add(const Duration(days: 1)))).toList();
     
     journals.sort((a, b) => b.date.compareTo(a.date));
     return journals;
@@ -91,7 +89,7 @@ class JournalRepository {
       MoodType.verySad: 0,
     };
 
-    for (var journal in journals) {
+    for (final journal in journals) {
       stats[journal.mood] = (stats[journal.mood] ?? 0) + 1;
     }
 

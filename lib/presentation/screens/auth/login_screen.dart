@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk login dengan Google Sign-In
 /// Location: lib/presentation/screens/auth/login_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -53,8 +54,7 @@ class LoginScreen extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
     Size size,
-  ) {
-    return SingleChildScrollView(
+  ) => SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: SizedBox(
         height: size.height - 48,
@@ -160,7 +160,6 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
-  }
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
@@ -187,15 +186,15 @@ class LoginScreen extends StatelessWidget {
 
 /// Feature Item Widget
 class _FeatureItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
 
   const _FeatureItem({
     required this.icon,
     required this.title,
     required this.description,
   });
+  final IconData icon;
+  final String title;
+  final String description;
 
   @override
   Widget build(BuildContext context) {

@@ -4,6 +4,36 @@ part 'photo_entity.g.dart';
 
 @HiveType(typeId: 5)
 class PhotoEntity extends HiveObject {
+
+  PhotoEntity({
+    required this.id,
+    required this.userId,
+    this.localPath,
+    this.cloudUrl,
+    this.caption,
+    this.isMilestone = false,
+    required this.dateTaken,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isSynced = false,
+    this.isUploaded = false,
+  });
+
+  factory PhotoEntity.fromJson(Map<String, dynamic> json) {
+    return PhotoEntity(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      localPath: json['localPath'] as String?,
+      cloudUrl: json['cloudUrl'] as String?,
+      caption: json['caption'] as String?,
+      isMilestone: json['isMilestone'] as bool? ?? false,
+      dateTaken: DateTime.parse(json['dateTaken'] as String),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      isSynced: true,
+      isUploaded: json['cloudUrl'] != null,
+    );
+  }
   @HiveField(0)
   final String id;
   
@@ -37,20 +67,6 @@ class PhotoEntity extends HiveObject {
   @HiveField(10)
   final bool isUploaded;
 
-  PhotoEntity({
-    required this.id,
-    required this.userId,
-    this.localPath,
-    this.cloudUrl,
-    this.caption,
-    this.isMilestone = false,
-    required this.dateTaken,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-    this.isUploaded = false,
-  });
-
   PhotoEntity copyWith({
     String? id,
     String? userId,
@@ -63,8 +79,7 @@ class PhotoEntity extends HiveObject {
     DateTime? updatedAt,
     bool? isSynced,
     bool? isUploaded,
-  }) {
-    return PhotoEntity(
+  }) => PhotoEntity(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       localPath: localPath ?? this.localPath,
@@ -77,10 +92,8 @@ class PhotoEntity extends HiveObject {
       isSynced: isSynced ?? this.isSynced,
       isUploaded: isUploaded ?? this.isUploaded,
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'localPath': localPath,
@@ -91,21 +104,4 @@ class PhotoEntity extends HiveObject {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
-  }
-
-  factory PhotoEntity.fromJson(Map<String, dynamic> json) {
-    return PhotoEntity(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      localPath: json['localPath'] as String?,
-      cloudUrl: json['cloudUrl'] as String?,
-      caption: json['caption'] as String?,
-      isMilestone: json['isMilestone'] as bool? ?? false,
-      dateTaken: DateTime.parse(json['dateTaken'] as String),
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-      isSynced: true,
-      isUploaded: json['cloudUrl'] != null,
-    );
-  }
 }

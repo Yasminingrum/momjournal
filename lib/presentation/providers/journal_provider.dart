@@ -7,6 +7,8 @@ import '/domain/entities/journal_entity.dart';
 /// ViewModel for Journal management
 /// Manages journal state and business logic using Provider pattern
 class JournalProvider extends ChangeNotifier {
+
+  JournalProvider(this._hiveDatabase);
   final JournalRepository _repository = JournalRepository();
   final Uuid _uuid = const Uuid();
   final HiveDatabase _hiveDatabase;
@@ -23,8 +25,6 @@ class JournalProvider extends ChangeNotifier {
   Map<MoodType, int> get moodStats => _moodStats;
   bool get isLoading => _isLoading;
   String? get error => _error;
-
-  JournalProvider(this._hiveDatabase);
 
   /// Initialize provider
   Future<void> init() async {

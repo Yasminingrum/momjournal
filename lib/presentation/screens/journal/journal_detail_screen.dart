@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk melihat detail journal entry
 /// Location: lib/presentation/screens/journal/journal_detail_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,12 +12,12 @@ import '../../widgets/dialogs/confirmation_dialog.dart';
 import '../../widgets/dialogs/info_dialog.dart';
 
 class JournalDetailScreen extends StatelessWidget {
-  final JournalEntity journal;
 
   const JournalDetailScreen({
     super.key,
     required this.journal,
   });
+  final JournalEntity journal;
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +212,7 @@ class JournalDetailScreen extends StatelessWidget {
   String _formatDate(DateTime date) {
     final months = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -219,7 +220,7 @@ class JournalDetailScreen extends StatelessWidget {
   String _formatDateTime(DateTime dateTime) {
     final months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}, '
         '${dateTime.hour.toString().padLeft(2, '0')}:'

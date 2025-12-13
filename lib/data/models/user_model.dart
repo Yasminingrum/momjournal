@@ -8,6 +8,50 @@ part 'user_model.g.dart';
 /// dan profil anak yang terkait
 @HiveType(typeId: 0)
 class UserModel extends HiveObject {
+
+  UserModel({
+    required this.uid,
+    required this.email,
+    this.displayName,
+    this.photoUrl,
+    required this.createdAt,
+    required this.lastLoginAt,
+    this.childName,
+    this.childBirthDate,
+    this.childGender,
+    this.hasCompletedOnboarding = false,
+    this.notificationsEnabled = true,
+    this.quietHoursStart = '22:00',
+    this.quietHoursEnd = '06:00',
+  });
+
+  /// Factory constructor untuk membuat UserModel dari JSON
+  /// Digunakan saat fetching data dari Firestore
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      uid: json['uid'] as String,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String?,
+      photoUrl: json['photoUrl'] as String?,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      lastLoginAt: json['lastLoginAt'] is DateTime
+          ? json['lastLoginAt'] as DateTime
+          : DateTime.parse(json['lastLoginAt'] as String),
+      childName: json['childName'] as String?,
+      childBirthDate: json['childBirthDate'] != null
+          ? (json['childBirthDate'] is DateTime
+              ? json['childBirthDate'] as DateTime
+              : DateTime.parse(json['childBirthDate'] as String))
+          : null,
+      childGender: json['childGender'] as String?,
+      hasCompletedOnboarding: json['hasCompletedOnboarding'] as bool? ?? false,
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      quietHoursStart: json['quietHoursStart'] as String? ?? '22:00',
+      quietHoursEnd: json['quietHoursEnd'] as String? ?? '06:00',
+    );
+  }
   /// ID unik user dari Firebase Auth
   @HiveField(0)
   final String uid;
@@ -60,53 +104,8 @@ class UserModel extends HiveObject {
   @HiveField(12)
   final String? quietHoursEnd;
 
-  UserModel({
-    required this.uid,
-    required this.email,
-    this.displayName,
-    this.photoUrl,
-    required this.createdAt,
-    required this.lastLoginAt,
-    this.childName,
-    this.childBirthDate,
-    this.childGender,
-    this.hasCompletedOnboarding = false,
-    this.notificationsEnabled = true,
-    this.quietHoursStart = '22:00',
-    this.quietHoursEnd = '06:00',
-  });
-
-  /// Factory constructor untuk membuat UserModel dari JSON
-  /// Digunakan saat fetching data dari Firestore
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      uid: json['uid'] as String,
-      email: json['email'] as String,
-      displayName: json['displayName'] as String?,
-      photoUrl: json['photoUrl'] as String?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      lastLoginAt: json['lastLoginAt'] is DateTime
-          ? json['lastLoginAt'] as DateTime
-          : DateTime.parse(json['lastLoginAt'] as String),
-      childName: json['childName'] as String?,
-      childBirthDate: json['childBirthDate'] != null
-          ? (json['childBirthDate'] is DateTime
-              ? json['childBirthDate'] as DateTime
-              : DateTime.parse(json['childBirthDate'] as String))
-          : null,
-      childGender: json['childGender'] as String?,
-      hasCompletedOnboarding: json['hasCompletedOnboarding'] as bool? ?? false,
-      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
-      quietHoursStart: json['quietHoursStart'] as String? ?? '22:00',
-      quietHoursEnd: json['quietHoursEnd'] as String? ?? '06:00',
-    );
-  }
-
   /// Convert UserModel ke JSON untuk disimpan di Firestore
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'uid': uid,
       'email': email,
       'displayName': displayName,
@@ -121,7 +120,6 @@ class UserModel extends HiveObject {
       'quietHoursStart': quietHoursStart,
       'quietHoursEnd': quietHoursEnd,
     };
-  }
 
   /// Create a copy of UserModel with updated fields
   UserModel copyWith({
@@ -138,8 +136,7 @@ class UserModel extends HiveObject {
     bool? notificationsEnabled,
     String? quietHoursStart,
     String? quietHoursEnd,
-  }) {
-    return UserModel(
+  }) => UserModel(
       uid: uid ?? this.uid,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
@@ -155,13 +152,10 @@ class UserModel extends HiveObject {
       quietHoursStart: quietHoursStart ?? this.quietHoursStart,
       quietHoursEnd: quietHoursEnd ?? this.quietHoursEnd,
     );
-  }
 
   @override
-  String toString() {
-    return 'UserModel(uid: $uid, email: $email, displayName: $displayName, '
+  String toString() => 'UserModel(uid: $uid, email: $email, displayName: $displayName, '
         'childName: $childName, hasCompletedOnboarding: $hasCompletedOnboarding)';
-  }
 
   @override
   bool operator ==(Object other) {
@@ -184,8 +178,7 @@ class UserModel extends HiveObject {
   }
 
   @override
-  int get hashCode {
-    return uid.hashCode ^
+  int get hashCode => uid.hashCode ^
         email.hashCode ^
         displayName.hashCode ^
         photoUrl.hashCode ^
@@ -198,5 +191,4 @@ class UserModel extends HiveObject {
         notificationsEnabled.hashCode ^
         quietHoursStart.hashCode ^
         quietHoursEnd.hashCode;
-  }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:momjournal/data/models/journal_model.dart';
-import 'package:momjournal/data/models/schedule_model.dart';
+import '../../../data/models/journal_model.dart';
+import '../../../data/models/schedule_model.dart';
 import 'package:provider/provider.dart';
 import '/core/constants/app_constants.dart';
 import '/core/constants/color_constants.dart';
@@ -33,8 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
@@ -72,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
 }
 
 /// Dashboard Screen showing overview of all features
@@ -104,8 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text(TextConstants.appName),
         actions: [
@@ -150,7 +147,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
-  }
 
   Widget _buildGreeting() {
     final hour = DateTime.now().hour;
@@ -182,8 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions() {
-    return Column(
+  Widget _buildQuickActions() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
@@ -231,10 +226,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ],
     );
-  }
 
-  Widget _buildTodayAgenda() {
-    return Consumer<ScheduleProvider>(
+  Widget _buildTodayAgenda() => Consumer<ScheduleProvider>(
       builder: (context, provider, child) {
         final schedules = provider.todaySchedules;
 
@@ -282,10 +275,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
     );
-  }
 
-  Widget _buildMoodSection() {
-    return Consumer<JournalProvider>(
+  Widget _buildMoodSection() => Consumer<JournalProvider>(
       builder: (context, provider, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,10 +307,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
     );
-  }
 
-  Widget _buildMoodStat(String emoji, int count) {
-    return Column(
+  Widget _buildMoodStat(String emoji, int count) => Column(
       children: [
         Text(emoji, style: const TextStyle(fontSize: 32)),
         const SizedBox(height: 4),
@@ -329,10 +318,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ],
     );
-  }
 
-  Widget _buildPhotoMemories() {
-    return Consumer<PhotoProvider>(
+  Widget _buildPhotoMemories() => Consumer<PhotoProvider>(
       builder: (context, provider, child) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,7 +372,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       },
     );
-  }
 
   Color _getCategoryColor(category) {
     switch (category) {
@@ -404,10 +390,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _QuickActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
 
   const _QuickActionButton({
     required this.icon,
@@ -415,10 +397,13 @@ class _QuickActionButton extends StatelessWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -438,5 +423,4 @@ class _QuickActionButton extends StatelessWidget {
         ),
       ),
     );
-  }
 }

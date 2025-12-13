@@ -2,14 +2,15 @@
 /// 
 /// Use case untuk Google Sign-In
 /// Location: lib/domain/usecases/auth/sign_in_with_google.dart
+library;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class SignInWithGoogleUseCase {
-  final AuthRepository repository;
 
   SignInWithGoogleUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<User> execute() async {
     try {

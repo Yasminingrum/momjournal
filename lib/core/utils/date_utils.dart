@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 /// Date Utilities
 /// Helper functions for date formatting and manipulation
 class DateUtils {
+  
+  // Private constructor to prevent instantiation
+  DateUtils._();
   // Date Formatters
   static final DateFormat _displayFormat = DateFormat('dd MMMM yyyy', 'id_ID');
   static final DateFormat _shortFormat = DateFormat('dd/MM/yyyy');
@@ -13,39 +16,25 @@ class DateUtils {
   static final DateFormat _dayMonthFormat = DateFormat('dd MMM', 'id_ID');
   
   /// Format date to display format (e.g., "08 Desember 2024")
-  static String formatDisplay(DateTime date) {
-    return _displayFormat.format(date);
-  }
+  static String formatDisplay(DateTime date) => _displayFormat.format(date);
   
   /// Format date to short format (e.g., "08/12/2024")
-  static String formatShort(DateTime date) {
-    return _shortFormat.format(date);
-  }
+  static String formatShort(DateTime date) => _shortFormat.format(date);
   
   /// Format time (e.g., "14:30")
-  static String formatTime(DateTime date) {
-    return _timeFormat.format(date);
-  }
+  static String formatTime(DateTime date) => _timeFormat.format(date);
   
   /// Format date and time (e.g., "08/12/2024 14:30")
-  static String formatDateTime(DateTime date) {
-    return _dateTimeFormat.format(date);
-  }
+  static String formatDateTime(DateTime date) => _dateTimeFormat.format(date);
   
   /// Format to full format (e.g., "Minggu, 08 Desember 2024")
-  static String formatFull(DateTime date) {
-    return _fullFormat.format(date);
-  }
+  static String formatFull(DateTime date) => _fullFormat.format(date);
   
   /// Format to month and year (e.g., "Desember 2024")
-  static String formatMonthYear(DateTime date) {
-    return _monthYearFormat.format(date);
-  }
+  static String formatMonthYear(DateTime date) => _monthYearFormat.format(date);
   
   /// Format to day and month (e.g., "08 Des")
-  static String formatDayMonth(DateTime date) {
-    return _dayMonthFormat.format(date);
-  }
+  static String formatDayMonth(DateTime date) => _dayMonthFormat.format(date);
   
   /// Check if date is today
   static bool isToday(DateTime date) {
@@ -126,14 +115,10 @@ class DateUtils {
   }
   
   /// Get start of day
-  static DateTime startOfDay(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
+  static DateTime startOfDay(DateTime date) => DateTime(date.year, date.month, date.day);
   
   /// Get end of day
-  static DateTime endOfDay(DateTime date) {
-    return DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
-  }
+  static DateTime endOfDay(DateTime date) => DateTime(date.year, date.month, date.day, 23, 59, 59, 999);
   
   /// Get start of week (Monday)
   static DateTime startOfWeek(DateTime date) {
@@ -148,9 +133,7 @@ class DateUtils {
   }
   
   /// Get start of month
-  static DateTime startOfMonth(DateTime date) {
-    return DateTime(date.year, date.month, 1);
-  }
+  static DateTime startOfMonth(DateTime date) => DateTime(date.year, date.month, 1);
   
   /// Get end of month
   static DateTime endOfMonth(DateTime date) {
@@ -161,26 +144,18 @@ class DateUtils {
   }
   
   /// Get days in month
-  static int daysInMonth(DateTime date) {
-    return endOfMonth(date).day;
-  }
+  static int daysInMonth(DateTime date) => endOfMonth(date).day;
   
   /// Check if two dates are the same day
-  static bool isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
+  static bool isSameDay(DateTime date1, DateTime date2) => date1.year == date2.year &&
            date1.month == date2.month &&
            date1.day == date2.day;
-  }
   
   /// Check if date is in the past
-  static bool isPast(DateTime date) {
-    return date.isBefore(DateTime.now());
-  }
+  static bool isPast(DateTime date) => date.isBefore(DateTime.now());
   
   /// Check if date is in the future
-  static bool isFuture(DateTime date) {
-    return date.isAfter(DateTime.now());
-  }
+  static bool isFuture(DateTime date) => date.isAfter(DateTime.now());
   
   /// Get age in years from birth date
   static int getAgeInYears(DateTime birthDate) {
@@ -262,8 +237,7 @@ class DateUtils {
   }
   
   /// Combine date and time
-  static DateTime combineDateTime(DateTime date, DateTime time) {
-    return DateTime(
+  static DateTime combineDateTime(DateTime date, DateTime time) => DateTime(
       date.year,
       date.month,
       date.day,
@@ -271,7 +245,6 @@ class DateUtils {
       time.minute,
       time.second,
     );
-  }
   
   /// Get time difference in readable format
   static String getTimeDifference(DateTime from, DateTime to) {
@@ -287,7 +260,4 @@ class DateUtils {
       return '${difference.inSeconds} detik';
     }
   }
-  
-  // Private constructor to prevent instantiation
-  DateUtils._();
 }

@@ -2,17 +2,18 @@
 /// 
 /// State management untuk notification settings
 /// Location: lib/presentation/providers/notification_provider.dart
+library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../services/notification_service.dart';
 
 class NotificationProvider with ChangeNotifier {
-  final NotificationService _notificationService;
 
   NotificationProvider({
     required NotificationService notificationService,
   }) : _notificationService = notificationService;
+  final NotificationService _notificationService;
 
   // Settings
   bool _notificationsEnabled = true;
@@ -104,15 +105,11 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  bool _isAfterOrEqual(TimeOfDay time, TimeOfDay other) {
-    return time.hour > other.hour ||
+  bool _isAfterOrEqual(TimeOfDay time, TimeOfDay other) => time.hour > other.hour ||
         (time.hour == other.hour && time.minute >= other.minute);
-  }
 
-  bool _isBefore(TimeOfDay time, TimeOfDay other) {
-    return time.hour < other.hour ||
+  bool _isBefore(TimeOfDay time, TimeOfDay other) => time.hour < other.hour ||
         (time.hour == other.hour && time.minute < other.minute);
-  }
 
   /// Schedule notification for schedule
   Future<void> scheduleNotification({

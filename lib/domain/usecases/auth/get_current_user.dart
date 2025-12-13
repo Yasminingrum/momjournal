@@ -2,24 +2,19 @@
 /// 
 /// Use case untuk mendapatkan current user
 /// Location: lib/domain/usecases/auth/get_current_user.dart
+library;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../data/repositories/auth_repository.dart';
 
 class GetCurrentUserUseCase {
-  final AuthRepository repository;
 
   GetCurrentUserUseCase(this.repository);
+  final AuthRepository repository;
 
-  User? execute() {
-    return repository.getCurrentUser();
-  }
+  User? execute() => repository.getCurrentUser();
 
-  bool isUserLoggedIn() {
-    return repository.isUserLoggedIn();
-  }
+  bool isUserLoggedIn() => repository.isUserLoggedIn();
 
-  String? getUserId() {
-    return repository.getUserId();
-  }
+  String? getUserId() => repository.getUserId();
 }

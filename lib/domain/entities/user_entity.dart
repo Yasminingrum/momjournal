@@ -4,6 +4,32 @@ part 'user_entity.g.dart';
 
 @HiveType(typeId: 0)
 class UserEntity extends HiveObject {
+
+  UserEntity({
+    required this.id,
+    required this.email,
+    required this.displayName,
+    this.photoUrl,
+    this.childName,
+    this.childDateOfBirth,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory UserEntity.fromJson(Map<String, dynamic> json) {
+    return UserEntity(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String,
+      photoUrl: json['photoUrl'] as String?,
+      childName: json['childName'] as String?,
+      childDateOfBirth: json['childDateOfBirth'] != null
+          ? DateTime.parse(json['childDateOfBirth'] as String)
+          : null,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
   @HiveField(0)
   final String id;
   
@@ -28,17 +54,6 @@ class UserEntity extends HiveObject {
   @HiveField(7)
   final DateTime updatedAt;
 
-  UserEntity({
-    required this.id,
-    required this.email,
-    required this.displayName,
-    this.photoUrl,
-    this.childName,
-    this.childDateOfBirth,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
   UserEntity copyWith({
     String? id,
     String? email,
@@ -48,8 +63,7 @@ class UserEntity extends HiveObject {
     DateTime? childDateOfBirth,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) {
-    return UserEntity(
+  }) => UserEntity(
       id: id ?? this.id,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
@@ -59,10 +73,8 @@ class UserEntity extends HiveObject {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
-  }
 
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'email': email,
       'displayName': displayName,
@@ -72,20 +84,4 @@ class UserEntity extends HiveObject {
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
-  }
-
-  factory UserEntity.fromJson(Map<String, dynamic> json) {
-    return UserEntity(
-      id: json['id'] as String,
-      email: json['email'] as String,
-      displayName: json['displayName'] as String,
-      photoUrl: json['photoUrl'] as String?,
-      childName: json['childName'] as String?,
-      childDateOfBirth: json['childDateOfBirth'] != null
-          ? DateTime.parse(json['childDateOfBirth'] as String)
-          : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
-    );
-  }
 }

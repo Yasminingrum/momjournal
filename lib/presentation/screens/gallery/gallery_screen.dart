@@ -4,8 +4,7 @@ class GalleryScreen extends StatelessWidget {
   const GalleryScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Gallery'),
       ),
@@ -18,5 +17,4 @@ class GalleryScreen extends StatelessWidget {
         child: const Icon(Icons.add_a_photo),
       ),
     );
-  }
 }

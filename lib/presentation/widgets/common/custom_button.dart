@@ -4,17 +4,6 @@ import '../../core/constants/color_constants.dart';
 /// Custom Button Widget
 /// Provides consistent button styling across the app
 class CustomButton extends StatelessWidget {
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final bool isFullWidth;
-  final IconData? icon;
-  final Color? backgroundColor;
-  final Color? textColor;
-  final double? elevation;
-  final EdgeInsetsGeometry? padding;
-  final double borderRadius;
-  final ButtonType type;
   
   const CustomButton({
     Key? key,
@@ -30,6 +19,17 @@ class CustomButton extends StatelessWidget {
     this.borderRadius = 8.0,
     this.type = ButtonType.elevated,
   }) : super(key: key);
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isFullWidth;
+  final IconData? icon;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? elevation;
+  final EdgeInsetsGeometry? padding;
+  final double borderRadius;
+  final ButtonType type;
   
   @override
   Widget build(BuildContext context) {
@@ -132,16 +132,15 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
     this.icon,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return CustomButton(
+  Widget build(BuildContext context) => CustomButton(
       text: text,
       onPressed: onPressed,
       isLoading: isLoading,
@@ -150,15 +149,10 @@ class PrimaryButton extends StatelessWidget {
       textColor: ColorConstants.white,
       type: ButtonType.elevated,
     );
-  }
 }
 
 /// Secondary Button - Pink filled
 class SecondaryButton extends StatelessWidget {
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final IconData? icon;
   
   const SecondaryButton({
     Key? key,
@@ -167,10 +161,13 @@ class SecondaryButton extends StatelessWidget {
     this.isLoading = false,
     this.icon,
   }) : super(key: key);
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomButton(
+  Widget build(BuildContext context) => CustomButton(
       text: text,
       onPressed: onPressed,
       isLoading: isLoading,
@@ -179,7 +176,6 @@ class SecondaryButton extends StatelessWidget {
       textColor: ColorConstants.white,
       type: ButtonType.elevated,
     );
-  }
 }
 
 /// Outline Button - Transparent with border
@@ -191,17 +187,16 @@ class OutlineButton extends StatelessWidget {
   final Color? color;
   
   const OutlineButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
     this.icon,
     this.color,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return CustomButton(
+  Widget build(BuildContext context) => CustomButton(
       text: text,
       onPressed: onPressed,
       isLoading: isLoading,
@@ -209,16 +204,10 @@ class OutlineButton extends StatelessWidget {
       backgroundColor: color ?? ColorConstants.primaryColor,
       type: ButtonType.outlined,
     );
-  }
 }
 
 /// Danger Button - Red for destructive actions
 class DangerButton extends StatelessWidget {
-  final String text;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final IconData? icon;
-  final bool outlined;
   
   const DangerButton({
     Key? key,
@@ -228,10 +217,14 @@ class DangerButton extends StatelessWidget {
     this.icon,
     this.outlined = false,
   }) : super(key: key);
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+  final bool outlined;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomButton(
+  Widget build(BuildContext context) => CustomButton(
       text: text,
       onPressed: onPressed,
       isLoading: isLoading,
@@ -240,17 +233,10 @@ class DangerButton extends StatelessWidget {
       textColor: outlined ? ColorConstants.error : ColorConstants.white,
       type: outlined ? ButtonType.outlined : ButtonType.elevated,
     );
-  }
 }
 
 /// Icon Button with background
 class IconButtonWithBackground extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final Color? backgroundColor;
-  final Color? iconColor;
-  final double size;
-  final double iconSize;
   
   const IconButtonWithBackground({
     Key? key,
@@ -261,10 +247,15 @@ class IconButtonWithBackground extends StatelessWidget {
     this.size = 48,
     this.iconSize = 24,
   }) : super(key: key);
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? iconColor;
+  final double size;
+  final double iconSize;
   
   @override
-  Widget build(BuildContext context) {
-    return Material(
+  Widget build(BuildContext context) => Material(
       color: backgroundColor ?? ColorConstants.primaryColor.withOpacity(0.1),
       borderRadius: BorderRadius.circular(size / 2),
       child: InkWell(
@@ -281,5 +272,4 @@ class IconButtonWithBackground extends StatelessWidget {
         ),
       ),
     );
-  }
 }

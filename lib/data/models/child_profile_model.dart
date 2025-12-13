@@ -7,6 +7,47 @@ part 'child_profile_model.g.dart';
 /// Menyimpan informasi profil anak yang disetup saat onboarding
 @HiveType(typeId: 4)
 class ChildProfileModel extends HiveObject {
+
+  ChildProfileModel({
+    required this.id,
+    required this.userId,
+    required this.name,
+    required this.birthDate,
+    this.gender,
+    this.photoUrl,
+    this.localPhotoPath,
+    this.birthWeightGrams,
+    this.birthHeightCm,
+    this.notes,
+    required this.createdAt,
+    required this.updatedAt,
+    this.isSynced = false,
+  });
+
+  /// Factory constructor dari JSON (Firestore)
+  factory ChildProfileModel.fromJson(Map<String, dynamic> json) {
+    return ChildProfileModel(
+      id: json['id'] as String,
+      userId: json['userId'] as String,
+      name: json['name'] as String,
+      birthDate: json['birthDate'] is DateTime
+          ? json['birthDate'] as DateTime
+          : DateTime.parse(json['birthDate'] as String),
+      gender: json['gender'] as String?,
+      photoUrl: json['photoUrl'] as String?,
+      localPhotoPath: json['localPhotoPath'] as String?,
+      birthWeightGrams: json['birthWeightGrams'] as int?,
+      birthHeightCm: json['birthHeightCm'] as int?,
+      notes: json['notes'] as String?,
+      createdAt: json['createdAt'] is DateTime
+          ? json['createdAt'] as DateTime
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] is DateTime
+          ? json['updatedAt'] as DateTime
+          : DateTime.parse(json['updatedAt'] as String),
+      isSynced: json['isSynced'] as bool? ?? false,
+    );
+  }
   /// ID unik untuk child profile
   @HiveField(0)
   final String id;
@@ -59,50 +100,8 @@ class ChildProfileModel extends HiveObject {
   @HiveField(12)
   final bool isSynced;
 
-  ChildProfileModel({
-    required this.id,
-    required this.userId,
-    required this.name,
-    required this.birthDate,
-    this.gender,
-    this.photoUrl,
-    this.localPhotoPath,
-    this.birthWeightGrams,
-    this.birthHeightCm,
-    this.notes,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isSynced = false,
-  });
-
-  /// Factory constructor dari JSON (Firestore)
-  factory ChildProfileModel.fromJson(Map<String, dynamic> json) {
-    return ChildProfileModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      name: json['name'] as String,
-      birthDate: json['birthDate'] is DateTime
-          ? json['birthDate'] as DateTime
-          : DateTime.parse(json['birthDate'] as String),
-      gender: json['gender'] as String?,
-      photoUrl: json['photoUrl'] as String?,
-      localPhotoPath: json['localPhotoPath'] as String?,
-      birthWeightGrams: json['birthWeightGrams'] as int?,
-      birthHeightCm: json['birthHeightCm'] as int?,
-      notes: json['notes'] as String?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
-      isSynced: json['isSynced'] as bool? ?? false,
-    );
-  }
-
   /// Convert ke JSON untuk Firestore
-  Map<String, dynamic> toJson() {
-    return {
+  Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'name': name,
@@ -117,7 +116,6 @@ class ChildProfileModel extends HiveObject {
       'updatedAt': updatedAt.toIso8601String(),
       'isSynced': isSynced,
     };
-  }
 
   /// Create copy with updated fields
   ChildProfileModel copyWith({
@@ -134,8 +132,7 @@ class ChildProfileModel extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isSynced,
-  }) {
-    return ChildProfileModel(
+  }) => ChildProfileModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       name: name ?? this.name,
@@ -150,7 +147,6 @@ class ChildProfileModel extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
     );
-  }
 
   /// Getter untuk usia anak dalam hari
   int get ageInDays {
@@ -231,10 +227,8 @@ class ChildProfileModel extends HiveObject {
   }
 
   @override
-  String toString() {
-    return 'ChildProfileModel(id: $id, name: $name, birthDate: $birthDate, '
+  String toString() => 'ChildProfileModel(id: $id, name: $name, birthDate: $birthDate, '
         'gender: $gender, ageInMonths: $ageInMonths)';
-  }
 
   @override
   bool operator ==(Object other) {
@@ -257,8 +251,7 @@ class ChildProfileModel extends HiveObject {
   }
 
   @override
-  int get hashCode {
-    return id.hashCode ^
+  int get hashCode => id.hashCode ^
         userId.hashCode ^
         name.hashCode ^
         birthDate.hashCode ^
@@ -271,5 +264,4 @@ class ChildProfileModel extends HiveObject {
         createdAt.hashCode ^
         updatedAt.hashCode ^
         isSynced.hashCode;
-  }
 }

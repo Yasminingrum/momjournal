@@ -11,10 +11,6 @@ import 'package:flutter/material.dart';
 /// - Loading state
 /// - Quick view of today's events
 class TodayAgenda extends StatelessWidget {
-  final List<AgendaItem> items;
-  final bool isLoading;
-  final VoidCallback? onSeeAll;
-  final VoidCallback? onItemTap;
 
   const TodayAgenda({
     super.key,
@@ -23,10 +19,13 @@ class TodayAgenda extends StatelessWidget {
     this.onSeeAll,
     this.onItemTap,
   });
+  final List<AgendaItem> items;
+  final bool isLoading;
+  final VoidCallback? onSeeAll;
+  final VoidCallback? onItemTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section header
@@ -59,10 +58,8 @@ class TodayAgenda extends StatelessWidget {
           _buildAgendaList(),
       ],
     );
-  }
 
-  Widget _buildLoadingState() {
-    return Padding(
+  Widget _buildLoadingState() => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: List.generate(
@@ -74,20 +71,16 @@ class TodayAgenda extends StatelessWidget {
         ),
       ),
     );
-  }
 
-  Widget _buildLoadingItem() {
-    return Container(
+  Widget _buildLoadingItem() => Container(
       height: 80,
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
     );
-  }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Padding(
+  Widget _buildEmptyState(BuildContext context) => Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: Center(
         child: Column(
@@ -117,7 +110,6 @@ class TodayAgenda extends StatelessWidget {
         ),
       ),
     );
-  }
 
   Widget _buildAgendaList() {
     // Sort by time
@@ -144,14 +136,14 @@ class TodayAgenda extends StatelessWidget {
 /// AgendaItemCard
 /// Individual card for agenda item
 class AgendaItemCard extends StatelessWidget {
-  final AgendaItem item;
-  final VoidCallback? onTap;
 
   const AgendaItemCard({
     super.key,
     required this.item,
     this.onTap,
   });
+  final AgendaItem item;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -246,8 +238,7 @@ class AgendaItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeIndicator(BuildContext context, bool isPast) {
-    return Container(
+  Widget _buildTimeIndicator(BuildContext context, bool isPast) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: isPast ? Colors.grey[200] : item.categoryColor.withOpacity(0.1),
@@ -271,7 +262,6 @@ class AgendaItemCard extends StatelessWidget {
         ],
       ),
     );
-  }
 
   String _formatTime(DateTime time) {
     final hour = time.hour;
@@ -288,13 +278,6 @@ class AgendaItemCard extends StatelessWidget {
 /// AgendaItem
 /// Data model for agenda item
 class AgendaItem {
-  final String id;
-  final String title;
-  final String category;
-  final Color categoryColor;
-  final DateTime time;
-  final String? notes;
-  final bool hasReminder;
 
   const AgendaItem({
     required this.id,
@@ -305,15 +288,18 @@ class AgendaItem {
     this.notes,
     this.hasReminder = false,
   });
+  final String id;
+  final String title;
+  final String category;
+  final Color categoryColor;
+  final DateTime time;
+  final String? notes;
+  final bool hasReminder;
 }
 
 /// TodayAgendaSummary
 /// Compact summary bar showing count and next event
 class TodayAgendaSummary extends StatelessWidget {
-  final int totalTasks;
-  final int completedTasks;
-  final AgendaItem? nextTask;
-  final VoidCallback? onTap;
 
   const TodayAgendaSummary({
     super.key,
@@ -322,10 +308,13 @@ class TodayAgendaSummary extends StatelessWidget {
     this.nextTask,
     this.onTap,
   });
+  final int totalTasks;
+  final int completedTasks;
+  final AgendaItem? nextTask;
+  final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
         onTap: onTap,
@@ -378,5 +367,4 @@ class TodayAgendaSummary extends StatelessWidget {
         ),
       ),
     );
-  }
 }

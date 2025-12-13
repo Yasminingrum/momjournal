@@ -3,10 +3,10 @@ import 'package:equatable/equatable.dart';
 /// Base Failure class
 /// Represents failures in the application (from exceptions or business logic)
 abstract class Failure extends Equatable {
-  final String message;
-  final String? code;
   
   const Failure(this.message, {this.code});
+  final String message;
+  final String? code;
   
   @override
   List<Object?> get props => [message, code];
@@ -17,8 +17,7 @@ abstract class Failure extends Equatable {
 
 /// Server Failure - kesalahan dari server
 class ServerFailure extends Failure {
-  const ServerFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const ServerFailure(super.message, {super.code});
   
   @override
   String toString() => 'ServerFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -26,8 +25,7 @@ class ServerFailure extends Failure {
 
 /// Cache Failure - kesalahan dari local cache
 class CacheFailure extends Failure {
-  const CacheFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const CacheFailure(super.message, {super.code});
   
   @override
   String toString() => 'CacheFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -35,8 +33,7 @@ class CacheFailure extends Failure {
 
 /// Network Failure - kesalahan jaringan
 class NetworkFailure extends Failure {
-  const NetworkFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const NetworkFailure(super.message, {super.code});
   
   @override
   String toString() => 'NetworkFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -44,8 +41,7 @@ class NetworkFailure extends Failure {
 
 /// Authentication Failure - kesalahan autentikasi
 class AuthenticationFailure extends Failure {
-  const AuthenticationFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const AuthenticationFailure(super.message, {super.code});
   
   @override
   String toString() => 'AuthenticationFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -53,8 +49,7 @@ class AuthenticationFailure extends Failure {
 
 /// Authorization Failure - kesalahan autorisasi
 class AuthorizationFailure extends Failure {
-  const AuthorizationFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const AuthorizationFailure(super.message, {super.code});
   
   @override
   String toString() => 'AuthorizationFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -62,8 +57,7 @@ class AuthorizationFailure extends Failure {
 
 /// Validation Failure - kesalahan validasi
 class ValidationFailure extends Failure {
-  const ValidationFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const ValidationFailure(super.message, {super.code});
   
   @override
   String toString() => 'ValidationFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -71,8 +65,7 @@ class ValidationFailure extends Failure {
 
 /// Not Found Failure - resource tidak ditemukan
 class NotFoundFailure extends Failure {
-  const NotFoundFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const NotFoundFailure(super.message, {super.code});
   
   @override
   String toString() => 'NotFoundFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -80,8 +73,7 @@ class NotFoundFailure extends Failure {
 
 /// Timeout Failure - operasi timeout
 class TimeoutFailure extends Failure {
-  const TimeoutFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const TimeoutFailure(super.message, {super.code});
   
   @override
   String toString() => 'TimeoutFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -89,8 +81,7 @@ class TimeoutFailure extends Failure {
 
 /// Parse Failure - kesalahan parsing data
 class ParseFailure extends Failure {
-  const ParseFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const ParseFailure(super.message, {super.code});
   
   @override
   String toString() => 'ParseFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -98,8 +89,7 @@ class ParseFailure extends Failure {
 
 /// Storage Failure - kesalahan storage
 class StorageFailure extends Failure {
-  const StorageFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const StorageFailure(super.message, {super.code});
   
   @override
   String toString() => 'StorageFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -107,8 +97,7 @@ class StorageFailure extends Failure {
 
 /// Permission Failure - kesalahan permission
 class PermissionFailure extends Failure {
-  const PermissionFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const PermissionFailure(super.message, {super.code});
   
   @override
   String toString() => 'PermissionFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -116,8 +105,7 @@ class PermissionFailure extends Failure {
 
 /// Upload Failure - kesalahan upload
 class UploadFailure extends Failure {
-  const UploadFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const UploadFailure(super.message, {super.code});
   
   @override
   String toString() => 'UploadFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -125,8 +113,7 @@ class UploadFailure extends Failure {
 
 /// Download Failure - kesalahan download
 class DownloadFailure extends Failure {
-  const DownloadFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const DownloadFailure(super.message, {super.code});
   
   @override
   String toString() => 'DownloadFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -134,8 +121,7 @@ class DownloadFailure extends Failure {
 
 /// Sync Failure - kesalahan sinkronisasi
 class SyncFailure extends Failure {
-  const SyncFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const SyncFailure(super.message, {super.code});
   
   @override
   String toString() => 'SyncFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -143,8 +129,7 @@ class SyncFailure extends Failure {
 
 /// Conflict Failure - data conflict
 class ConflictFailure extends Failure {
-  const ConflictFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const ConflictFailure(super.message, {super.code});
   
   @override
   String toString() => 'ConflictFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -152,8 +137,7 @@ class ConflictFailure extends Failure {
 
 /// Rate Limit Failure - rate limiting
 class RateLimitFailure extends Failure {
-  const RateLimitFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const RateLimitFailure(super.message, {super.code});
   
   @override
   String toString() => 'RateLimitFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -161,8 +145,7 @@ class RateLimitFailure extends Failure {
 
 /// Unsupported Failure - operasi tidak didukung
 class UnsupportedFailure extends Failure {
-  const UnsupportedFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const UnsupportedFailure(super.message, {super.code});
   
   @override
   String toString() => 'UnsupportedFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -170,8 +153,7 @@ class UnsupportedFailure extends Failure {
 
 /// Platform Specific Failure - platform-specific error
 class PlatformSpecificFailure extends Failure {
-  const PlatformSpecificFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const PlatformSpecificFailure(super.message, {super.code});
   
   @override
   String toString() => 'PlatformSpecificFailure: $message ${code != null ? '(Code: $code)' : ''}';
@@ -179,8 +161,7 @@ class PlatformSpecificFailure extends Failure {
 
 /// Unknown Failure - kesalahan tidak diketahui
 class UnknownFailure extends Failure {
-  const UnknownFailure(String message, {String? code}) 
-      : super(message, code: code);
+  const UnknownFailure(super.message, {super.code});
   
   @override
   String toString() => 'UnknownFailure: $message ${code != null ? '(Code: $code)' : ''}';

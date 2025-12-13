@@ -1,15 +1,14 @@
 /// Validation Utilities
 /// Helper functions for input validation
 class ValidationUtils {
+  
+  // Private constructor to prevent instantiation
+  ValidationUtils._();
   /// Validate if string is not empty
-  static bool isNotEmpty(String? value) {
-    return value != null && value.trim().isNotEmpty;
-  }
+  static bool isNotEmpty(String? value) => value != null && value.trim().isNotEmpty;
   
   /// Validate if string is empty
-  static bool isEmpty(String? value) {
-    return value == null || value.trim().isEmpty;
-  }
+  static bool isEmpty(String? value) => value == null || value.trim().isEmpty;
   
   /// Validate minimum length
   static bool hasMinLength(String? value, int minLength) {
@@ -24,9 +23,7 @@ class ValidationUtils {
   }
   
   /// Validate length range
-  static bool hasLengthInRange(String? value, int minLength, int maxLength) {
-    return hasMinLength(value, minLength) && hasMaxLength(value, maxLength);
-  }
+  static bool hasLengthInRange(String? value, int minLength, int maxLength) => hasMinLength(value, minLength) && hasMaxLength(value, maxLength);
   
   /// Validate email format
   static bool isValidEmail(String? email) {
@@ -87,14 +84,10 @@ class ValidationUtils {
   }
   
   /// Validate number is positive
-  static bool isPositive(num? value) {
-    return value != null && value > 0;
-  }
+  static bool isPositive(num? value) => value != null && value > 0;
   
   /// Validate number is not negative
-  static bool isNotNegative(num? value) {
-    return value != null && value >= 0;
-  }
+  static bool isNotNegative(num? value) => value != null && value >= 0;
   
   /// Validate number is within range
   static bool isInRange(num? value, num min, num max) {
@@ -128,13 +121,13 @@ class ValidationUtils {
     if (password.length < 8) return false;
     
     // Contains at least one uppercase letter
-    if (!RegExp(r'[A-Z]').hasMatch(password)) return false;
+    if (!RegExp('[A-Z]').hasMatch(password)) return false;
     
     // Contains at least one lowercase letter
-    if (!RegExp(r'[a-z]').hasMatch(password)) return false;
+    if (!RegExp('[a-z]').hasMatch(password)) return false;
     
     // Contains at least one number
-    if (!RegExp(r'[0-9]').hasMatch(password)) return false;
+    if (!RegExp('[0-9]').hasMatch(password)) return false;
     
     return true;
   }
@@ -175,7 +168,7 @@ class ValidationUtils {
   static String? validateMinLength(
     String? value, 
     int minLength, 
-    {String? fieldName}
+    {String? fieldName,}
   ) {
     if (isEmpty(value)) {
       return fieldName != null 
@@ -194,7 +187,7 @@ class ValidationUtils {
   static String? validateMaxLength(
     String? value, 
     int maxLength, 
-    {String? fieldName}
+    {String? fieldName,}
   ) {
     if (value != null && !hasMaxLength(value, maxLength)) {
       return fieldName != null
@@ -209,7 +202,7 @@ class ValidationUtils {
     String? value,
     int minLength,
     int maxLength,
-    {String? fieldName}
+    {String? fieldName,}
   ) {
     if (isEmpty(value)) {
       return fieldName != null 
@@ -301,11 +294,9 @@ class ValidationUtils {
   }
   
   /// Helper to check if two dates are the same day
-  static bool _isSameDay(DateTime date1, DateTime date2) {
-    return date1.year == date2.year &&
+  static bool _isSameDay(DateTime date1, DateTime date2) => date1.year == date2.year &&
            date1.month == date2.month &&
            date1.day == date2.day;
-  }
   
   /// Sanitize input (remove extra spaces, trim)
   static String sanitize(String? input) {
@@ -325,9 +316,6 @@ class ValidationUtils {
     ];
     
     final lowerValue = value.toLowerCase();
-    return profanityList.any((word) => lowerValue.contains(word));
+    return profanityList.any(lowerValue.contains);
   }
-  
-  // Private constructor to prevent instantiation
-  ValidationUtils._();
 }

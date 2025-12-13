@@ -2,6 +2,7 @@
 /// 
 /// Centralized route definitions dan navigation
 /// Location: lib/presentation/routes/app_router.dart
+library;
 
 import 'package:flutter/material.dart';
 import '../screens/splash/splash_screen.dart';
@@ -197,32 +198,26 @@ class AppRouter {
 /// Navigation Helper Extensions
 extension NavigationHelper on BuildContext {
   /// Push named route
-  Future<T?> pushNamed<T>(String routeName, {Object? arguments}) {
-    return Navigator.pushNamed<T>(this, routeName, arguments: arguments);
-  }
+  Future<T?> pushNamed<T>(String routeName, {Object? arguments}) => Navigator.pushNamed<T>(this, routeName, arguments: arguments);
   
   /// Push replacement
-  Future<T?> pushReplacementNamed<T, TO>(String routeName, {Object? arguments}) {
-    return Navigator.pushReplacementNamed<T, TO>(
+  Future<T?> pushReplacementNamed<T, TO>(String routeName, {Object? arguments}) => Navigator.pushReplacementNamed<T, TO>(
       this,
       routeName,
       arguments: arguments,
     );
-  }
   
   /// Push and remove until
   Future<T?> pushNamedAndRemoveUntil<T>(
     String routeName,
     bool Function(Route<dynamic>) predicate, {
     Object? arguments,
-  }) {
-    return Navigator.pushNamedAndRemoveUntil<T>(
+  }) => Navigator.pushNamedAndRemoveUntil<T>(
       this,
       routeName,
       predicate,
       arguments: arguments,
     );
-  }
   
   /// Pop
   void pop<T>([T? result]) {
@@ -235,86 +230,71 @@ extension NavigationHelper on BuildContext {
   }
   
   /// Can pop
-  bool canPop() {
-    return Navigator.canPop(this);
-  }
+  bool canPop() => Navigator.canPop(this);
 }
 
 /// Quick Navigation Methods
 class Nav {
   /// Navigate to home (clear stack)
-  static Future<void> toHome(BuildContext context) {
-    return Navigator.pushNamedAndRemoveUntil(
+  static Future<void> toHome(BuildContext context) => Navigator.pushNamedAndRemoveUntil(
       context,
       Routes.home,
       (route) => false,
     );
-  }
   
   /// Navigate to login (clear stack)
-  static Future<void> toLogin(BuildContext context) {
-    return Navigator.pushNamedAndRemoveUntil(
+  static Future<void> toLogin(BuildContext context) => Navigator.pushNamedAndRemoveUntil(
       context,
       Routes.login,
       (route) => false,
     );
-  }
   
   /// Navigate to add schedule
   static Future<void> toAddSchedule(
     BuildContext context, {
     DateTime? selectedDate,
-  }) {
-    return Navigator.pushNamed(
+  }) => Navigator.pushNamed(
       context,
       Routes.addSchedule,
       arguments: {'selectedDate': selectedDate},
     );
-  }
   
   /// Navigate to schedule detail
   static Future<void> toScheduleDetail(
     BuildContext context,
     ScheduleEntity schedule,
-  ) {
-    return Navigator.pushNamed(
+  ) => Navigator.pushNamed(
       context,
       Routes.scheduleDetail,
       arguments: schedule,
     );
-  }
   
   /// Navigate to add journal
   static Future<void> toAddJournal(
     BuildContext context, {
     DateTime? selectedDate,
-  }) {
-    return Navigator.pushNamed(
+  }) => Navigator.pushNamed(
       context,
       Routes.addJournal,
       arguments: {'selectedDate': selectedDate},
     );
-  }
   
   /// Navigate to journal detail
   static Future<void> toJournalDetail(
     BuildContext context,
     JournalEntity journal,
-  ) {
-    return Navigator.pushNamed(
+  ) => Navigator.pushNamed(
       context,
       Routes.journalDetail,
       arguments: journal,
     );
-  }
   
   /// Navigate to photo detail
   static Future<void> toPhotoDetail(
     BuildContext context,
     PhotoEntity photo,
     String heroTag,
-  ) {
-    return Navigator.pushNamed(
+  ) => Navigator.pushNamed(
       context,
       Routes.photoDetail,
       arguments: {
@@ -322,5 +302,4 @@ class Nav {
         'heroTag': heroTag,
       },
     );
-  }
 }

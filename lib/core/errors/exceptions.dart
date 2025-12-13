@@ -1,13 +1,14 @@
 /// Custom Exceptions
 /// Defines custom exception classes for error handling
+library;
 
 /// Base exception class
 abstract class AppException implements Exception {
+  
+  const AppException(this.message, {this.code, this.details});
   final String message;
   final String? code;
   final dynamic details;
-  
-  const AppException(this.message, {this.code, this.details});
   
   @override
   String toString() => 'AppException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -16,10 +17,10 @@ abstract class AppException implements Exception {
 /// Server Exception - untuk error dari server/backend
 class ServerException extends AppException {
   const ServerException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'ServerException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -28,10 +29,10 @@ class ServerException extends AppException {
 /// Cache Exception - untuk error dari local storage
 class CacheException extends AppException {
   const CacheException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'CacheException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -40,10 +41,10 @@ class CacheException extends AppException {
 /// Network Exception - untuk error jaringan
 class NetworkException extends AppException {
   const NetworkException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'NetworkException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -52,10 +53,10 @@ class NetworkException extends AppException {
 /// Authentication Exception - untuk error autentikasi
 class AuthenticationException extends AppException {
   const AuthenticationException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'AuthenticationException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -64,10 +65,10 @@ class AuthenticationException extends AppException {
 /// Authorization Exception - untuk error autorisasi
 class AuthorizationException extends AppException {
   const AuthorizationException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'AuthorizationException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -76,10 +77,10 @@ class AuthorizationException extends AppException {
 /// Validation Exception - untuk error validasi input
 class ValidationException extends AppException {
   const ValidationException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'ValidationException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -88,10 +89,10 @@ class ValidationException extends AppException {
 /// Not Found Exception - untuk resource yang tidak ditemukan
 class NotFoundException extends AppException {
   const NotFoundException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'NotFoundException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -100,10 +101,10 @@ class NotFoundException extends AppException {
 /// Timeout Exception - untuk timeout operations
 class TimeoutException extends AppException {
   const TimeoutException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'TimeoutException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -112,10 +113,10 @@ class TimeoutException extends AppException {
 /// Parse Exception - untuk error parsing data
 class ParseException extends AppException {
   const ParseException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'ParseException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -124,10 +125,10 @@ class ParseException extends AppException {
 /// Storage Exception - untuk error storage (file system, database)
 class StorageException extends AppException {
   const StorageException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'StorageException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -136,10 +137,10 @@ class StorageException extends AppException {
 /// Permission Exception - untuk error permissions
 class PermissionException extends AppException {
   const PermissionException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'PermissionException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -148,10 +149,10 @@ class PermissionException extends AppException {
 /// Upload Exception - untuk error upload file
 class UploadException extends AppException {
   const UploadException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'UploadException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -160,10 +161,10 @@ class UploadException extends AppException {
 /// Download Exception - untuk error download file
 class DownloadException extends AppException {
   const DownloadException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'DownloadException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -172,10 +173,10 @@ class DownloadException extends AppException {
 /// Sync Exception - untuk error sinkronisasi data
 class SyncException extends AppException {
   const SyncException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'SyncException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -184,10 +185,10 @@ class SyncException extends AppException {
 /// Conflict Exception - untuk data conflicts (saat sync)
 class ConflictException extends AppException {
   const ConflictException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'ConflictException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -196,10 +197,10 @@ class ConflictException extends AppException {
 /// Rate Limit Exception - untuk rate limiting
 class RateLimitException extends AppException {
   const RateLimitException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'RateLimitException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -208,10 +209,10 @@ class RateLimitException extends AppException {
 /// Unsupported Exception - untuk operasi yang tidak didukung
 class UnsupportedException extends AppException {
   const UnsupportedException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'UnsupportedException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -220,10 +221,10 @@ class UnsupportedException extends AppException {
 /// Platform Exception - untuk error platform-specific
 class PlatformSpecificException extends AppException {
   const PlatformSpecificException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'PlatformSpecificException: $message ${code != null ? '(Code: $code)' : ''}';
@@ -232,10 +233,10 @@ class PlatformSpecificException extends AppException {
 /// Platform Exception - untuk error platform-specific
 class DatabaseException extends AppException {
   const DatabaseException(
-    String message, {
-    String? code,
-    dynamic details,
-  }) : super(message, code: code, details: details);
+    super.message, {
+    super.code,
+    super.details,
+  });
   
   @override
   String toString() => 'PlatformSpecificException: $message ${code != null ? '(Code: $code)' : ''}';

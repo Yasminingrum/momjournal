@@ -32,14 +32,14 @@ abstract class AuthRemoteDatasource {
 
 /// Implementation dari Auth Remote Datasource
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
-  final FirebaseService _firebaseService;
-  final GoogleSignIn _googleSignIn;
 
   AuthRemoteDatasourceImpl({
     FirebaseService? firebaseService,
     GoogleSignIn? googleSignIn,
   })  : _firebaseService = firebaseService ?? FirebaseService(),
         _googleSignIn = googleSignIn ?? GoogleSignIn();
+  final FirebaseService _firebaseService;
+  final GoogleSignIn _googleSignIn;
 
   FirebaseAuth get _auth => _firebaseService.auth;
   FirebaseFirestore get _firestore => _firebaseService.firestore;
@@ -55,7 +55,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       if (googleUser == null) {
         // User canceled the sign-in
         print('❌ User canceled Google Sign-In');
-        throw AuthenticationException ('Login dibatalkan');
+        throw const AuthenticationException ('Login dibatalkan');
       }
 
       print('✅ Google account selected: ${googleUser.email}');
@@ -64,7 +64,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        throw AuthenticationException ('Gagal mendapatkan token autentikasi');
+        throw const AuthenticationException ('Gagal mendapatkan token autentikasi');
       }
 
       print('✅ Got authentication tokens');
@@ -79,7 +79,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
 
       if (userCredential.user == null) {
-        throw AuthenticationException ('Gagal masuk ke Firebase');
+        throw const AuthenticationException ('Gagal masuk ke Firebase');
       }
 
       print('✅ Signed in to Firebase: ${userCredential.user!.uid}');
@@ -125,9 +125,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   }
 
   @override
-  User? getCurrentUser() {
-    return _auth.currentUser;
-  }
+  User? getCurrentUser() => _auth.currentUser;
 
   @override
   Future<bool> userExistsInFirestore(String uid) async {
@@ -191,7 +189,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     try {
       final User? user = getCurrentUser();
       if (user == null) {
-        throw AuthenticationException ('Tidak ada pengguna yang masuk');
+        throw const AuthenticationException ('Tidak ada pengguna yang masuk');
       }
 
       print('🗑️ Deleting user account: ${user.uid}');
@@ -210,7 +208,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       print('❌ FirebaseAuthException during deletion: ${e.code}');
       
       if (e.code == 'requires-recent-login') {
-        throw AuthenticationException (
+        throw const AuthenticationException (
           'Untuk keamanan, silakan login ulang sebelum menghapus akun',
         );
       }
@@ -235,7 +233,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           .collection('schedules')
           .get();
       
-      for (var doc in schedulesSnapshot.docs) {
+      for (final doc in schedulesSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
@@ -246,7 +244,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           .collection('journals')
           .get();
       
-      for (var doc in journalsSnapshot.docs) {
+      for (final doc in journalsSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
@@ -257,7 +255,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
           .collection('photos')
           .get();
       
-      for (var doc in photosSnapshot.docs) {
+      for (final doc in photosSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
@@ -286,7 +284,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       
       final listResult = await storageRef.listAll();
       
-      for (var item in listResult.items) {
+      for (final item in listResult.items) {
         await item.delete();
       }
 
@@ -305,7 +303,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        throw AuthenticationException ('Re-autentikasi dibatalkan');
+        throw const AuthenticationException ('Re-autentikasi dibatalkan');
       }
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -317,7 +315,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
       final User? user = getCurrentUser();
       if (user == null) {
-        throw AuthenticationException ('Tidak ada pengguna yang masuk');
+        throw const AuthenticationException ('Tidak ada pengguna yang masuk');
       }
 
       await user.reauthenticateWithCredential(credential);

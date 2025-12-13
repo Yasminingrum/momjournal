@@ -2,15 +2,16 @@
 /// 
 /// Use case untuk membuat journal entry baru
 /// Location: lib/domain/usecases/journal/create_journal.dart
+library;
 
 import '../../../data/repositories/journal_repository.dart';
 import '../../entities/journal_entity.dart';
 import '../../../core/errors/exceptions.dart';
 
 class CreateJournalUseCase {
-  final JournalRepository repository;
 
   CreateJournalUseCase(this.repository);
+  final JournalRepository repository;
 
   Future<void> execute(JournalEntity journal) async {
     try {
@@ -29,15 +30,15 @@ class CreateJournalUseCase {
 
   void _validateJournal(JournalEntity journal) {
     if (journal.content.trim().isEmpty) {
-      throw ValidationException('Konten jurnal tidak boleh kosong');
+      throw const ValidationException('Konten jurnal tidak boleh kosong');
     }
 
     if (journal.content.trim().length < 10) {
-      throw ValidationException('Konten jurnal minimal 10 karakter');
+      throw const ValidationException('Konten jurnal minimal 10 karakter');
     }
 
     if (journal.content.length > 500) {
-      throw ValidationException('Konten jurnal maksimal 500 karakter');
+      throw const ValidationException('Konten jurnal maksimal 500 karakter');
     }
   }
 }

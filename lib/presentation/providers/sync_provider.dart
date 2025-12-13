@@ -2,17 +2,18 @@
 /// 
 /// State management untuk cloud synchronization
 /// Location: lib/presentation/providers/sync_provider.dart
+library;
 
 import 'package:flutter/foundation.dart';
 import '../../data/repositories/sync_repository.dart';
 import '../../core/errors/exceptions.dart';
 
 class SyncProvider with ChangeNotifier {
-  final SyncRepository _repository;
 
   SyncProvider({
     required SyncRepository repository,
   }) : _repository = repository;
+  final SyncRepository _repository;
 
   // State
   SyncStatus _status = SyncStatus.idle;

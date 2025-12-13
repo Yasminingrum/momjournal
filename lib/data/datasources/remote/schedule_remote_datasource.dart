@@ -29,11 +29,11 @@ abstract class ScheduleRemoteDatasource {
 
 /// Implementation dari Schedule Remote Datasource
 class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
-  final FirebaseService _firebaseService;
 
   ScheduleRemoteDatasourceImpl({
     FirebaseService? firebaseService,
   }) : _firebaseService = firebaseService ?? FirebaseService();
+  final FirebaseService _firebaseService;
 
   CollectionReference? get _schedulesCollection =>
       _firebaseService.schedulesCollection;
@@ -42,7 +42,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> createSchedule(ScheduleEntity schedule) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final scheduleData = _scheduleToFirestore(schedule);
@@ -66,7 +66,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<List<ScheduleEntity>> getAllSchedules() async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
@@ -74,7 +74,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .get();
 
       final schedules = snapshot.docs
-          .map((doc) => _scheduleFromFirestore(doc))
+          .map(_scheduleFromFirestore)
           .toList();
 
       print('✅ Fetched ${schedules.length} schedules from Firestore');
@@ -96,7 +96,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   ) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
@@ -106,7 +106,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
           .get();
 
       final schedules = snapshot.docs
-          .map((doc) => _scheduleFromFirestore(doc))
+          .map(_scheduleFromFirestore)
           .toList();
 
       print('✅ Fetched ${schedules.length} schedules for date range');
@@ -125,7 +125,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> updateSchedule(ScheduleEntity schedule) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final scheduleData = _scheduleToFirestore(schedule);
@@ -150,7 +150,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   Future<void> deleteSchedule(String scheduleId) async {
     try {
       if (_schedulesCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       await _schedulesCollection!.doc(scheduleId).delete();
@@ -169,17 +169,15 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   @override
   Stream<List<ScheduleEntity>> watchSchedules() {
     if (_schedulesCollection == null) {
-      return Stream.error(AuthorizationException ('User tidak login'));
+      return Stream.error(const AuthorizationException ('User tidak login'));
     }
 
     return _schedulesCollection!
         .orderBy('dateTime', descending: true)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs
+        .map((snapshot) => snapshot.docs
           .map((doc) => _scheduleFromFirestore(doc))
-          .toList();
-    }).handleError((error) {
+          .toList()).handleError((error) {
       print('❌ Error in schedules stream: $error');
       if (error is FirebaseException) {
         throw DatabaseException(FirebaseErrorHandler.getErrorMessage(error));
@@ -189,8 +187,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   }
 
   /// Convert ScheduleEntity to Firestore map
-  Map<String, dynamic> _scheduleToFirestore(ScheduleEntity schedule) {
-    return {
+  Map<String, dynamic> _scheduleToFirestore(ScheduleEntity schedule) => {
       'id': schedule.id,
       'title': schedule.title,
       'notes': schedule.notes,
@@ -202,7 +199,6 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       'createdAt': Timestamp.fromDate(schedule.createdAt),
       'updatedAt': Timestamp.fromDate(schedule.updatedAt),
     };
-  }
 
   /// Convert Firestore document to ScheduleEntity
   ScheduleEntity _scheduleFromFirestore(DocumentSnapshot doc) {

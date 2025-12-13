@@ -5,30 +5,6 @@ import '../../core/constants/color_constants.dart';
 /// Custom Text Field Widget
 /// Provides consistent text input styling across the app
 class CustomTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
-  final String? errorText;
-  final String? helperText;
-  final IconData? prefixIcon;
-  final Widget? suffixIcon;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-  final TextInputAction? textInputAction;
-  final int? maxLines;
-  final int? minLines;
-  final int? maxLength;
-  final bool enabled;
-  final bool readOnly;
-  final VoidCallback? onTap;
-  final ValueChanged<String>? onChanged;
-  final VoidCallback? onEditingComplete;
-  final ValueChanged<String>? onSubmitted;
-  final FormFieldValidator<String>? validator;
-  final List<TextInputFormatter>? inputFormatters;
-  final FocusNode? focusNode;
-  final bool autofocus;
-  final EdgeInsetsGeometry? contentPadding;
   
   const CustomTextField({
     Key? key,
@@ -57,10 +33,33 @@ class CustomTextField extends StatelessWidget {
     this.autofocus = false,
     this.contentPadding,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final String? errorText;
+  final String? helperText;
+  final IconData? prefixIcon;
+  final Widget? suffixIcon;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final int? maxLines;
+  final int? minLines;
+  final int? maxLength;
+  final bool enabled;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final VoidCallback? onEditingComplete;
+  final ValueChanged<String>? onSubmitted;
+  final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
+  final FocusNode? focusNode;
+  final bool autofocus;
+  final EdgeInsetsGeometry? contentPadding;
   
   @override
-  Widget build(BuildContext context) {
-    return TextFormField(
+  Widget build(BuildContext context) => TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
@@ -89,19 +88,10 @@ class CustomTextField extends StatelessWidget {
         counterText: maxLength != null ? null : '',
       ),
     );
-  }
 }
 
 /// Multi-line Text Field for long text input
 class MultiLineTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
-  final int maxLines;
-  final int? maxLength;
-  final ValueChanged<String>? onChanged;
-  final FormFieldValidator<String>? validator;
-  final bool showCounter;
   
   const MultiLineTextField({
     Key? key,
@@ -114,10 +104,17 @@ class MultiLineTextField extends StatelessWidget {
     this.validator,
     this.showCounter = true,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final int maxLines;
+  final int? maxLength;
+  final ValueChanged<String>? onChanged;
+  final FormFieldValidator<String>? validator;
+  final bool showCounter;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label,
       hint: hint,
@@ -128,16 +125,10 @@ class MultiLineTextField extends StatelessWidget {
       onChanged: onChanged,
       validator: validator,
     );
-  }
 }
 
 /// Password Field with show/hide toggle
 class PasswordTextField extends StatefulWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
-  final FormFieldValidator<String>? validator;
-  final ValueChanged<String>? onSubmitted;
   
   const PasswordTextField({
     Key? key,
@@ -147,6 +138,11 @@ class PasswordTextField extends StatefulWidget {
     this.validator,
     this.onSubmitted,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final FormFieldValidator<String>? validator;
+  final ValueChanged<String>? onSubmitted;
   
   @override
   State<PasswordTextField> createState() => _PasswordTextFieldState();
@@ -156,8 +152,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
   bool _obscureText = true;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: widget.controller,
       label: widget.label ?? 'Password',
       hint: widget.hint,
@@ -178,15 +173,10 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
       validator: widget.validator,
       onSubmitted: widget.onSubmitted,
     );
-  }
 }
 
 /// Search Field with search icon and clear button
 class SearchTextField extends StatefulWidget {
-  final TextEditingController? controller;
-  final String? hint;
-  final ValueChanged<String>? onChanged;
-  final VoidCallback? onClear;
   
   const SearchTextField({
     Key? key,
@@ -195,6 +185,10 @@ class SearchTextField extends StatefulWidget {
     this.onChanged,
     this.onClear,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? hint;
+  final ValueChanged<String>? onChanged;
+  final VoidCallback? onClear;
   
   @override
   State<SearchTextField> createState() => _SearchTextFieldState();
@@ -230,8 +224,7 @@ class _SearchTextFieldState extends State<SearchTextField> {
   }
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: _controller,
       hint: widget.hint ?? 'Cari...',
       prefixIcon: Icons.search,
@@ -244,14 +237,10 @@ class _SearchTextFieldState extends State<SearchTextField> {
       onChanged: widget.onChanged,
       textInputAction: TextInputAction.search,
     );
-  }
 }
 
 /// Email Field with email validation
 class EmailTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final FormFieldValidator<String>? validator;
   
   const EmailTextField({
     Key? key,
@@ -259,10 +248,12 @@ class EmailTextField extends StatelessWidget {
     this.label,
     this.validator,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final FormFieldValidator<String>? validator;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label ?? 'Email',
       hint: 'nama@email.com',
@@ -271,14 +262,10 @@ class EmailTextField extends StatelessWidget {
       prefixIcon: Icons.email_outlined,
       validator: validator,
     );
-  }
 }
 
 /// Phone Field with phone formatting
 class PhoneTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final FormFieldValidator<String>? validator;
   
   const PhoneTextField({
     Key? key,
@@ -286,10 +273,12 @@ class PhoneTextField extends StatelessWidget {
     this.label,
     this.validator,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final FormFieldValidator<String>? validator;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label ?? 'Nomor Telepon',
       hint: '08xxxxxxxxxx',
@@ -302,17 +291,10 @@ class PhoneTextField extends StatelessWidget {
       ],
       validator: validator,
     );
-  }
 }
 
 /// Number Field for numeric input only
 class NumberTextField extends StatelessWidget {
-  final TextEditingController? controller;
-  final String? label;
-  final String? hint;
-  final int? maxLength;
-  final FormFieldValidator<String>? validator;
-  final bool allowDecimal;
   
   const NumberTextField({
     Key? key,
@@ -323,10 +305,15 @@ class NumberTextField extends StatelessWidget {
     this.validator,
     this.allowDecimal = false,
   }) : super(key: key);
+  final TextEditingController? controller;
+  final String? label;
+  final String? hint;
+  final int? maxLength;
+  final FormFieldValidator<String>? validator;
+  final bool allowDecimal;
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label,
       hint: hint,
@@ -344,18 +331,10 @@ class NumberTextField extends StatelessWidget {
             ],
       validator: validator,
     );
-  }
 }
 
 /// Date Picker Field (read-only with date picker)
 class DatePickerField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final DateTime? initialDate;
-  final DateTime? firstDate;
-  final DateTime? lastDate;
-  final ValueChanged<DateTime>? onDateSelected;
-  final FormFieldValidator<String>? validator;
   
   const DatePickerField({
     Key? key,
@@ -367,6 +346,13 @@ class DatePickerField extends StatelessWidget {
     this.onDateSelected,
     this.validator,
   }) : super(key: key);
+  final TextEditingController controller;
+  final String? label;
+  final DateTime? initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+  final ValueChanged<DateTime>? onDateSelected;
+  final FormFieldValidator<String>? validator;
   
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -382,8 +368,7 @@ class DatePickerField extends StatelessWidget {
   }
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label ?? 'Tanggal',
       prefixIcon: Icons.calendar_today_outlined,
@@ -391,16 +376,10 @@ class DatePickerField extends StatelessWidget {
       onTap: () => _selectDate(context),
       validator: validator,
     );
-  }
 }
 
 /// Time Picker Field (read-only with time picker)
 class TimePickerField extends StatelessWidget {
-  final TextEditingController controller;
-  final String? label;
-  final TimeOfDay? initialTime;
-  final ValueChanged<TimeOfDay>? onTimeSelected;
-  final FormFieldValidator<String>? validator;
   
   const TimePickerField({
     Key? key,
@@ -410,6 +389,11 @@ class TimePickerField extends StatelessWidget {
     this.onTimeSelected,
     this.validator,
   }) : super(key: key);
+  final TextEditingController controller;
+  final String? label;
+  final TimeOfDay? initialTime;
+  final ValueChanged<TimeOfDay>? onTimeSelected;
+  final FormFieldValidator<String>? validator;
   
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -423,8 +407,7 @@ class TimePickerField extends StatelessWidget {
   }
   
   @override
-  Widget build(BuildContext context) {
-    return CustomTextField(
+  Widget build(BuildContext context) => CustomTextField(
       controller: controller,
       label: label ?? 'Waktu',
       prefixIcon: Icons.access_time_outlined,
@@ -432,5 +415,4 @@ class TimePickerField extends StatelessWidget {
       onTap: () => _selectTime(context),
       validator: validator,
     );
-  }
 }

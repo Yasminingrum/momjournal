@@ -2,6 +2,7 @@
 /// 
 /// Bottom sheet untuk memilih waktu pengingat
 /// Location: lib/presentation/widgets/bottom_sheets/time_picker_bottom_sheet.dart
+library;
 
 import 'package:flutter/material.dart';
 
@@ -11,8 +12,7 @@ import 'package:flutter/material.dart';
 Future<int?> showTimePickerBottomSheet(
   BuildContext context, {
   int? selectedMinutes,
-}) async {
-  return await showModalBottomSheet<int>(
+}) async => await showModalBottomSheet<int>(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -21,16 +21,15 @@ Future<int?> showTimePickerBottomSheet(
       selectedMinutes: selectedMinutes,
     ),
   );
-}
 
 /// Time Picker Bottom Sheet Widget
 class TimePickerBottomSheet extends StatelessWidget {
-  final int? selectedMinutes;
 
   const TimePickerBottomSheet({
     super.key,
     this.selectedMinutes,
   });
+  final int? selectedMinutes;
 
   // Pilihan waktu pengingat (dalam menit)
   static const List<int> reminderOptions = [
@@ -110,9 +109,6 @@ class TimePickerBottomSheet extends StatelessWidget {
 
 /// Time Option Tile Widget
 class TimeOptionTile extends StatelessWidget {
-  final int minutes;
-  final bool isSelected;
-  final VoidCallback onTap;
 
   const TimeOptionTile({
     super.key,
@@ -120,6 +116,9 @@ class TimeOptionTile extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
   });
+  final int minutes;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

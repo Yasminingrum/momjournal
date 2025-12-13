@@ -2,13 +2,14 @@
 /// 
 /// Use case untuk logout
 /// Location: lib/domain/usecases/auth/sign_out.dart
+library;
 
 import '../../../data/repositories/auth_repository.dart';
 
 class SignOutUseCase {
-  final AuthRepository repository;
 
   SignOutUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<void> execute() async {
     try {

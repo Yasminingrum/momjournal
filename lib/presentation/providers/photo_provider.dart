@@ -7,6 +7,8 @@ import '/domain/entities/photo_entity.dart';
 /// ViewModel for Photo management
 /// Manages photo state and business logic using Provider pattern
 class PhotoProvider extends ChangeNotifier {
+
+  PhotoProvider(this._hiveDatabase);
   final PhotoRepository _repository = PhotoRepository();
   final Uuid _uuid = const Uuid();
   final HiveDatabase _hiveDatabase;
@@ -15,7 +17,7 @@ class PhotoProvider extends ChangeNotifier {
   List<PhotoEntity> _milestonePhotos = [];
   bool _isLoading = false;
   bool _isUploading = false;
-  double _uploadProgress = 0.0;
+  double _uploadProgress = 0;
   String? _error;
   int _currentPage = 0;
   static const int _pageSize = 20;
@@ -27,8 +29,6 @@ class PhotoProvider extends ChangeNotifier {
   bool get isUploading => _isUploading;
   double get uploadProgress => _uploadProgress;
   String? get error => _error;
-
-  PhotoProvider(this._hiveDatabase);
 
   /// Initialize provider
   Future<void> init() async {

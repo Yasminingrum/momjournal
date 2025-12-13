@@ -4,8 +4,7 @@ class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text('Schedule'),
       ),
@@ -18,5 +17,4 @@ class ScheduleScreen extends StatelessWidget {
         child: const Icon(Icons.add),
       ),
     );
-  }
 }

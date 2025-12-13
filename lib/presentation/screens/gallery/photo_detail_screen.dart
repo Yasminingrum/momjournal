@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk melihat foto full screen dengan hero animation
 /// Location: lib/presentation/screens/gallery/photo_detail_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,18 +13,17 @@ import '../../widgets/dialogs/confirmation_dialog.dart';
 import '../../widgets/dialogs/info_dialog.dart';
 
 class PhotoDetailScreen extends StatelessWidget {
-  final PhotoEntity photo;
-  final String heroTag;
 
   const PhotoDetailScreen({
     super.key,
     required this.photo,
     required this.heroTag,
   });
+  final PhotoEntity photo;
+  final String heroTag;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -142,7 +142,6 @@ class PhotoDetailScreen extends StatelessWidget {
         ],
       ),
     );
-  }
 
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDeleteConfirmation(
@@ -179,7 +178,7 @@ class PhotoDetailScreen extends StatelessWidget {
   String _formatDate(DateTime date) {
     final months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

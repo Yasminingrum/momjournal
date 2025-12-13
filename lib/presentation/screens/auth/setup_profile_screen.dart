@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk setup profil anak setelah login pertama kali
 /// Location: lib/presentation/screens/auth/setup_profile_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import '../../widgets/common/custom_button.dart';
@@ -253,7 +254,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
   String _formatDate(DateTime date) {
     final months = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     
     return '${date.day} ${months[date.month - 1]} ${date.year}';

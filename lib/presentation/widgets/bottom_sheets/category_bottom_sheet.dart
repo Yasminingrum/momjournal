@@ -2,6 +2,7 @@
 /// 
 /// Bottom sheet untuk memilih kategori schedule
 /// Location: lib/presentation/widgets/bottom_sheets/category_bottom_sheet.dart
+library;
 
 import 'package:flutter/material.dart';
 import '../../../domain/entities/schedule_entity.dart';
@@ -13,8 +14,7 @@ import '../../../core/constants/color_constants.dart';
 Future<ScheduleCategory?> showCategoryBottomSheet(
   BuildContext context, {
   ScheduleCategory? selectedCategory,
-}) async {
-  return await showModalBottomSheet<ScheduleCategory>(
+}) async => await showModalBottomSheet<ScheduleCategory>(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -23,16 +23,15 @@ Future<ScheduleCategory?> showCategoryBottomSheet(
       selectedCategory: selectedCategory,
     ),
   );
-}
 
 /// Category Bottom Sheet Widget
 class CategoryBottomSheet extends StatelessWidget {
-  final ScheduleCategory? selectedCategory;
 
   const CategoryBottomSheet({
     super.key,
     this.selectedCategory,
   });
+  final ScheduleCategory? selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -101,9 +100,6 @@ class CategoryBottomSheet extends StatelessWidget {
 
 /// Category Tile Widget
 class CategoryTile extends StatelessWidget {
-  final ScheduleCategory category;
-  final bool isSelected;
-  final VoidCallback onTap;
 
   const CategoryTile({
     super.key,
@@ -111,6 +107,9 @@ class CategoryTile extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
   });
+  final ScheduleCategory category;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

@@ -2,15 +2,16 @@
 /// 
 /// Use case untuk update schedule
 /// Location: lib/domain/usecases/schedule/update_schedule.dart
+library;
 
 import '../../../data/repositories/schedule_repository.dart';
 import '../../entities/schedule_entity.dart';
 import '../../../core/errors/exceptions.dart';
 
 class UpdateScheduleUseCase {
-  final ScheduleRepository repository;
 
   UpdateScheduleUseCase(this.repository);
+  final ScheduleRepository repository;
 
   Future<void> execute(ScheduleEntity schedule) async {
     try {
@@ -29,15 +30,15 @@ class UpdateScheduleUseCase {
 
   void _validateSchedule(ScheduleEntity schedule) {
     if (schedule.id.isEmpty) {
-      throw ValidationException('Schedule ID tidak boleh kosong');
+      throw const ValidationException('Schedule ID tidak boleh kosong');
     }
 
     if (schedule.title.trim().isEmpty) {
-      throw ValidationException('Judul jadwal tidak boleh kosong');
+      throw const ValidationException('Judul jadwal tidak boleh kosong');
     }
 
     if (schedule.title.trim().length < 3) {
-      throw ValidationException('Judul jadwal minimal 3 karakter');
+      throw const ValidationException('Judul jadwal minimal 3 karakter');
     }
   }
 

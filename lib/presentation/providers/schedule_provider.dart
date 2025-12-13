@@ -7,11 +7,11 @@ import '/domain/entities/schedule_entity.dart';
 /// ViewModel for Schedule management
 /// Manages schedule state and business logic using Provider pattern
 class ScheduleProvider extends ChangeNotifier {
+
+  ScheduleProvider(this._hiveDatabase);
   final ScheduleRepository _repository = ScheduleRepository();
   final Uuid _uuid = const Uuid();
   final HiveDatabase _hiveDatabase;
-
-  ScheduleProvider(this._hiveDatabase);
 
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];

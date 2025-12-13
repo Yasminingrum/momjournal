@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk menulis journal entry baru
 /// Location: lib/presentation/screens/journal/add_journal_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,12 +12,12 @@ import '../../widgets/common/custom_button.dart';
 import '../../widgets/dialogs/info_dialog.dart';
 
 class AddJournalScreen extends StatefulWidget {
-  final DateTime? selectedDate;
 
   const AddJournalScreen({
     super.key,
     this.selectedDate,
   });
+  final DateTime? selectedDate;
 
   @override
   State<AddJournalScreen> createState() => _AddJournalScreenState();
@@ -115,8 +116,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
     );
   }
 
-  Widget _buildDateSelector(ThemeData theme) {
-    return Card(
+  Widget _buildDateSelector(ThemeData theme) => Card(
       child: InkWell(
         onTap: _selectDate,
         borderRadius: BorderRadius.circular(12),
@@ -152,10 +152,8 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
         ),
       ),
     );
-  }
 
-  Widget _buildMoodSelector() {
-    return Row(
+  Widget _buildMoodSelector() => Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: Mood.values.map((mood) {
         final isSelected = _selectedMood == mood;
@@ -189,7 +187,6 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
         );
       }).toList(),
     );
-  }
 
   Future<void> _selectDate() async {
     final picked = await showDatePicker(
@@ -297,7 +294,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
   String _formatDate(DateTime date) {
     final months = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }

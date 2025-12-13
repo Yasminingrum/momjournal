@@ -7,6 +7,9 @@ import 'package:uuid/uuid.dart';
 /// Image Utilities
 /// Helper functions for image manipulation and optimization
 class ImageUtils {
+  
+  // Private constructor to prevent instantiation
+  ImageUtils._();
   static const int defaultQuality = 85;
   static const int thumbnailSize = 300;
   static const int maxImageWidth = 1920;
@@ -156,9 +159,7 @@ class ImageUtils {
   }
   
   /// Get file extension
-  static String getFileExtension(String path) {
-    return path.split('.').last.toLowerCase();
-  }
+  static String getFileExtension(String path) => path.split('.').last.toLowerCase();
   
   /// Check if file is a valid image
   static bool isValidImageExtension(String path) {
@@ -373,7 +374,4 @@ class ImageUtils {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
   }
-  
-  // Private constructor to prevent instantiation
-  ImageUtils._();
 }

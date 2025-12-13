@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk melihat dan edit detail schedule
 /// Location: lib/presentation/screens/schedule/schedule_detail_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,12 +14,12 @@ import '../../widgets/dialogs/info_dialog.dart';
 import '../../../core/constants/color_constants.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
-  final ScheduleEntity schedule;
 
   const ScheduleDetailScreen({
     super.key,
     required this.schedule,
   });
+  final ScheduleEntity schedule;
 
   @override
   Widget build(BuildContext context) {
@@ -148,8 +149,7 @@ class ScheduleDetailScreen extends StatelessWidget {
 
             // Toggle completion button
             Consumer<ScheduleProvider>(
-              builder: (context, provider, child) {
-                return CustomButton(
+              builder: (context, provider, child) => CustomButton(
                   onPressed: provider.isLoading
                       ? null
                       : () => _handleToggleCompletion(context),
@@ -163,8 +163,7 @@ class ScheduleDetailScreen extends StatelessWidget {
                       ? ButtonType.outlined
                       : ButtonType.primary,
                   isFullWidth: true,
-                );
-              },
+                ),
             ),
           ],
         ),
@@ -207,8 +206,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     required String label,
     required String value,
     required ThemeData theme,
-  }) {
-    return Row(
+  }) => Row(
       children: [
         Icon(icon, size: 20, color: Colors.grey[600]),
         const SizedBox(width: 12),
@@ -231,7 +229,6 @@ class ScheduleDetailScreen extends StatelessWidget {
         ),
       ],
     );
-  }
 
   Future<void> _handleToggleCompletion(BuildContext context) async {
     final provider = context.read<ScheduleProvider>();
@@ -342,14 +339,12 @@ class ScheduleDetailScreen extends StatelessWidget {
   String _formatDate(DateTime date) {
     final months = [
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
+  String _formatTime(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
   String _formatReminderTime(int minutes) {
     if (minutes < 60) {

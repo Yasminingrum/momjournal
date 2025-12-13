@@ -13,12 +13,6 @@ import 'package:table_calendar/table_calendar.dart';
 /// - Today indicator
 /// - Category-based event coloring
 class CalendarWidget extends StatefulWidget {
-  final DateTime focusedDay;
-  final DateTime? selectedDay;
-  final Map<DateTime, List<CalendarEvent>> events;
-  final Function(DateTime, DateTime) onDaySelected;
-  final Function(DateTime) onPageChanged;
-  final CalendarFormat initialFormat;
 
   const CalendarWidget({
     super.key,
@@ -29,6 +23,12 @@ class CalendarWidget extends StatefulWidget {
     required this.onPageChanged,
     this.initialFormat = CalendarFormat.month,
   });
+  final DateTime focusedDay;
+  final DateTime? selectedDay;
+  final Map<DateTime, List<CalendarEvent>> events;
+  final Function(DateTime, DateTime) onDaySelected;
+  final Function(DateTime) onPageChanged;
+  final CalendarFormat initialFormat;
 
   @override
   State<CalendarWidget> createState() => _CalendarWidgetState();
@@ -46,8 +46,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       elevation: 2,
       margin: const EdgeInsets.all(16),
       shape: RoundedRectangleBorder(
@@ -175,20 +174,13 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         ),
       ),
     );
-  }
 
-  DateTime _normalizeDate(DateTime date) {
-    return DateTime(date.year, date.month, date.day);
-  }
+  DateTime _normalizeDate(DateTime date) => DateTime(date.year, date.month, date.day);
 }
 
 /// CalendarEvent
 /// Model for calendar event markers
 class CalendarEvent {
-  final String id;
-  final String title;
-  final Color categoryColor;
-  final DateTime time;
 
   const CalendarEvent({
     required this.id,
@@ -196,21 +188,24 @@ class CalendarEvent {
     required this.categoryColor,
     required this.time,
   });
+  final String id;
+  final String title;
+  final Color categoryColor;
+  final DateTime time;
 }
 
 /// CalendarLegend
 /// Legend showing category colors
 class CalendarLegend extends StatelessWidget {
-  final List<CalendarCategory> categories;
 
   const CalendarLegend({
     super.key,
     required this.categories,
   });
+  final List<CalendarCategory> categories;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -240,30 +235,25 @@ class CalendarLegend extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// CalendarCategory
 /// Model for calendar category
 class CalendarCategory {
-  final String name;
-  final Color color;
-  final int count;
 
   const CalendarCategory({
     required this.name,
     required this.color,
     this.count = 0,
   });
+  final String name;
+  final Color color;
+  final int count;
 }
 
 /// CompactCalendar
 /// Smaller calendar widget for quick date picking
 class CompactCalendar extends StatelessWidget {
-  final DateTime selectedDate;
-  final Function(DateTime) onDateSelected;
-  final DateTime? minDate;
-  final DateTime? maxDate;
 
   const CompactCalendar({
     super.key,
@@ -272,10 +262,13 @@ class CompactCalendar extends StatelessWidget {
     this.minDate,
     this.maxDate,
   });
+  final DateTime selectedDate;
+  final Function(DateTime) onDateSelected;
+  final DateTime? minDate;
+  final DateTime? maxDate;
 
   @override
-  Widget build(BuildContext context) {
-    return TableCalendar(
+  Widget build(BuildContext context) => TableCalendar(
       firstDay: minDate ?? DateTime.utc(2020, 1, 1),
       lastDay: maxDate ?? DateTime.utc(2030, 12, 31),
       focusedDay: selectedDate,
@@ -306,5 +299,4 @@ class CompactCalendar extends StatelessWidget {
         weekendStyle: TextStyle(fontWeight: FontWeight.w600),
       ),
     );
-  }
 }

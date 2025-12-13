@@ -12,14 +12,6 @@ import 'package:flutter/material.dart';
 /// - Dividers
 /// - Disabled state
 class SettingsTile extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  final bool enabled;
-  final bool showDivider;
 
   const SettingsTile({
     super.key,
@@ -32,10 +24,17 @@ class SettingsTile extends StatelessWidget {
     this.enabled = true,
     this.showDivider = true,
   });
+  final IconData? icon;
+  final Color? iconColor;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final bool enabled;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       children: [
         ListTile(
           enabled: enabled,
@@ -86,20 +85,11 @@ class SettingsTile extends StatelessWidget {
           ),
       ],
     );
-  }
 }
 
 /// SettingsSwitchTile
 /// Settings tile with a switch control
 class SettingsSwitchTile extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final Function(bool) onChanged;
-  final bool enabled;
-  final bool showDivider;
 
   const SettingsSwitchTile({
     super.key,
@@ -112,10 +102,17 @@ class SettingsSwitchTile extends StatelessWidget {
     this.enabled = true,
     this.showDivider = true,
   });
+  final IconData? icon;
+  final Color? iconColor;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final Function(bool) onChanged;
+  final bool enabled;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsTile(
+  Widget build(BuildContext context) => SettingsTile(
       icon: icon,
       iconColor: iconColor,
       title: title,
@@ -129,20 +126,11 @@ class SettingsSwitchTile extends StatelessWidget {
       ),
       onTap: enabled ? () => onChanged(!value) : null,
     );
-  }
 }
 
 /// SettingsValueTile
 /// Settings tile displaying a value
 class SettingsValueTile extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final String value;
-  final VoidCallback? onTap;
-  final bool enabled;
-  final bool showDivider;
 
   const SettingsValueTile({
     super.key,
@@ -155,10 +143,17 @@ class SettingsValueTile extends StatelessWidget {
     this.enabled = true,
     this.showDivider = true,
   });
+  final IconData? icon;
+  final Color? iconColor;
+  final String title;
+  final String? subtitle;
+  final String value;
+  final VoidCallback? onTap;
+  final bool enabled;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsTile(
+  Widget build(BuildContext context) => SettingsTile(
       icon: icon,
       iconColor: iconColor,
       title: title,
@@ -184,18 +179,11 @@ class SettingsValueTile extends StatelessWidget {
       ),
       onTap: onTap,
     );
-  }
 }
 
 /// SettingsActionTile
 /// Settings tile for destructive actions
 class SettingsActionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final Color color;
-  final VoidCallback onTap;
-  final bool showDivider;
 
   const SettingsActionTile({
     super.key,
@@ -206,10 +194,15 @@ class SettingsActionTile extends StatelessWidget {
     required this.onTap,
     this.showDivider = true,
   });
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Color color;
+  final VoidCallback onTap;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsTile(
+  Widget build(BuildContext context) => SettingsTile(
       icon: icon,
       iconColor: color,
       title: title,
@@ -217,24 +210,22 @@ class SettingsActionTile extends StatelessWidget {
       showDivider: showDivider,
       onTap: onTap,
     );
-  }
 }
 
 /// SettingsSectionHeader
 /// Section header for grouping settings
 class SettingsSectionHeader extends StatelessWidget {
-  final String title;
-  final EdgeInsets padding;
 
   const SettingsSectionHeader({
     super.key,
     required this.title,
     this.padding = const EdgeInsets.fromLTRB(16, 24, 16, 8),
   });
+  final String title;
+  final EdgeInsets padding;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
+  Widget build(BuildContext context) => Padding(
       padding: padding,
       child: Text(
         title.toUpperCase(),
@@ -245,24 +236,22 @@ class SettingsSectionHeader extends StatelessWidget {
             ),
       ),
     );
-  }
 }
 
 /// SettingsCard
 /// Card container for settings sections
 class SettingsCard extends StatelessWidget {
-  final List<Widget> children;
-  final EdgeInsets margin;
 
   const SettingsCard({
     super.key,
     required this.children,
     this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
   });
+  final List<Widget> children;
+  final EdgeInsets margin;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       margin: margin,
       elevation: 1,
       shape: RoundedRectangleBorder(
@@ -272,17 +261,11 @@ class SettingsCard extends StatelessWidget {
         children: children,
       ),
     );
-  }
 }
 
 /// SettingsInfoTile
 /// Informational tile without interaction
 class SettingsInfoTile extends StatelessWidget {
-  final IconData icon;
-  final Color? iconColor;
-  final String title;
-  final String value;
-  final bool showDivider;
 
   const SettingsInfoTile({
     super.key,
@@ -292,10 +275,14 @@ class SettingsInfoTile extends StatelessWidget {
     required this.value,
     this.showDivider = true,
   });
+  final IconData icon;
+  final Color? iconColor;
+  final String title;
+  final String value;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsTile(
+  Widget build(BuildContext context) => SettingsTile(
       icon: icon,
       iconColor: iconColor,
       title: title,
@@ -308,23 +295,11 @@ class SettingsInfoTile extends StatelessWidget {
             ),
       ),
     );
-  }
 }
 
 /// SettingsSliderTile
 /// Settings tile with slider control
 class SettingsSliderTile extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final double value;
-  final double min;
-  final double max;
-  final int? divisions;
-  final String Function(double)? valueLabel;
-  final Function(double) onChanged;
-  final bool enabled;
 
   const SettingsSliderTile({
     super.key,
@@ -340,10 +315,20 @@ class SettingsSliderTile extends StatelessWidget {
     required this.onChanged,
     this.enabled = true,
   });
+  final IconData? icon;
+  final Color? iconColor;
+  final String title;
+  final String? subtitle;
+  final double value;
+  final double min;
+  final double max;
+  final int? divisions;
+  final String Function(double)? valueLabel;
+  final Function(double) onChanged;
+  final bool enabled;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       children: [
         ListTile(
           enabled: enabled,
@@ -397,20 +382,11 @@ class SettingsSliderTile extends StatelessWidget {
         ),
       ],
     );
-  }
 }
 
 /// SettingsCheckboxTile
 /// Settings tile with checkbox
 class SettingsCheckboxTile extends StatelessWidget {
-  final IconData? icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final Function(bool?) onChanged;
-  final bool enabled;
-  final bool showDivider;
 
   const SettingsCheckboxTile({
     super.key,
@@ -423,10 +399,17 @@ class SettingsCheckboxTile extends StatelessWidget {
     this.enabled = true,
     this.showDivider = true,
   });
+  final IconData? icon;
+  final Color? iconColor;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final Function(bool?) onChanged;
+  final bool enabled;
+  final bool showDivider;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsTile(
+  Widget build(BuildContext context) => SettingsTile(
       icon: icon,
       iconColor: iconColor,
       title: title,
@@ -440,5 +423,4 @@ class SettingsCheckboxTile extends StatelessWidget {
       ),
       onTap: enabled ? () => onChanged(!value) : null,
     );
-  }
 }

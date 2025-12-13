@@ -11,15 +11,6 @@ import 'package:flutter/material.dart';
 /// - Loading and error states
 /// - Responsive sizing
 class DashboardCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final Color? backgroundColor;
-  final VoidCallback? onTap;
-  final bool isLoading;
-  final String? subtitle;
-  final Widget? trailing;
 
   const DashboardCard({
     super.key,
@@ -33,10 +24,18 @@ class DashboardCard extends StatelessWidget {
     this.subtitle,
     this.trailing,
   });
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color color;
+  final Color? backgroundColor;
+  final VoidCallback? onTap;
+  final bool isLoading;
+  final String? subtitle;
+  final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -53,10 +52,8 @@ class DashboardCard extends StatelessWidget {
         ),
       ),
     );
-  }
 
-  Widget _buildContent(BuildContext context) {
-    return Column(
+  Widget _buildContent(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -110,10 +107,8 @@ class DashboardCard extends StatelessWidget {
         ],
       ],
     );
-  }
 
-  Widget _buildLoading() {
-    return Column(
+  Widget _buildLoading() => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -153,16 +148,11 @@ class DashboardCard extends StatelessWidget {
         ),
       ],
     );
-  }
 }
 
 /// ScheduleDashboardCard
 /// Specialized dashboard card for schedule summary
 class ScheduleDashboardCard extends StatelessWidget {
-  final int todayCount;
-  final int upcomingCount;
-  final VoidCallback onTap;
-  final bool isLoading;
 
   const ScheduleDashboardCard({
     super.key,
@@ -171,10 +161,13 @@ class ScheduleDashboardCard extends StatelessWidget {
     required this.onTap,
     this.isLoading = false,
   });
+  final int todayCount;
+  final int upcomingCount;
+  final VoidCallback onTap;
+  final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return DashboardCard(
+  Widget build(BuildContext context) => DashboardCard(
       title: 'Today\'s Schedule',
       value: todayCount.toString(),
       subtitle: upcomingCount > 0 
@@ -190,16 +183,11 @@ class ScheduleDashboardCard extends StatelessWidget {
         color: Colors.grey,
       ),
     );
-  }
 }
 
 /// JournalDashboardCard
 /// Specialized dashboard card for journal summary
 class JournalDashboardCard extends StatelessWidget {
-  final String todayMood;
-  final int weeklyCount;
-  final VoidCallback onTap;
-  final bool isLoading;
 
   const JournalDashboardCard({
     super.key,
@@ -208,10 +196,13 @@ class JournalDashboardCard extends StatelessWidget {
     required this.onTap,
     this.isLoading = false,
   });
+  final String todayMood;
+  final int weeklyCount;
+  final VoidCallback onTap;
+  final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return DashboardCard(
+  Widget build(BuildContext context) => DashboardCard(
       title: 'Today\'s Mood',
       value: todayMood.isEmpty ? '—' : todayMood,
       subtitle: '$weeklyCount entries this week',
@@ -225,16 +216,11 @@ class JournalDashboardCard extends StatelessWidget {
         color: Colors.grey,
       ),
     );
-  }
 }
 
 /// PhotoDashboardCard
 /// Specialized dashboard card for photo gallery summary
 class PhotoDashboardCard extends StatelessWidget {
-  final int totalPhotos;
-  final int thisMonthCount;
-  final VoidCallback onTap;
-  final bool isLoading;
 
   const PhotoDashboardCard({
     super.key,
@@ -243,10 +229,13 @@ class PhotoDashboardCard extends StatelessWidget {
     required this.onTap,
     this.isLoading = false,
   });
+  final int totalPhotos;
+  final int thisMonthCount;
+  final VoidCallback onTap;
+  final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return DashboardCard(
+  Widget build(BuildContext context) => DashboardCard(
       title: 'Photo Memories',
       value: totalPhotos.toString(),
       subtitle: '$thisMonthCount added this month',
@@ -260,16 +249,11 @@ class PhotoDashboardCard extends StatelessWidget {
         color: Colors.grey,
       ),
     );
-  }
 }
 
 /// MilestoneDashboardCard
 /// Specialized dashboard card for milestone tracking
 class MilestoneDashboardCard extends StatelessWidget {
-  final int milestoneCount;
-  final String? latestMilestone;
-  final VoidCallback onTap;
-  final bool isLoading;
 
   const MilestoneDashboardCard({
     super.key,
@@ -278,10 +262,13 @@ class MilestoneDashboardCard extends StatelessWidget {
     required this.onTap,
     this.isLoading = false,
   });
+  final int milestoneCount;
+  final String? latestMilestone;
+  final VoidCallback onTap;
+  final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return DashboardCard(
+  Widget build(BuildContext context) => DashboardCard(
       title: 'Milestones',
       value: milestoneCount.toString(),
       subtitle: latestMilestone ?? 'No milestones yet',
@@ -295,5 +282,4 @@ class MilestoneDashboardCard extends StatelessWidget {
         color: Colors.grey,
       ),
     );
-  }
 }

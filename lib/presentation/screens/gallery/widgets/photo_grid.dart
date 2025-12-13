@@ -14,15 +14,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 /// - Selection mode
 /// - Pull to refresh
 class PhotoGrid extends StatelessWidget {
-  final List<PhotoGridItem> photos;
-  final int crossAxisCount;
-  final double spacing;
-  final bool showHeaders;
-  final bool selectionMode;
-  final Set<String> selectedPhotoIds;
-  final Function(String)? onPhotoTap;
-  final Function(String, bool)? onPhotoSelected;
-  final bool isLoading;
 
   const PhotoGrid({
     super.key,
@@ -36,6 +27,15 @@ class PhotoGrid extends StatelessWidget {
     this.onPhotoSelected,
     this.isLoading = false,
   });
+  final List<PhotoGridItem> photos;
+  final int crossAxisCount;
+  final double spacing;
+  final bool showHeaders;
+  final bool selectionMode;
+  final Set<String> selectedPhotoIds;
+  final Function(String)? onPhotoTap;
+  final Function(String, bool)? onPhotoSelected;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +54,7 @@ class PhotoGrid extends StatelessWidget {
     return _buildSimpleGrid();
   }
 
-  Widget _buildSimpleGrid() {
-    return GridView.builder(
+  Widget _buildSimpleGrid() => GridView.builder(
       padding: const EdgeInsets.all(4),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
@@ -68,12 +67,11 @@ class PhotoGrid extends StatelessWidget {
         return _buildPhotoTile(photos[index]);
       },
     );
-  }
 
   Widget _buildGridWithHeaders() {
     // Group photos by date
     final groupedPhotos = <String, List<PhotoGridItem>>{};
-    for (var photo in photos) {
+    for (final photo in photos) {
       final dateKey = _formatDateHeader(photo.createdAt);
       groupedPhotos.putIfAbsent(dateKey, () => []).add(photo);
     }
@@ -108,12 +106,10 @@ class PhotoGrid extends StatelessWidget {
                 crossAxisCount: crossAxisCount,
                 crossAxisSpacing: spacing,
                 mainAxisSpacing: spacing,
-                childAspectRatio: 1.0,
+                childAspectRatio: 1,
               ),
               itemCount: sectionPhotos.length,
-              itemBuilder: (context, index) {
-                return _buildPhotoTile(sectionPhotos[index]);
-              },
+              itemBuilder: (context, index) => _buildPhotoTile(sectionPhotos[index]),
             ),
           ],
         );
@@ -202,8 +198,7 @@ class PhotoGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingGrid() {
-    return GridView.builder(
+  Widget _buildLoadingGrid() => GridView.builder(
       padding: const EdgeInsets.all(4),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
@@ -221,10 +216,8 @@ class PhotoGrid extends StatelessWidget {
         );
       },
     );
-  }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
+  Widget _buildEmptyState(BuildContext context) => Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -250,7 +243,6 @@ class PhotoGrid extends StatelessWidget {
         ],
       ),
     );
-  }
 
   String _formatDateHeader(DateTime date) {
     final now = DateTime.now();
@@ -265,7 +257,7 @@ class PhotoGrid extends StatelessWidget {
     } else {
       final months = [
         'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        'July', 'August', 'September', 'October', 'November', 'December',
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     }
@@ -275,12 +267,6 @@ class PhotoGrid extends StatelessWidget {
 /// PhotoGridItem
 /// Data model for photo grid item
 class PhotoGridItem {
-  final String id;
-  final String imageUrl;
-  final String? thumbnailUrl;
-  final DateTime createdAt;
-  final String? caption;
-  final bool isMilestone;
 
   const PhotoGridItem({
     required this.id,
@@ -290,14 +276,17 @@ class PhotoGridItem {
     this.caption,
     this.isMilestone = false,
   });
+  final String id;
+  final String imageUrl;
+  final String? thumbnailUrl;
+  final DateTime createdAt;
+  final String? caption;
+  final bool isMilestone;
 }
 
 /// AdaptivePhotoGrid
 /// Grid that adapts columns based on screen width
 class AdaptivePhotoGrid extends StatelessWidget {
-  final List<PhotoGridItem> photos;
-  final Function(String)? onPhotoTap;
-  final bool isLoading;
 
   const AdaptivePhotoGrid({
     super.key,
@@ -305,10 +294,12 @@ class AdaptivePhotoGrid extends StatelessWidget {
     this.onPhotoTap,
     this.isLoading = false,
   });
+  final List<PhotoGridItem> photos;
+  final Function(String)? onPhotoTap;
+  final bool isLoading;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
+  Widget build(BuildContext context) => LayoutBuilder(
       builder: (context, constraints) {
         int crossAxisCount;
         if (constraints.maxWidth < 400) {
@@ -327,18 +318,11 @@ class AdaptivePhotoGrid extends StatelessWidget {
         );
       },
     );
-  }
 }
 
 /// PhotoGridHeader
 /// Header with filters and view options
 class PhotoGridHeader extends StatelessWidget {
-  final int photoCount;
-  final bool showMilestonesOnly;
-  final VoidCallback onToggleMilestones;
-  final VoidCallback? onSort;
-  final bool isGridView;
-  final VoidCallback onToggleView;
 
   const PhotoGridHeader({
     super.key,
@@ -349,10 +333,15 @@ class PhotoGridHeader extends StatelessWidget {
     required this.isGridView,
     required this.onToggleView,
   });
+  final int photoCount;
+  final bool showMilestonesOnly;
+  final VoidCallback onToggleMilestones;
+  final VoidCallback? onSort;
+  final bool isGridView;
+  final VoidCallback onToggleView;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -402,5 +391,4 @@ class PhotoGridHeader extends StatelessWidget {
         ],
       ),
     );
-  }
 }

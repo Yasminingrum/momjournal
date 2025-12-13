@@ -2,6 +2,7 @@
 /// 
 /// Screen untuk account settings dan user info
 /// Location: lib/presentation/screens/settings/account_screen.dart
+library;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -99,9 +100,7 @@ class AccountScreen extends StatelessWidget {
                 leading: const Icon(Icons.cloud_sync),
                 title: const Text('Sinkronisasi Data'),
                 subtitle: Consumer<SyncProvider>(
-                  builder: (context, syncProvider, child) {
-                    return Text(syncProvider.lastSyncTimeFormatted);
-                  },
+                  builder: (context, syncProvider, child) => Text(syncProvider.lastSyncTimeFormatted),
                 ),
                 trailing: Consumer<SyncProvider>(
                   builder: (context, syncProvider, child) {

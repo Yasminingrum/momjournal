@@ -2,6 +2,7 @@
 /// 
 /// Handles photo operations with Firebase Storage and Firestore
 /// Location: lib/data/datasources/remote/photo_remote_datasource.dart
+library;
 
 import 'dart:io';
 
@@ -23,11 +24,11 @@ abstract class PhotoRemoteDatasource {
 }
 
 class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
-  final FirebaseService _firebaseService;
 
   PhotoRemoteDatasourceImpl({
     FirebaseService? firebaseService,
   }) : _firebaseService = firebaseService ?? FirebaseService();
+  final FirebaseService _firebaseService;
 
   CollectionReference? get _photosCollection =>
       _firebaseService.photosCollection;
@@ -38,7 +39,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<String> uploadPhoto(File photoFile, String photoId) async {
     try {
       if (_userPhotosRef == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       print('📤 Uploading photo: $photoId');
@@ -67,7 +68,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> createPhotoMetadata(PhotoEntity photo) async {
     try {
       if (_photosCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       await _photosCollection!
@@ -84,7 +85,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<List<PhotoEntity>> getAllPhotos() async {
     try {
       if (_photosCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final snapshot = await _photosCollection!
@@ -101,7 +102,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> updatePhoto(PhotoEntity photo) async {
     try {
       if (_photosCollection == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       final data = _photoToFirestore(photo);
@@ -118,7 +119,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   Future<void> deletePhoto(String photoId, String downloadUrl) async {
     try {
       if (_photosCollection == null || _userPhotosRef == null) {
-        throw AuthorizationException('User tidak login');
+        throw const AuthorizationException('User tidak login');
       }
 
       // Delete from Storage
@@ -144,19 +145,16 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   @override
   Stream<List<PhotoEntity>> watchPhotos() {
     if (_photosCollection == null) {
-      return Stream.error(AuthorizationException('User tidak login'));
+      return Stream.error(const AuthorizationException('User tidak login'));
     }
 
     return _photosCollection!
         .orderBy('dateTaken', descending: true)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map(_photoFromFirestore).toList();
-    });
+        .map((snapshot) => snapshot.docs.map(_photoFromFirestore).toList());
   }
 
-  Map<String, dynamic> _photoToFirestore(PhotoEntity photo) {
-    return {
+  Map<String, dynamic> _photoToFirestore(PhotoEntity photo) => {
       'id': photo.id,
       'userId': photo.userId,
       'cloudUrl': photo.cloudUrl,
@@ -166,7 +164,6 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       'createdAt': Timestamp.fromDate(photo.createdAt),
       'updatedAt': Timestamp.fromDate(photo.updatedAt),
     };
-  }
 
   PhotoEntity _photoFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;

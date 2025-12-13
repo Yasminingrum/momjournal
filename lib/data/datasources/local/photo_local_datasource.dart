@@ -51,7 +51,7 @@ class PhotoLocalDataSource {
   Future<void> createPhotosBatch(List<PhotoModel> photos) async {
     try {
       final Map<String, PhotoModel> photoMap = {
-        for (var photo in photos) photo.id: photo,
+        for (final photo in photos) photo.id: photo,
       };
       await _photoBox.putAll(photoMap);
     } catch (e) {
@@ -168,9 +168,7 @@ class PhotoLocalDataSource {
   /// Returns photos marked as milestones, sorted by date descending
   List<PhotoModel> getMilestonePhotos() {
     try {
-      final photos = _photoBox.values.where((photo) {
-        return photo.isMilestone;
-      }).toList();
+      final photos = _photoBox.values.where((photo) => photo.isMilestone).toList();
 
       // Sort by date descending
       photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -191,9 +189,7 @@ class PhotoLocalDataSource {
   List<PhotoModel> getPhotosByTag(String tag) {
     try {
       final lowerTag = tag.toLowerCase();
-      final photos = _photoBox.values.where((photo) {
-        return photo.tags?.any((t) => t.toLowerCase() == lowerTag) ?? false;
-      }).toList();
+      final photos = _photoBox.values.where((photo) => photo.tags?.any((t) => t.toLowerCase() == lowerTag) ?? false).toList();
 
       // Sort by date descending
       photos.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -225,7 +221,7 @@ class PhotoLocalDataSource {
         
         // Search in tags if they exist
         final tagsMatch = photo.tags?.any((tag) =>
-          tag.toLowerCase().contains(lowerQuery)
+          tag.toLowerCase().contains(lowerQuery),
         ) ?? false;
 
         return captionMatch || tagsMatch;

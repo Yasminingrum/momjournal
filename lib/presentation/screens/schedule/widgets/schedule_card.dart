@@ -12,18 +12,6 @@ import 'package:flutter/material.dart';
 /// - Completion checkbox
 /// - Notes preview
 class ScheduleCard extends StatelessWidget {
-  final String id;
-  final String title;
-  final DateTime dateTime;
-  final String category;
-  final Color categoryColor;
-  final String? notes;
-  final bool hasReminder;
-  final bool isCompleted;
-  final VoidCallback? onTap;
-  final VoidCallback? onEdit;
-  final VoidCallback? onDelete;
-  final Function(bool?)? onCompletedChanged;
 
   const ScheduleCard({
     super.key,
@@ -40,6 +28,18 @@ class ScheduleCard extends StatelessWidget {
     this.onDelete,
     this.onCompletedChanged,
   });
+  final String id;
+  final String title;
+  final DateTime dateTime;
+  final String category;
+  final Color categoryColor;
+  final String? notes;
+  final bool hasReminder;
+  final bool isCompleted;
+  final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final Function(bool?)? onCompletedChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class ScheduleCard extends StatelessWidget {
       secondaryBackground: _buildSwipeBackground(context, isLeft: false),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart && onDelete != null) {
-          return await _confirmDelete(context);
+          return _confirmDelete(context);
         } else if (direction == DismissDirection.startToEnd && onEdit != null) {
           onEdit!();
           return false;
@@ -111,8 +111,7 @@ class ScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeColumn(BuildContext context, bool isPast) {
-    return Container(
+  Widget _buildTimeColumn(BuildContext context, bool isPast) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: isPast
@@ -138,10 +137,8 @@ class ScheduleCard extends StatelessWidget {
         ],
       ),
     );
-  }
 
-  Widget _buildContent(BuildContext context, bool isPast) {
-    return Column(
+  Widget _buildContent(BuildContext context, bool isPast) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title
@@ -182,10 +179,8 @@ class ScheduleCard extends StatelessWidget {
         ],
       ],
     );
-  }
 
-  Widget _buildStatusIcons(BuildContext context, bool isUpcoming) {
-    return Column(
+  Widget _buildStatusIcons(BuildContext context, bool isUpcoming) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (hasReminder)
@@ -206,10 +201,8 @@ class ScheduleCard extends StatelessWidget {
         ],
       ],
     );
-  }
 
-  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) {
-    return Container(
+  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) => Container(
       alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
       color: isLeft ? Colors.blue : Colors.red,
@@ -219,10 +212,8 @@ class ScheduleCard extends StatelessWidget {
         size: 28,
       ),
     );
-  }
 
-  Future<bool> _confirmDelete(BuildContext context) async {
-    return await showDialog<bool>(
+  Future<bool> _confirmDelete(BuildContext context) async => await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Delete Schedule'),
@@ -243,7 +234,6 @@ class ScheduleCard extends StatelessWidget {
           ),
         ) ??
         false;
-  }
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
@@ -267,12 +257,6 @@ class ScheduleCard extends StatelessWidget {
 /// ScheduleListSection
 /// Grouped schedule list by date
 class ScheduleListSection extends StatelessWidget {
-  final DateTime date;
-  final List<ScheduleCardData> schedules;
-  final Function(String) onScheduleTap;
-  final Function(String) onScheduleEdit;
-  final Function(String) onScheduleDelete;
-  final Function(String, bool) onCompletedChanged;
 
   const ScheduleListSection({
     super.key,
@@ -283,10 +267,15 @@ class ScheduleListSection extends StatelessWidget {
     required this.onScheduleDelete,
     required this.onCompletedChanged,
   });
+  final DateTime date;
+  final List<ScheduleCardData> schedules;
+  final Function(String) onScheduleTap;
+  final Function(String) onScheduleEdit;
+  final Function(String) onScheduleDelete;
+  final Function(String, bool) onCompletedChanged;
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Date header
@@ -320,7 +309,6 @@ class ScheduleListSection extends StatelessWidget {
             )),
       ],
     );
-  }
 
   bool _isToday(DateTime date) {
     final now = DateTime.now();
@@ -347,7 +335,7 @@ class ScheduleListSection extends StatelessWidget {
   String _formatFullDate(DateTime date) {
     final months = [
       'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -356,14 +344,6 @@ class ScheduleListSection extends StatelessWidget {
 /// ScheduleCardData
 /// Data model for schedule card
 class ScheduleCardData {
-  final String id;
-  final String title;
-  final DateTime dateTime;
-  final String category;
-  final Color categoryColor;
-  final String? notes;
-  final bool hasReminder;
-  final bool isCompleted;
 
   const ScheduleCardData({
     required this.id,
@@ -375,4 +355,12 @@ class ScheduleCardData {
     this.hasReminder = false,
     this.isCompleted = false,
   });
+  final String id;
+  final String title;
+  final DateTime dateTime;
+  final String category;
+  final Color categoryColor;
+  final String? notes;
+  final bool hasReminder;
+  final bool isCompleted;
 }

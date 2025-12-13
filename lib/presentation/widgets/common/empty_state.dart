@@ -6,13 +6,6 @@ import 'custom_button.dart';
 /// Empty State Widget
 /// Displays empty states with optional action button
 class EmptyState extends StatelessWidget {
-  final String? title;
-  final String? message;
-  final IconData? icon;
-  final Widget? illustration;
-  final VoidCallback? onAction;
-  final String? actionText;
-  final bool showAction;
   
   const EmptyState({
     Key? key,
@@ -24,10 +17,16 @@ class EmptyState extends StatelessWidget {
     this.actionText,
     this.showAction = true,
   }) : super(key: key);
+  final String? title;
+  final String? message;
+  final IconData? icon;
+  final Widget? illustration;
+  final VoidCallback? onAction;
+  final String? actionText;
+  final bool showAction;
   
   @override
-  Widget build(BuildContext context) {
-    return Center(
+  Widget build(BuildContext context) => Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
@@ -81,70 +80,63 @@ class EmptyState extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Empty Schedule State
 class EmptyScheduleState extends StatelessWidget {
-  final VoidCallback? onAddSchedule;
   
   const EmptyScheduleState({
     Key? key,
     this.onAddSchedule,
   }) : super(key: key);
+  final VoidCallback? onAddSchedule;
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.calendar_today_outlined,
       title: TextConstants.emptySchedules,
       message: TextConstants.emptySchedulesDescription,
       onAction: onAddSchedule,
       actionText: TextConstants.addSchedule,
     );
-  }
 }
 
 /// Empty Journal State
 class EmptyJournalState extends StatelessWidget {
-  final VoidCallback? onAddJournal;
   
   const EmptyJournalState({
     Key? key,
     this.onAddJournal,
   }) : super(key: key);
+  final VoidCallback? onAddJournal;
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.edit_note_outlined,
       title: TextConstants.emptyJournals,
       message: TextConstants.emptyJournalsDescription,
       onAction: onAddJournal,
       actionText: TextConstants.addJournal,
     );
-  }
 }
 
 /// Empty Photo State
 class EmptyPhotoState extends StatelessWidget {
-  final VoidCallback? onAddPhoto;
   
   const EmptyPhotoState({
     Key? key,
     this.onAddPhoto,
   }) : super(key: key);
+  final VoidCallback? onAddPhoto;
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.photo_library_outlined,
       title: TextConstants.emptyPhotos,
       message: TextConstants.emptyPhotosDescription,
       onAction: onAddPhoto,
       actionText: TextConstants.addPhoto,
     );
-  }
 }
 
 /// Empty Search Results State
@@ -153,14 +145,13 @@ class EmptySearchState extends StatelessWidget {
   final VoidCallback? onClear;
   
   const EmptySearchState({
-    Key? key,
+    super.key,
     this.query,
     this.onClear,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.search_off,
       title: TextConstants.emptySearch,
       message: query != null
@@ -170,28 +161,25 @@ class EmptySearchState extends StatelessWidget {
       actionText: 'Hapus Pencarian',
       showAction: query != null && onClear != null,
     );
-  }
 }
 
 /// No Connection State
 class NoConnectionState extends StatelessWidget {
-  final VoidCallback? onRetry;
   
   const NoConnectionState({
     Key? key,
     this.onRetry,
   }) : super(key: key);
+  final VoidCallback? onRetry;
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.cloud_off_outlined,
       title: 'Tidak Ada Koneksi',
       message: 'Tidak dapat terhubung ke internet.\nPastikan Anda terhubung dan coba lagi.',
       onAction: onRetry,
       actionText: TextConstants.retry,
     );
-  }
 }
 
 /// Coming Soon State
@@ -199,13 +187,12 @@ class ComingSoonState extends StatelessWidget {
   final String? feature;
   
   const ComingSoonState({
-    Key? key,
+    super.key,
     this.feature,
-  }) : super(key: key);
+  });
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.construction_outlined,
       title: 'Segera Hadir',
       message: feature != null
@@ -213,50 +200,41 @@ class ComingSoonState extends StatelessWidget {
           : 'Fitur ini akan segera tersedia!',
       showAction: false,
     );
-  }
 }
 
 /// Under Maintenance State
 class MaintenanceState extends StatelessWidget {
-  final String? message;
   
   const MaintenanceState({
     Key? key,
     this.message,
   }) : super(key: key);
+  final String? message;
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.build_outlined,
       title: 'Dalam Perbaikan',
       message: message ?? 'Kami sedang melakukan perbaikan.\nSilakan coba lagi nanti.',
       showAction: false,
     );
-  }
 }
 
 /// No Notifications State
 class NoNotificationsState extends StatelessWidget {
-  const NoNotificationsState({Key? key}) : super(key: key);
+  const NoNotificationsState({super.key});
   
   @override
-  Widget build(BuildContext context) {
-    return EmptyState(
+  Widget build(BuildContext context) => EmptyState(
       icon: Icons.notifications_none_outlined,
       title: 'Tidak Ada Notifikasi',
       message: 'Anda belum memiliki notifikasi',
       showAction: false,
     );
-  }
 }
 
 /// Placeholder Card (for loading states)
 class PlaceholderCard extends StatelessWidget {
-  final double height;
-  final double? width;
-  final double borderRadius;
-  final Widget? child;
   
   const PlaceholderCard({
     Key? key,
@@ -265,10 +243,13 @@ class PlaceholderCard extends StatelessWidget {
     this.borderRadius = 12,
     this.child,
   }) : super(key: key);
+  final double height;
+  final double? width;
+  final double borderRadius;
+  final Widget? child;
   
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       height: height,
       width: width,
       padding: const EdgeInsets.all(16),
@@ -290,23 +271,21 @@ class PlaceholderCard extends StatelessWidget {
             ),
           ),
     );
-  }
 }
 
 /// Empty List Message
 class EmptyListMessage extends StatelessWidget {
-  final String message;
-  final IconData? icon;
   
   const EmptyListMessage({
     Key? key,
     required this.message,
     this.icon,
   }) : super(key: key);
+  final String message;
+  final IconData? icon;
   
   @override
-  Widget build(BuildContext context) {
-    return Padding(
+  Widget build(BuildContext context) => Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -327,5 +306,4 @@ class EmptyListMessage extends StatelessWidget {
         ],
       ),
     );
-  }
 }
