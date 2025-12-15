@@ -1,7 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
@@ -38,7 +38,7 @@ class ImageUtils {
       
       return result != null ? File(result.path) : null;
     } catch (e) {
-      print('Error compressing image: $e');
+      debugPrint('Error compressing image: $e');
       return null;
     }
   }
@@ -60,7 +60,7 @@ class ImageUtils {
       
       return result;
     } catch (e) {
-      print('Error compressing image to bytes: $e');
+      debugPrint('Error compressing image to bytes: $e');
       return null;
     }
   }
@@ -84,7 +84,7 @@ class ImageUtils {
       
       return result != null ? File(result.path) : null;
     } catch (e) {
-      print('Error creating thumbnail: $e');
+      debugPrint('Error creating thumbnail: $e');
       return null;
     }
   }
@@ -105,7 +105,7 @@ class ImageUtils {
       
       return result;
     } catch (e) {
-      print('Error creating thumbnail from bytes: $e');
+      debugPrint('Error creating thumbnail from bytes: $e');
       return null;
     }
   }
@@ -130,7 +130,7 @@ class ImageUtils {
       
       return result != null ? File(result.path) : null;
     } catch (e) {
-      print('Error resizing image: $e');
+      debugPrint('Error resizing image: $e');
       return null;
     }
   }
@@ -140,7 +140,7 @@ class ImageUtils {
     try {
       return await file.length();
     } catch (e) {
-      print('Error getting file size: $e');
+      debugPrint('Error getting file size: $e');
       return 0;
     }
   }
@@ -188,7 +188,7 @@ class ImageUtils {
       
       return result != null ? File(result.path) : null;
     } catch (e) {
-      print('Error converting image format: $e');
+      debugPrint('Error converting image format: $e');
       return null;
     }
   }
@@ -206,7 +206,7 @@ class ImageUtils {
       await file.writeAsBytes(bytes);
       return file;
     } catch (e) {
-      print('Error saving bytes to file: $e');
+      debugPrint('Error saving bytes to file: $e');
       return null;
     }
   }
@@ -216,7 +216,7 @@ class ImageUtils {
     try {
       return await file.readAsBytes();
     } catch (e) {
-      print('Error reading file as bytes: $e');
+      debugPrint('Error reading file as bytes: $e');
       return null;
     }
   }
@@ -224,13 +224,13 @@ class ImageUtils {
   /// Delete file
   static Future<bool> deleteFile(File file) async {
     try {
-      if (await file.exists()) {
+      if (file.existsSync()) {
         await file.delete();
         return true;
       }
       return false;
     } catch (e) {
-      print('Error deleting file: $e');
+      debugPrint('Error deleting file: $e');
       return false;
     }
   }
@@ -241,7 +241,7 @@ class ImageUtils {
       final file = File(path);
       return await deleteFile(file);
     } catch (e) {
-      print('Error deleting file by path: $e');
+      debugPrint('Error deleting file by path: $e');
       return false;
     }
   }
@@ -251,7 +251,7 @@ class ImageUtils {
     try {
       return await source.copy(targetPath);
     } catch (e) {
-      print('Error copying file: $e');
+      debugPrint('Error copying file: $e');
       return null;
     }
   }
@@ -261,7 +261,7 @@ class ImageUtils {
     try {
       return await source.rename(targetPath);
     } catch (e) {
-      print('Error moving file: $e');
+      debugPrint('Error moving file: $e');
       return null;
     }
   }
@@ -358,7 +358,7 @@ class ImageUtils {
     try {
       return null;
     } catch (e) {
-      print('Error getting image dimensions: $e');
+      debugPrint('Error getting image dimensions: $e');
       return null;
     }
   }

@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 /// Service untuk mengelola koneksi dan instance Firebase
 class FirebaseService {
@@ -15,9 +16,9 @@ class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
 
   // Firebase instances
-  FirebaseAuth? _auth;
-  FirebaseFirestore? _firestore;
-  FirebaseStorage? _storage;
+  late FirebaseAuth? _auth;
+  late FirebaseFirestore? _firestore;
+  late FirebaseStorage? _storage;
   
   bool _isInitialized = false;
 
@@ -44,9 +45,9 @@ class FirebaseService {
       );
 
       _isInitialized = true;
-      print('✅ Firebase initialized successfully');
+      debugPrint('✅ Firebase initialized successfully');
     } catch (e) {
-      print('❌ Failed to initialize Firebase: $e');
+      debugPrint('❌ Failed to initialize Firebase: $e');
       rethrow;
     }
   }
@@ -134,18 +135,18 @@ class FirebaseService {
   Future<void> enableNetwork() async {
     try {
       await firestore.enableNetwork();
-      print('✅ Firestore network enabled');
+      debugPrint('✅ Firestore network enabled');
     } catch (e) {
-      print('❌ Failed to enable Firestore network: $e');
+      debugPrint('❌ Failed to enable Firestore network: $e');
     }
   }
 
   Future<void> disableNetwork() async {
     try {
       await firestore.disableNetwork();
-      print('✅ Firestore network disabled');
+      debugPrint('✅ Firestore network disabled');
     } catch (e) {
-      print('❌ Failed to disable Firestore network: $e');
+      debugPrint('❌ Failed to disable Firestore network: $e');
     }
   }
 
@@ -153,9 +154,9 @@ class FirebaseService {
   Future<void> clearPersistence() async {
     try {
       await firestore.clearPersistence();
-      print('✅ Firestore persistence cleared');
+      debugPrint('✅ Firestore persistence cleared');
     } catch (e) {
-      print('❌ Failed to clear Firestore persistence: $e');
+      debugPrint('❌ Failed to clear Firestore persistence: $e');
     }
   }
 
@@ -164,15 +165,18 @@ class FirebaseService {
     try {
       await firestore.terminate();
       _isInitialized = false;
-      print('✅ Firebase terminated');
+      debugPrint('✅ Firebase terminated');
     } catch (e) {
-      print('❌ Failed to terminate Firebase: $e');
+      debugPrint('❌ Failed to terminate Firebase: $e');
     }
   }
 }
 
 /// Firebase Error Handler
 class FirebaseErrorHandler {
+  // Private constructor to prevent instantiation
+  FirebaseErrorHandler._();
+  
   /// Convert Firebase exception to user-friendly message
   static String getErrorMessage(dynamic error) {
     if (error is FirebaseAuthException) {
@@ -245,6 +249,9 @@ class FirebaseErrorHandler {
 
 /// Firebase Connection Monitor
 class FirebaseConnectionMonitor {
+  // Private constructor to prevent instantiation
+  FirebaseConnectionMonitor._();
+  
   static Stream<bool> get connectionStream => FirebaseService()
         .firestore
         .collection('.info')

@@ -36,12 +36,11 @@ class ScheduleCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final Function(bool?)? onCompletedChanged;
+  final void Function(bool?)? onCompletedChanged;
 
   @override
   Widget build(BuildContext context) {
     final isPast = dateTime.isBefore(DateTime.now());
-    final isToday = _isToday(dateTime);
     final isUpcoming = dateTime.isAfter(DateTime.now()) &&
         dateTime.difference(DateTime.now()).inMinutes <= 60;
 
@@ -113,7 +112,7 @@ class ScheduleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isPast
             ? Colors.grey[200]
-            : categoryColor.withOpacity(0.1),
+            : categoryColor.withValues (alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -210,33 +209,28 @@ class ScheduleCard extends StatelessWidget {
       ),
     );
 
-  Future<bool> _confirmDelete(BuildContext context) async => await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Delete Schedule'),
-            content: const Text('Are you sure you want to delete this schedule?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Delete',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Schedule'),
+        content: const Text('Are you sure you want to delete this schedule?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
-        ) ??
-        false;
-
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   String _formatTime(DateTime time) {
@@ -262,10 +256,10 @@ class ScheduleListSection extends StatelessWidget {
   });
   final DateTime date;
   final List<ScheduleCardData> schedules;
-  final Function(String) onScheduleTap;
-  final Function(String) onScheduleEdit;
-  final Function(String) onScheduleDelete;
-  final Function(String, bool) onCompletedChanged;
+  final void Function(String) onScheduleTap;
+  final void Function(String) onScheduleEdit;
+  final void Function(String) onScheduleDelete;
+  final void Function(String, bool) onCompletedChanged;
 
   @override
   Widget build(BuildContext context) => Column(

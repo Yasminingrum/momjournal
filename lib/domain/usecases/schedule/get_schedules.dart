@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../data/repositories/schedule_repository.dart';
 import '../../entities/schedule_entity.dart';
 
@@ -10,10 +12,10 @@ class GetSchedulesUseCase {
   Future<List<ScheduleEntity>> execute() async {
     try {
       final schedules = await repository.getAllSchedules();
-      print('✅ UseCase: Retrieved ${schedules.length} schedules');
+      debugPrint('✅ UseCase: Retrieved ${schedules.length} schedules');
       return schedules;
     } catch (e) {
-      print('❌ UseCase: Failed to get schedules: $e');
+      debugPrint('❌ UseCase: Failed to get schedules: $e');
       rethrow;
     }
   }
@@ -23,10 +25,10 @@ class GetSchedulesUseCase {
     try {
       final schedules = await repository.getSchedulesByDate(date);
       
-      print('✅ UseCase: Retrieved ${schedules.length} schedules for ${date.toString()}');
+      debugPrint('✅ UseCase: Retrieved ${schedules.length} schedules for ${date.toString()}');
       return schedules;
     } catch (e) {
-      print('❌ UseCase: Failed to get schedules by date: $e');
+      debugPrint('❌ UseCase: Failed to get schedules by date: $e');
       rethrow;
     }
   }
@@ -36,10 +38,10 @@ class GetSchedulesUseCase {
     try {
       final schedules = await repository.getSchedulesByMonth(year, month);
       
-      print('✅ UseCase: Retrieved ${schedules.length} schedules for $year-$month');
+      debugPrint('✅ UseCase: Retrieved ${schedules.length} schedules for $year-$month');
       return schedules;
     } catch (e) {
-      print('❌ UseCase: Failed to get schedules by month: $e');
+      debugPrint('❌ UseCase: Failed to get schedules by month: $e');
       rethrow;
     }
   }
@@ -59,10 +61,10 @@ class GetSchedulesUseCase {
           .toList();
       
       // Already sorted by repository
-      print('✅ UseCase: Retrieved ${schedules.length} upcoming schedules');
+      debugPrint('✅ UseCase: Retrieved ${schedules.length} upcoming schedules');
       return schedules;
     } catch (e) {
-      print('❌ UseCase: Failed to get upcoming schedules: $e');
+      debugPrint('❌ UseCase: Failed to get upcoming schedules: $e');
       rethrow;
     }
   }

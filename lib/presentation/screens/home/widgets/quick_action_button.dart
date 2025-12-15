@@ -13,11 +13,7 @@ import 'package:flutter/material.dart';
 class QuickActionButton extends StatelessWidget {
 
   const QuickActionButton({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onTap,
+    required this.label, required this.icon, required this.color, required this.onTap, super.key,
     this.enabled = true,
     this.size = 64,
   });
@@ -36,7 +32,7 @@ class QuickActionButton extends StatelessWidget {
         children: [
           // Circular button
           Material(
-            color: color.withOpacity(0.1),
+            color: color.withValues (alpha:0.1),
             borderRadius: BorderRadius.circular(size / 2),
             child: InkWell(
               onTap: enabled ? onTap : null,
@@ -47,7 +43,7 @@ class QuickActionButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: color.withOpacity(0.3),
+                    color: color.withValues (alpha:0.3),
                     width: 2,
                   ),
                 ),
@@ -81,8 +77,7 @@ class QuickActionButton extends StatelessWidget {
 class QuickActionsGrid extends StatelessWidget {
 
   const QuickActionsGrid({
-    super.key,
-    required this.actions,
+    required this.actions, super.key,
     this.crossAxisCount = 3,
     this.spacing = 16,
   });
@@ -98,7 +93,7 @@ class QuickActionsGrid extends StatelessWidget {
         crossAxisCount: crossAxisCount,
         crossAxisSpacing: spacing,
         mainAxisSpacing: spacing,
-        childAspectRatio: 1.0,
+        childAspectRatio: 1,
       ),
       itemCount: actions.length,
       itemBuilder: (context, index) {
@@ -134,6 +129,7 @@ class QuickActionItem {
 
 /// Predefined quick actions for common use cases
 class QuickActions {
+  QuickActions._();
   /// Add Schedule action
   static QuickActionItem addSchedule(VoidCallback onTap) => QuickActionItem(
       label: 'Add Schedule',
@@ -212,9 +208,8 @@ class QuickActions {
 class QuickActionsSection extends StatelessWidget {
 
   const QuickActionsSection({
-    super.key,
+    required this.actions, super.key,
     this.title = 'Quick Actions',
-    required this.actions,
     this.crossAxisCount = 3,
   });
   final String title;

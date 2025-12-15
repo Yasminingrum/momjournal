@@ -143,7 +143,7 @@ class TimeOptionTile extends StatelessWidget {
               height: 48,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? colorScheme.primary.withOpacity(0.2)
+                    ? colorScheme.primary.withValues (alpha:0.2)
                     : Colors.grey[200],
                 borderRadius: BorderRadius.circular(12),
               ),

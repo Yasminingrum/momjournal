@@ -51,7 +51,7 @@ class JournalCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
-            color: mood.color.withOpacity(0.3),
+            color: mood.color.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -112,7 +112,7 @@ class JournalCard extends StatelessWidget {
   Widget _buildMoodIndicator() => Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: mood.color.withOpacity(0.1),
+        color: mood.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: mood.color, width: 1.5),
       ),
@@ -238,17 +238,17 @@ enum MoodLevel {
     value: 5,
   );
 
-  final String emoji;
-  final String label;
-  final Color color;
-  final int value;
-
   const MoodLevel({
     required this.emoji,
     required this.label,
     required this.color,
     required this.value,
   });
+
+  final String emoji;
+  final String label;
+  final Color color;
+  final int value;
 }
 
 /// JournalListSection
@@ -260,9 +260,9 @@ class JournalListSection extends StatelessWidget {
   });
   final String monthYear;
   final List<JournalCardData> journals;
-  final Function(String) onJournalTap;
-  final Function(String) onJournalEdit;
-  final Function(String) onJournalDelete;
+  final void Function(String) onJournalTap;
+  final void Function(String) onJournalEdit;
+  final void Function(String) onJournalDelete;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -335,7 +335,7 @@ class CompactJournalCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: mood.color.withOpacity(0.1),
+                  color: mood.color.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Text(

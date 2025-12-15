@@ -168,19 +168,7 @@ class NotificationService {
   Future<List<PendingNotificationRequest>> getPendingNotifications() async => _notifications.pendingNotificationRequests();
   
   /// Check if notifications are enabled
-  Future<bool> areNotificationsEnabled() async {
-    final result = await _notifications
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.checkPermissions();
-    
-    if (result != null) {
-      return result.isEnabled;
-    }
-    
-    // For Android, assume enabled (checked at channel level)
-    return true;
-  }
+  Future<bool> areNotificationsEnabled() async => _initialized;
   
   /// Schedule daily notification at specific time
   Future<void> scheduleDailyNotification({

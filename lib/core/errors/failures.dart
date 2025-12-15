@@ -171,6 +171,7 @@ class UnknownFailure extends Failure {
 
 /// Helper to convert exceptions to failures
 class FailureConverter {
+  FailureConverter._();
   /// Convert exception to appropriate failure
   static Failure fromException(Exception exception) {
     // Import exceptions.dart types here

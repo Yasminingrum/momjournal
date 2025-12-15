@@ -15,7 +15,7 @@ Future<void> showInfoDialog(
   Widget? icon,
   VoidCallback? onPressed,
 }) async {
-  await showDialog(
+  await showDialog<void>(
     context: context,
     builder: (context) => InfoDialog(
       title: title,

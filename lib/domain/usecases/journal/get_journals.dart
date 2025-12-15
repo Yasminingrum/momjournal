@@ -4,6 +4,8 @@
 /// Location: lib/domain/usecases/journal/get_journals.dart
 library;
 
+import 'package:flutter/foundation.dart';
+
 import '../../../data/repositories/journal_repository.dart';
 import '../../entities/journal_entity.dart';
 
@@ -16,10 +18,10 @@ class GetJournalsUseCase {
   Future<List<JournalEntity>> execute() async {
     try {
       final journals = await repository.getAllJournals();
-      print('✅ UseCase: Retrieved ${journals.length} journals');
+      debugPrint('✅ UseCase: Retrieved ${journals.length} journals');
       return journals;
     } catch (e) {
-      print('❌ UseCase: Failed to get journals: $e');
+      debugPrint('❌ UseCase: Failed to get journals: $e');
       rethrow;
     }
   }
@@ -35,10 +37,10 @@ class GetJournalsUseCase {
         endDate,
       );
       
-      print('✅ UseCase: Retrieved ${journals.length} journals for date range');
+      debugPrint('✅ UseCase: Retrieved ${journals.length} journals for date range');
       return journals;
     } catch (e) {
-      print('❌ UseCase: Failed to get journals by date range: $e');
+      debugPrint('❌ UseCase: Failed to get journals by date range: $e');
       rethrow;
     }
   }
@@ -54,10 +56,10 @@ class GetJournalsUseCase {
         endOfMonth,
       );
       
-      print('✅ UseCase: Retrieved ${journals.length} journals for $year-$month');
+      debugPrint('✅ UseCase: Retrieved ${journals.length} journals for $year-$month');
       return journals;
     } catch (e) {
-      print('❌ UseCase: Failed to get journals by month: $e');
+      debugPrint('❌ UseCase: Failed to get journals by month: $e');
       rethrow;
     }
   }
@@ -70,10 +72,10 @@ class GetJournalsUseCase {
       // Take only recent entries
       final recent = journals.take(limit).toList();
       
-      print('✅ UseCase: Retrieved ${recent.length} recent journals');
+      debugPrint('✅ UseCase: Retrieved ${recent.length} recent journals');
       return recent;
     } catch (e) {
-      print('❌ UseCase: Failed to get recent journals: $e');
+      debugPrint('❌ UseCase: Failed to get recent journals: $e');
       rethrow;
     }
   }
@@ -91,7 +93,7 @@ class GetJournalsUseCase {
       
       return journals.isNotEmpty ? journals.first : null;
     } catch (e) {
-      print('❌ UseCase: Failed to check journal for date: $e');
+      debugPrint('❌ UseCase: Failed to check journal for date: $e');
       rethrow;
     }
   }

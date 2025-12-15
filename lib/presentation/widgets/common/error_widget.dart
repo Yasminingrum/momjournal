@@ -325,6 +325,7 @@ class InlineInfoMessage extends StatelessWidget {
 
 /// Snackbar Helper
 class SnackBarHelper {
+  SnackBarHelper._();
   static void showSuccess(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

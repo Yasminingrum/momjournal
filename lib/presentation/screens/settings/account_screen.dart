@@ -272,7 +272,7 @@ class AccountScreen extends StatelessWidget {
     }
 
     // Show loading
-    await showDialog(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(

@@ -250,7 +250,7 @@ class IconButtonWithBackground extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) => Material(
-      color: backgroundColor ?? ColorConstants.primaryColor.withOpacity(0.1),
+      color: backgroundColor ?? ColorConstants.primaryColor.withValues (alpha:0.1),
       borderRadius: BorderRadius.circular(size / 2),
       child: InkWell(
         onTap: onPressed,

@@ -169,7 +169,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: categoryColor.withOpacity(0.2),
+        color: categoryColor.withValues (alpha:0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

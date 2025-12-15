@@ -13,8 +13,7 @@ import 'package:flutter/material.dart';
 class TodayAgenda extends StatelessWidget {
 
   const TodayAgenda({
-    super.key,
-    required this.items,
+    required this.items, super.key,
     this.isLoading = false,
     this.onSeeAll,
     this.onItemTap,
@@ -138,8 +137,7 @@ class TodayAgenda extends StatelessWidget {
 class AgendaItemCard extends StatelessWidget {
 
   const AgendaItemCard({
-    super.key,
-    required this.item,
+    required this.item, super.key,
     this.onTap,
   });
   final AgendaItem item;
@@ -241,7 +239,7 @@ class AgendaItemCard extends StatelessWidget {
   Widget _buildTimeIndicator(BuildContext context, bool isPast) => Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isPast ? Colors.grey[200] : item.categoryColor.withOpacity(0.1),
+        color: isPast ? Colors.grey[200] : item.categoryColor.withValues (alpha:0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -270,7 +268,9 @@ class AgendaItemCard extends StatelessWidget {
   }
 
   String _getTimeOfDay(DateTime time) {
-    if (time.hour < 12) return 'AM';
+    if (time.hour < 12) {
+      return 'AM';
+    }
     return 'PM';
   }
 }
@@ -302,9 +302,7 @@ class AgendaItem {
 class TodayAgendaSummary extends StatelessWidget {
 
   const TodayAgendaSummary({
-    super.key,
-    required this.totalTasks,
-    required this.completedTasks,
+    required this.totalTasks, required this.completedTasks, super.key,
     this.nextTask,
     this.onTap,
   });

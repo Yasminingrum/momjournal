@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import '../../models/schedule_model.dart';
 import 'hive_database.dart';
@@ -21,9 +22,9 @@ class ScheduleLocalDataSource {
   Future<void> addSchedule(ScheduleModel schedule) async {
     try {
       await _scheduleBox.put(schedule.id, schedule);
-      print('✓ Schedule added to local DB: ${schedule.id}');
+      debugPrint('✓ Schedule added to local DB: ${schedule.id}');
     } catch (e) {
-      print('✗ Error adding schedule to local DB: $e');
+      debugPrint('✗ Error adding schedule to local DB: $e');
       rethrow;
     }
   }
@@ -35,9 +36,9 @@ class ScheduleLocalDataSource {
         for (final schedule in schedules) schedule.id: schedule,
       };
       await _scheduleBox.putAll(entries);
-      print('✓ ${schedules.length} schedules added to local DB');
+      debugPrint('✓ ${schedules.length} schedules added to local DB');
     } catch (e) {
-      print('✗ Error adding schedules to local DB: $e');
+      debugPrint('✗ Error adding schedules to local DB: $e');
       rethrow;
     }
   }
@@ -49,7 +50,7 @@ class ScheduleLocalDataSource {
     try {
       return _scheduleBox.get(id);
     } catch (e) {
-      print('✗ Error getting schedule by ID: $e');
+      debugPrint('✗ Error getting schedule by ID: $e');
       return null;
     }
   }
@@ -59,7 +60,7 @@ class ScheduleLocalDataSource {
     try {
       return _scheduleBox.values.toList();
     } catch (e) {
-      print('✗ Error getting all schedules: $e');
+      debugPrint('✗ Error getting all schedules: $e');
       return [];
     }
   }
@@ -71,7 +72,7 @@ class ScheduleLocalDataSource {
           .where((schedule) => schedule.userId == userId)
           .toList();
     } catch (e) {
-      print('✗ Error getting schedules by user ID: $e');
+      debugPrint('✗ Error getting schedules by user ID: $e');
       return [];
     }
   }
@@ -96,7 +97,7 @@ class ScheduleLocalDataSource {
       }).toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
-      print('✗ Error getting schedules by date: $e');
+      debugPrint('✗ Error getting schedules by date: $e');
       return [];
     }
   }
@@ -117,7 +118,7 @@ class ScheduleLocalDataSource {
       }).toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
-      print('✗ Error getting schedules by month: $e');
+      debugPrint('✗ Error getting schedules by month: $e');
       return [];
     }
   }
@@ -134,7 +135,7 @@ class ScheduleLocalDataSource {
           .toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
-      print('✗ Error getting schedules by category: $e');
+      debugPrint('✗ Error getting schedules by category: $e');
       return [];
     }
   }
@@ -152,7 +153,7 @@ class ScheduleLocalDataSource {
       }).toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
-      print('✗ Error getting upcoming schedules: $e');
+      debugPrint('✗ Error getting upcoming schedules: $e');
       return [];
     }
   }
@@ -170,7 +171,7 @@ class ScheduleLocalDataSource {
       }).toList()
         ..sort((a, b) => b.scheduledTime.compareTo(a.scheduledTime));
     } catch (e) {
-      print('✗ Error getting past schedules: $e');
+      debugPrint('✗ Error getting past schedules: $e');
       return [];
     }
   }
@@ -185,7 +186,7 @@ class ScheduleLocalDataSource {
           .toList()
         ..sort((a, b) => b.completedAt!.compareTo(a.completedAt!));
     } catch (e) {
-      print('✗ Error getting completed schedules: $e');
+      debugPrint('✗ Error getting completed schedules: $e');
       return [];
     }
   }
@@ -198,7 +199,7 @@ class ScheduleLocalDataSource {
               schedule.userId == userId && schedule.reminderEnabled,)
           .toList();
     } catch (e) {
-      print('✗ Error getting schedules with reminder: $e');
+      debugPrint('✗ Error getting schedules with reminder: $e');
       return [];
     }
   }
@@ -209,7 +210,7 @@ class ScheduleLocalDataSource {
       final now = DateTime.now();
       return getSchedulesByDate(now, userId);
     } catch (e) {
-      print('✗ Error getting today schedules: $e');
+      debugPrint('✗ Error getting today schedules: $e');
       return [];
     }
   }
@@ -233,7 +234,7 @@ class ScheduleLocalDataSource {
       }).toList()
         ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
     } catch (e) {
-      print('✗ Error getting schedules by date range: $e');
+      debugPrint('✗ Error getting schedules by date range: $e');
       return [];
     }
   }
@@ -244,9 +245,9 @@ class ScheduleLocalDataSource {
   Future<void> updateSchedule(ScheduleModel schedule) async {
     try {
       await _scheduleBox.put(schedule.id, schedule);
-      print('✓ Schedule updated in local DB: ${schedule.id}');
+      debugPrint('✓ Schedule updated in local DB: ${schedule.id}');
     } catch (e) {
-      print('✗ Error updating schedule in local DB: $e');
+      debugPrint('✗ Error updating schedule in local DB: $e');
       rethrow;
     }
   }
@@ -267,9 +268,9 @@ class ScheduleLocalDataSource {
       );
 
       await _scheduleBox.put(id, updatedSchedule);
-      print('✓ Schedule marked as completed: $id');
+      debugPrint('✓ Schedule marked as completed: $id');
     } catch (e) {
-      print('✗ Error marking schedule as completed: $e');
+      debugPrint('✗ Error marking schedule as completed: $e');
       rethrow;
     }
   }
@@ -288,9 +289,9 @@ class ScheduleLocalDataSource {
       );
 
       await _scheduleBox.put(id, updatedSchedule);
-      print('✓ Schedule reminder toggled: $id');
+      debugPrint('✓ Schedule reminder toggled: $id');
     } catch (e) {
-      print('✗ Error toggling reminder: $e');
+      debugPrint('✗ Error toggling reminder: $e');
       rethrow;
     }
   }
@@ -306,7 +307,7 @@ class ScheduleLocalDataSource {
       final updatedSchedule = schedule.copyWith(isSynced: isSynced);
       await _scheduleBox.put(id, updatedSchedule);
     } catch (e) {
-      print('✗ Error updating sync status: $e');
+      debugPrint('✗ Error updating sync status: $e');
       rethrow;
     }
   }
@@ -317,9 +318,9 @@ class ScheduleLocalDataSource {
   Future<void> deleteSchedule(String id) async {
     try {
       await _scheduleBox.delete(id);
-      print('✓ Schedule deleted from local DB: $id');
+      debugPrint('✓ Schedule deleted from local DB: $id');
     } catch (e) {
-      print('✗ Error deleting schedule from local DB: $e');
+      debugPrint('✗ Error deleting schedule from local DB: $e');
       rethrow;
     }
   }
@@ -328,9 +329,9 @@ class ScheduleLocalDataSource {
   Future<void> deleteSchedules(List<String> ids) async {
     try {
       await _scheduleBox.deleteAll(ids);
-      print('✓ ${ids.length} schedules deleted from local DB');
+      debugPrint('✓ ${ids.length} schedules deleted from local DB');
     } catch (e) {
-      print('✗ Error deleting schedules from local DB: $e');
+      debugPrint('✗ Error deleting schedules from local DB: $e');
       rethrow;
     }
   }
@@ -341,9 +342,9 @@ class ScheduleLocalDataSource {
       final userSchedules = getSchedulesByUserId(userId);
       final ids = userSchedules.map((s) => s.id).toList();
       await deleteSchedules(ids);
-      print('✓ All schedules deleted for user: $userId');
+      debugPrint('✓ All schedules deleted for user: $userId');
     } catch (e) {
-      print('✗ Error deleting all user schedules: $e');
+      debugPrint('✗ Error deleting all user schedules: $e');
       rethrow;
     }
   }
@@ -354,9 +355,9 @@ class ScheduleLocalDataSource {
       final completedSchedules = getCompletedSchedules(userId);
       final ids = completedSchedules.map((s) => s.id).toList();
       await deleteSchedules(ids);
-      print('✓ Completed schedules deleted for user: $userId');
+      debugPrint('✓ Completed schedules deleted for user: $userId');
     } catch (e) {
-      print('✗ Error deleting completed schedules: $e');
+      debugPrint('✗ Error deleting completed schedules: $e');
       rethrow;
     }
   }
@@ -367,15 +368,17 @@ class ScheduleLocalDataSource {
       final cutoffDate = DateTime.now().subtract(Duration(days: olderThanDays));
 
       final oldSchedules = _scheduleBox.values.where((schedule) {
-        if (schedule.userId != userId) return false;
+        if (schedule.userId != userId) {
+          return false;
+        }
         return schedule.scheduledTime.isBefore(cutoffDate);
       }).toList();
 
       final ids = oldSchedules.map((s) => s.id).toList();
       await deleteSchedules(ids);
-      print('✓ Old schedules deleted (older than $olderThanDays days)');
+      debugPrint('✓ Old schedules deleted (older than $olderThanDays days)');
     } catch (e) {
-      print('✗ Error deleting past schedules: $e');
+      debugPrint('✗ Error deleting past schedules: $e');
       rethrow;
     }
   }
@@ -398,7 +401,7 @@ class ScheduleLocalDataSource {
           .where((schedule) => schedule.userId == userId && !schedule.isSynced)
           .toList();
     } catch (e) {
-      print('✗ Error getting unsynced schedules: $e');
+      debugPrint('✗ Error getting unsynced schedules: $e');
       return [];
     }
   }
@@ -407,9 +410,9 @@ class ScheduleLocalDataSource {
   Future<void> clearAll() async {
     try {
       await _scheduleBox.clear();
-      print('✓ All schedules cleared from local DB');
+      debugPrint('✓ All schedules cleared from local DB');
     } catch (e) {
-      print('✗ Error clearing schedules: $e');
+      debugPrint('✗ Error clearing schedules: $e');
       rethrow;
     }
   }

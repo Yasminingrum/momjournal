@@ -5,8 +5,9 @@
 library;
 
 import 'package:flutter/foundation.dart';
-import '../../data/repositories/sync_repository.dart';
+
 import '../../core/errors/exceptions.dart';
+import '../../data/repositories/sync_repository.dart';
 
 class SyncProvider with ChangeNotifier {
 
@@ -31,7 +32,9 @@ class SyncProvider with ChangeNotifier {
   bool get autoSyncEnabled => _autoSyncEnabled;
 
   String get lastSyncTimeFormatted {
-    if (_lastSyncTime == null) return 'Belum pernah sync';
+    if (_lastSyncTime == null) {
+      return 'Belum pernah sync';
+    }
     
     final now = DateTime.now();
     final difference = now.difference(_lastSyncTime!);

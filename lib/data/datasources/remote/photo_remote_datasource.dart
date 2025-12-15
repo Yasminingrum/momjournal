@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/exceptions.dart';
 import '../../../domain/entities/photo_entity.dart';
@@ -42,7 +43,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      print('📤 Uploading photo: $photoId');
+      debugPrint('📤 Uploading photo: $photoId');
 
       final ref = _userPhotosRef!.child('$photoId.jpg');
       final uploadTask = ref.putFile(
@@ -53,13 +54,13 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       final snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      print('✅ Photo uploaded: $downloadUrl');
+      debugPrint('✅ Photo uploaded: $downloadUrl');
       return downloadUrl;
     } on FirebaseException catch (e) {
-      print('❌ Firebase error uploading photo: ${e.code}');
+      debugPrint('❌ Firebase error uploading photo: ${e.code}');
       throw StorageException(FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      print('❌ Error uploading photo: $e');
+      debugPrint('❌ Error uploading photo: $e');
       throw StorageException('Gagal mengunggah foto: $e');
     }
   }
@@ -75,7 +76,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
           .doc(photo.id)
           .set(_photoToFirestore(photo));
 
-      print('✅ Photo metadata created: ${photo.id}');
+      debugPrint('✅ Photo metadata created: ${photo.id}');
     } catch (e) {
       throw DatabaseException('Gagal menyimpan metadata foto: $e');
     }
@@ -109,7 +110,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       data['updatedAt'] = FieldValue.serverTimestamp();
 
       await _photosCollection!.doc(photo.id).update(data);
-      print('✅ Photo updated: ${photo.id}');
+      debugPrint('✅ Photo updated: ${photo.id}');
     } catch (e) {
       throw DatabaseException('Gagal memperbarui foto: $e');
     }
@@ -125,11 +126,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       // Delete from Storage
       final ref = _firebaseService.storage.refFromURL(downloadUrl);
       await ref.delete();
-      print('✅ Photo deleted from Storage');
+      debugPrint('✅ Photo deleted from Storage');
 
       // Delete metadata
       await _photosCollection!.doc(photoId).delete();
-      print('✅ Photo metadata deleted: $photoId');
+      debugPrint('✅ Photo metadata deleted: $photoId');
     } on FirebaseException catch (e) {
       if (e.code == 'object-not-found') {
         // File already deleted, just remove metadata

@@ -99,6 +99,7 @@ extension MoodTypeExtension on MoodType {
 
 /// Helper class for MoodType conversions
 class MoodHelper {
+  MoodHelper._();
   /// Converts string to MoodType
   /// 
   /// Returns null if string doesn't match any mood type

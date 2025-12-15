@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
 
@@ -10,10 +12,10 @@ class GetPhotosUseCase {
   Future<List<PhotoEntity>> execute() async {
     try {
       final photos = await repository.getAllPhotos();
-      print('✅ UseCase: Retrieved ${photos.length} photos');
+      debugPrint('✅ UseCase: Retrieved ${photos.length} photos');
       return photos;
     } catch (e) {
-      print('❌ UseCase: Failed to get photos: $e');
+      debugPrint('❌ UseCase: Failed to get photos: $e');
       rethrow;
     }
   }
@@ -38,10 +40,10 @@ class GetPhotosUseCase {
         endIndex > allPhotos.length ? allPhotos.length : endIndex,
       );
       
-      print('✅ UseCase: Retrieved ${paginatedPhotos.length} photos (page $page)');
+      debugPrint('✅ UseCase: Retrieved ${paginatedPhotos.length} photos (page $page)');
       return paginatedPhotos;
     } catch (e) {
-      print('❌ UseCase: Failed to get paginated photos: $e');
+      debugPrint('❌ UseCase: Failed to get paginated photos: $e');
       rethrow;
     }
   }
@@ -52,10 +54,10 @@ class GetPhotosUseCase {
       final allPhotos = await repository.getAllPhotos();
       final milestones = allPhotos.where((p) => p.isMilestone).toList();
       
-      print('✅ UseCase: Retrieved ${milestones.length} milestone photos');
+      debugPrint('✅ UseCase: Retrieved ${milestones.length} milestone photos');
       return milestones;
     } catch (e) {
-      print('❌ UseCase: Failed to get milestone photos: $e');
+      debugPrint('❌ UseCase: Failed to get milestone photos: $e');
       rethrow;
     }
   }
@@ -70,10 +72,10 @@ class GetPhotosUseCase {
         return capturedDate.year == year && capturedDate.month == month;
       }).toList();
       
-      print('✅ UseCase: Retrieved ${photosInMonth.length} photos for $year-$month');
+      debugPrint('✅ UseCase: Retrieved ${photosInMonth.length} photos for $year-$month');
       return photosInMonth;
     } catch (e) {
-      print('❌ UseCase: Failed to get photos by month: $e');
+      debugPrint('❌ UseCase: Failed to get photos by month: $e');
       rethrow;
     }
   }
@@ -92,10 +94,10 @@ class GetPhotosUseCase {
                capturedDate.isBefore(endDate);
       }).toList();
       
-      print('✅ UseCase: Retrieved ${photosInRange.length} photos for date range');
+      debugPrint('✅ UseCase: Retrieved ${photosInRange.length} photos for date range');
       return photosInRange;
     } catch (e) {
-      print('❌ UseCase: Failed to get photos by date range: $e');
+      debugPrint('❌ UseCase: Failed to get photos by date range: $e');
       rethrow;
     }
   }
@@ -106,10 +108,10 @@ class GetPhotosUseCase {
       final photos = await repository.getAllPhotos();
       final recent = photos.take(limit).toList();
       
-      print('✅ UseCase: Retrieved ${recent.length} recent photos');
+      debugPrint('✅ UseCase: Retrieved ${recent.length} recent photos');
       return recent;
     } catch (e) {
-      print('❌ UseCase: Failed to get recent photos: $e');
+      debugPrint('❌ UseCase: Failed to get recent photos: $e');
       rethrow;
     }
   }

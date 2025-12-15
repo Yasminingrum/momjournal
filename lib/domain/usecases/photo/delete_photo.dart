@@ -4,6 +4,8 @@
 /// Location: lib/domain/usecases/photo/delete_photo.dart
 library;
 
+import 'package:flutter/foundation.dart';
+
 import '../../../core/errors/exceptions.dart';
 import '../../../data/repositories/photo_repository.dart';
 import '../../entities/photo_entity.dart';
@@ -21,9 +23,9 @@ class DeletePhotoUseCase {
 
       await repository.deletePhoto(photo.id);
       
-      print('✅ UseCase: Photo deleted successfully');
+      debugPrint('✅ UseCase: Photo deleted successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to delete photo: $e');
+      debugPrint('❌ UseCase: Failed to delete photo: $e');
       rethrow;
     }
   }
@@ -35,9 +37,9 @@ class DeletePhotoUseCase {
         await repository.deletePhoto(photo.id);
       }
       
-      print('✅ UseCase: ${photos.length} photos deleted successfully');
+      debugPrint('✅ UseCase: ${photos.length} photos deleted successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to delete multiple photos: $e');
+      debugPrint('❌ UseCase: Failed to delete multiple photos: $e');
       rethrow;
     }
   }

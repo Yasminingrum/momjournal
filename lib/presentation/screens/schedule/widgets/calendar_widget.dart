@@ -24,8 +24,8 @@ class CalendarWidget extends StatefulWidget {
   final DateTime focusedDay;
   final DateTime? selectedDay;
   final Map<DateTime, List<CalendarEvent>> events;
-  final Function(DateTime, DateTime) onDaySelected;
-  final Function(DateTime) onPageChanged;
+  final void Function(DateTime, DateTime) onDaySelected;
+  final void Function(DateTime) onPageChanged;
   final CalendarFormat initialFormat;
 
   @override
@@ -75,7 +75,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
           calendarStyle: CalendarStyle(
             // Today
             todayDecoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.3),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             todayTextStyle: TextStyle(
@@ -109,7 +109,7 @@ class _CalendarWidgetState extends State<CalendarWidget> {
             titleCentered: true,
             formatButtonShowsNext: false,
             formatButtonDecoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues (alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             formatButtonTextStyle: TextStyle(
@@ -254,12 +254,12 @@ class CompactCalendar extends StatelessWidget {
     this.maxDate,
   });
   final DateTime selectedDate;
-  final Function(DateTime) onDateSelected;
+  final void Function(DateTime) onDateSelected;
   final DateTime? minDate;
   final DateTime? maxDate;
 
   @override
-  Widget build(BuildContext context) => TableCalendar(
+  Widget build(BuildContext context) => TableCalendar<dynamic>(
       firstDay: minDate ?? DateTime.utc(2020, 1, 1),
       lastDay: maxDate ?? DateTime.utc(2030, 12, 31),
       focusedDay: selectedDate,
@@ -276,7 +276,7 @@ class CompactCalendar extends StatelessWidget {
       ),
       calendarStyle: CalendarStyle(
         todayDecoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.3),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         selectedDecoration: BoxDecoration(

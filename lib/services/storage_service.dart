@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '/core/constants/app_constants.dart';
 
@@ -55,7 +56,7 @@ class StorageService {
         : appDocumentsDirectory;
     
     // Create directory if it doesn't exist
-    if (!await directory.exists()) {
+    if (!directory.existsSync()) {
       await directory.create(recursive: true);
     }
     
@@ -79,12 +80,12 @@ class StorageService {
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
       
-      if (await file.exists()) {
+      if (file.existsSync()) {
         return await file.readAsBytes();
       }
       return null;
     } catch (e) {
-      print('Error reading file: $e');
+      debugPrint('Error reading file: $e');
       return null;
     }
   }
@@ -102,13 +103,13 @@ class StorageService {
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
       
-      if (await file.exists()) {
+      if (file.existsSync()) {
         await file.delete();
         return true;
       }
       return false;
     } catch (e) {
-      print('Error deleting file: $e');
+      debugPrint('Error deleting file: $e');
       return false;
     }
   }
@@ -126,9 +127,9 @@ class StorageService {
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
       
-      return await file.exists();
+      return file.existsSync();
     } catch (e) {
-      print('Error checking file existence: $e');
+      debugPrint('Error checking file existence: $e');
       return false;
     }
   }
@@ -154,12 +155,12 @@ class StorageService {
           ? Directory('${appDocumentsDirectory.path}/$subDirectory')
           : appDocumentsDirectory;
       
-      if (await directory.exists()) {
+      if (directory.existsSync()) {
         return directory.listSync();
       }
       return [];
     } catch (e) {
-      print('Error listing files: $e');
+      debugPrint('Error listing files: $e');
       return [];
     }
   }
@@ -173,7 +174,7 @@ class StorageService {
           ? Directory('${appDocumentsDirectory.path}/$subDirectory')
           : appDocumentsDirectory;
       
-      if (!await directory.exists()) {
+      if (!directory.existsSync()) {
         return 0;
       }
       
@@ -186,7 +187,7 @@ class StorageService {
       
       return totalSize;
     } catch (e) {
-      print('Error calculating directory size: $e');
+      debugPrint('Error calculating directory size: $e');
       return 0;
     }
   }
@@ -197,14 +198,14 @@ class StorageService {
   /// Clear cache
   Future<bool> clearCache() async {
     try {
-      if (await cacheDirectory.exists()) {
+      if (cacheDirectory.existsSync()) {
         await cacheDirectory.delete(recursive: true);
         await cacheDirectory.create();
         return true;
       }
       return false;
     } catch (e) {
-      print('Error clearing cache: $e');
+      debugPrint('Error clearing cache: $e');
       return false;
     }
   }
@@ -212,14 +213,14 @@ class StorageService {
   /// Clear temporary directory
   Future<bool> clearTemporaryFiles() async {
     try {
-      if (await temporaryDirectory.exists()) {
+      if (temporaryDirectory.existsSync()) {
         await temporaryDirectory.delete(recursive: true);
         await temporaryDirectory.create();
         return true;
       }
       return false;
     } catch (e) {
-      print('Error clearing temporary files: $e');
+      debugPrint('Error clearing temporary files: $e');
       return false;
     }
   }
@@ -229,7 +230,7 @@ class StorageService {
     int maxAgeInDays = AppConstants.cacheMaxAge,
   }) async {
     try {
-      if (!await cacheDirectory.exists()) {
+      if (!cacheDirectory.existsSync()) {
         return 0;
       }
       
@@ -238,7 +239,7 @@ class StorageService {
       
       await for (final entity in cacheDirectory.list(recursive: true)) {
         if (entity is File) {
-          final lastModified = await entity.lastModified();
+          final lastModified = entity.lastModifiedSync();
           if (lastModified.isBefore(cutoffDate)) {
             await entity.delete();
             deletedCount++;
@@ -248,7 +249,7 @@ class StorageService {
       
       return deletedCount;
     } catch (e) {
-      print('Error clearing old cache: $e');
+      debugPrint('Error clearing old cache: $e');
       return 0;
     }
   }
@@ -287,7 +288,7 @@ class StorageService {
       
       return true;
     } catch (e) {
-      print('Error ensuring cache size limit: $e');
+      debugPrint('Error ensuring cache size limit: $e');
       return false;
     }
   }
@@ -300,7 +301,7 @@ class StorageService {
     try {
       return await source.copy(destinationPath);
     } catch (e) {
-      print('Error copying file: $e');
+      debugPrint('Error copying file: $e');
       return null;
     }
   }
@@ -313,7 +314,7 @@ class StorageService {
     try {
       return await source.rename(destinationPath);
     } catch (e) {
-      print('Error moving file: $e');
+      debugPrint('Error moving file: $e');
       return null;
     }
   }
@@ -330,13 +331,13 @@ class StorageService {
       
       final directory = Directory('$parentPath/$directoryName');
       
-      if (!await directory.exists()) {
+      if (!directory.existsSync()) {
         return await directory.create(recursive: true);
       }
       
       return directory;
     } catch (e) {
-      print('Error creating directory: $e');
+      debugPrint('Error creating directory: $e');
       return null;
     }
   }
@@ -353,14 +354,14 @@ class StorageService {
       
       final directory = Directory('$parentPath/$directoryName');
       
-      if (await directory.exists()) {
+      if (directory.existsSync()) {
         await directory.delete(recursive: true);
         return true;
       }
       
       return false;
     } catch (e) {
-      print('Error deleting directory: $e');
+      debugPrint('Error deleting directory: $e');
       return false;
     }
   }

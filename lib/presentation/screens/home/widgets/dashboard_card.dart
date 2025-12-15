@@ -13,11 +13,7 @@ import 'package:flutter/material.dart';
 class DashboardCard extends StatelessWidget {
 
   const DashboardCard({
-    super.key,
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
+    required this.title, required this.value, required this.icon, required this.color, super.key,
     this.backgroundColor,
     this.onTap,
     this.isLoading = false,
@@ -40,12 +36,12 @@ class DashboardCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      color: backgroundColor ?? color.withOpacity(0.1),
+      color: backgroundColor ?? color.withValues (alpha:0.1),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: isLoading
               ? _buildLoading()
               : _buildContent(context),
@@ -63,7 +59,7 @@ class DashboardCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues (alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -155,10 +151,7 @@ class DashboardCard extends StatelessWidget {
 class ScheduleDashboardCard extends StatelessWidget {
 
   const ScheduleDashboardCard({
-    super.key,
-    required this.todayCount,
-    required this.upcomingCount,
-    required this.onTap,
+    required this.todayCount, required this.upcomingCount, required this.onTap, super.key,
     this.isLoading = false,
   });
   final int todayCount;
@@ -190,10 +183,7 @@ class ScheduleDashboardCard extends StatelessWidget {
 class JournalDashboardCard extends StatelessWidget {
 
   const JournalDashboardCard({
-    super.key,
-    required this.todayMood,
-    required this.weeklyCount,
-    required this.onTap,
+    required this.todayMood, required this.weeklyCount, required this.onTap, super.key,
     this.isLoading = false,
   });
   final String todayMood;
@@ -223,10 +213,7 @@ class JournalDashboardCard extends StatelessWidget {
 class PhotoDashboardCard extends StatelessWidget {
 
   const PhotoDashboardCard({
-    super.key,
-    required this.totalPhotos,
-    required this.thisMonthCount,
-    required this.onTap,
+    required this.totalPhotos, required this.thisMonthCount, required this.onTap, super.key,
     this.isLoading = false,
   });
   final int totalPhotos;
@@ -256,10 +243,8 @@ class PhotoDashboardCard extends StatelessWidget {
 class MilestoneDashboardCard extends StatelessWidget {
 
   const MilestoneDashboardCard({
-    super.key,
-    required this.milestoneCount,
+    required this.milestoneCount, required this.onTap, super.key,
     this.latestMilestone,
-    required this.onTap,
     this.isLoading = false,
   });
   final int milestoneCount;

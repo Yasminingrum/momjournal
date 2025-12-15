@@ -44,7 +44,7 @@ class SettingsTile extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: (iconColor ?? Theme.of(context).primaryColor)
-                        .withOpacity(0.1),
+                        .withValues (alpha:0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -105,7 +105,7 @@ class SettingsSwitchTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final Function(bool) onChanged;
+  final void Function(bool) onChanged;
   final bool enabled;
   final bool showDivider;
 
@@ -235,8 +235,7 @@ class SettingsSectionHeader extends StatelessWidget {
 class SettingsCard extends StatelessWidget {
 
   const SettingsCard({
-    super.key,
-    required this.children,
+    required this.children, super.key,
     this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
   });
   final List<Widget> children;
@@ -310,7 +309,7 @@ class SettingsSliderTile extends StatelessWidget {
   final double max;
   final int? divisions;
   final String Function(double)? valueLabel;
-  final Function(double) onChanged;
+  final void Function(double) onChanged;
   final bool enabled;
 
   @override
@@ -323,7 +322,7 @@ class SettingsSliderTile extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: (iconColor ?? Theme.of(context).primaryColor)
-                        .withOpacity(0.1),
+                        .withValues (alpha:0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -387,7 +386,7 @@ class SettingsCheckboxTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final Function(bool?) onChanged;
+  final void Function(bool?) onChanged;
   final bool enabled;
   final bool showDivider;
 

@@ -28,7 +28,7 @@ class MoodSelector extends StatefulWidget {
     this.enableHaptics = true,
   });
   final MoodLevel? selectedMood;
-  final Function(MoodLevel) onMoodSelected;
+  final void Function(MoodLevel) onMoodSelected;
   final double size;
   final bool showLabels;
   final bool enableHaptics;
@@ -116,12 +116,12 @@ class _MoodSelectorState extends State<MoodSelector>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? mood.color.withOpacity(0.2)
+                    ? mood.color.withValues(alpha: 0.2)
                     : Colors.transparent,
                 border: Border.all(
                   color: isSelected
                       ? mood.color
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                   width: isSelected ? 3 : 1,
                 ),
               ),
@@ -183,17 +183,17 @@ enum MoodLevel {
     value: 5,
   );
 
-  final String emoji;
-  final String label;
-  final Color color;
-  final int value;
-
   const MoodLevel({
     required this.emoji,
     required this.label,
     required this.color,
     required this.value,
   });
+
+  final String emoji;
+  final String label;
+  final Color color;
+  final int value;
 
   /// Get mood level from value
   static MoodLevel? fromValue(int value) {
@@ -225,7 +225,7 @@ class CompactMoodSelector extends StatelessWidget {
     this.selectedMood,
   });
   final MoodLevel? selectedMood;
-  final Function(MoodLevel) onMoodSelected;
+  final void Function(MoodLevel) onMoodSelected;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -245,12 +245,12 @@ class CompactMoodSelector extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? mood.color.withOpacity(0.2)
+                    ? mood.color.withValues(alpha: 0.2)
                     : Colors.transparent,
                 border: Border.all(
                   color: isSelected
                       ? mood.color
-                      : Colors.grey.withOpacity(0.3),
+                      : Colors.grey.withValues(alpha: 0.3),
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -289,7 +289,7 @@ class MoodIndicator extends StatelessWidget {
           height: size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: mood.color.withOpacity(0.1),
+            color: mood.color.withValues(alpha: 0.1),
             border: Border.all(color: mood.color, width: 2),
           ),
           child: Center(
@@ -403,6 +403,7 @@ class _MoodSelectorDialogState extends State<MoodSelectorDialog> {
       ),
     );
 
+  // ignore: unused_element
   static Future<MoodLevel?> show(
     BuildContext context, {
     MoodLevel? initialMood,

@@ -47,7 +47,7 @@ class JournalDetailScreen extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: _getMoodColor(journal.mood).withOpacity(0.2),
+                  color: _getMoodColor(journal.mood).withValues (alpha: 0.2),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: _getMoodColor(journal.mood),

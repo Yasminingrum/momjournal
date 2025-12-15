@@ -128,7 +128,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getCategoryColor().withOpacity(0.2),
+                  color: _getCategoryColor().withValues (alpha:0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
