@@ -16,7 +16,12 @@ import 'package:flutter/material.dart';
 class ScheduleCard extends StatelessWidget {
 
   const ScheduleCard({
-    required this.id, required this.title, required this.dateTime, required this.category, required this.categoryColor, super.key,
+    required this.id, 
+    required this.title, 
+    required this.dateTime, 
+    required this.category, 
+    required this.categoryColor, 
+    super.key,
     this.notes,
     this.hasReminder = false,
     this.isCompleted = false,
@@ -36,7 +41,7 @@ class ScheduleCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
-  final void Function(bool?)? onCompletedChanged;
+  final void Function({required bool isCompleted})? onCompletedChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +82,7 @@ class ScheduleCard extends StatelessWidget {
                 if (onCompletedChanged != null)
                   Checkbox(
                     value: isCompleted,
-                    onChanged: onCompletedChanged,
+                    onChanged: (value) => onCompletedChanged!(isCompleted: value ?? false),
                     activeColor: categoryColor,
                   ),
                 // Category indicator
@@ -252,14 +257,20 @@ class ScheduleCard extends StatelessWidget {
 class ScheduleListSection extends StatelessWidget {
 
   const ScheduleListSection({
-    required this.date, required this.schedules, required this.onScheduleTap, required this.onScheduleEdit, required this.onScheduleDelete, required this.onCompletedChanged, super.key,
+    required this.date, 
+    required this.schedules, 
+    required this.onScheduleTap, 
+    required this.onScheduleEdit, 
+    required this.onScheduleDelete, 
+    required this.onCompletedChanged, 
+    super.key,
   });
   final DateTime date;
   final List<ScheduleCardData> schedules;
   final void Function(String) onScheduleTap;
   final void Function(String) onScheduleEdit;
   final void Function(String) onScheduleDelete;
-  final void Function(String, bool) onCompletedChanged;
+  final void Function(String id, {required bool isCompleted}) onCompletedChanged;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -291,8 +302,8 @@ class ScheduleListSection extends StatelessWidget {
               onTap: () => onScheduleTap(schedule.id),
               onEdit: () => onScheduleEdit(schedule.id),
               onDelete: () => onScheduleDelete(schedule.id),
-              onCompletedChanged: (value) =>
-                  onCompletedChanged(schedule.id, value ?? false),
+              onCompletedChanged: ({required bool isCompleted}) =>
+                  onCompletedChanged(schedule.id, isCompleted: isCompleted),
             ),),
       ],
     );

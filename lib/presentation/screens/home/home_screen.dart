@@ -103,6 +103,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ]);
   }
 
+  // Navigate to Schedule tab
+  void _navigateToSchedule() {
+    final homeState = context.findAncestorStateOfType<_HomeScreenState>();
+    homeState?.setState(() {
+      homeState._currentIndex = 1;
+    });
+  }
+
+  // Navigate to Journal tab
+  void _navigateToJournal() {
+    final homeState = context.findAncestorStateOfType<_HomeScreenState>();
+    homeState?.setState(() {
+      homeState._currentIndex = 2;
+    });
+  }
+
+  // Navigate to Gallery tab
+  void _navigateToGallery() {
+    final homeState = context.findAncestorStateOfType<_HomeScreenState>();
+    homeState?.setState(() {
+      homeState._currentIndex = 3;
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
@@ -114,6 +138,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Syncing...')),
               );
+              _loadData();
             },
           ),
         ],
@@ -121,27 +146,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: RefreshIndicator(
         onRefresh: _loadData,
         child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting
               _buildGreeting(),
               const SizedBox(height: 24),
-
-              // Quick Actions
               _buildQuickActions(),
               const SizedBox(height: 24),
-
-              // Today's Agenda
               _buildTodayAgenda(),
               const SizedBox(height: 24),
-
-              // Mood This Week
               _buildMoodSection(),
               const SizedBox(height: 24),
-
-              // Photo Memories
               _buildPhotoMemories(),
             ],
           ),
@@ -151,15 +168,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildGreeting() {
     final hour = DateTime.now().hour;
-    String greeting;
-    
-    if (hour < 12) {
-      greeting = 'Good Morning';
-    } else if (hour < 17) {
-      greeting = 'Good Afternoon';
-    } else {
-      greeting = 'Good Evening';
-    }
+    final greeting = hour < 12
+        ? 'Good Morning'
+        : hour < 17
+            ? 'Good Afternoon'
+            : 'Good Evening';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.event_note,
                 label: 'Add Schedule',
                 color: ColorConstants.categoryHealth,
-                onTap: () {},
+                onTap: _navigateToSchedule,
               ),
             ),
             const SizedBox(width: 12),
@@ -205,7 +218,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.edit_note,
                 label: 'Write Journal',
                 color: ColorConstants.primaryColor,
-                onTap: () {},
+                onTap: _navigateToJournal,
               ),
             ),
             const SizedBox(width: 12),
@@ -214,7 +227,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icons.add_a_photo,
                 label: 'Add Photo',
                 color: ColorConstants.categoryMilestone,
-                onTap: () {},
+                onTap: _navigateToGallery,
               ),
             ),
           ],
@@ -347,7 +360,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: _navigateToGallery,
                   child: const Text('View All'),
                 ),
               ],
@@ -358,21 +371,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
               builder: (context, snapshot) {
                 final count = snapshot.data ?? 0;
                 return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          const Icon(Icons.photo_library, size: 48),
-                          const SizedBox(height: 8),
-                          Text(
-                            '$count Photos',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                  child: InkWell(
+                    onTap: _navigateToGallery,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const Icon(Icons.photo_library, size: 48),
+                            const SizedBox(height: 8),
+                            Text(
+                              '$count Photos',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -415,7 +432,10 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          debugPrint('🔥 Quick Action tapped: $label');
+          onTap();
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 16),

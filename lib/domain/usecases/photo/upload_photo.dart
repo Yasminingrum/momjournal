@@ -40,10 +40,8 @@ class UploadPhotoUseCase {
       // Upload photo melalui repository
       await repository.createPhoto(photo);
       
-      print('✅ UseCase: Photo uploaded successfully');
       return photo;
     } catch (e) {
-      print('❌ UseCase: Failed to upload photo: $e');
       rethrow;
     }
   }

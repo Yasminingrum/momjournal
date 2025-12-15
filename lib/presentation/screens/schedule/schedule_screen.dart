@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/presentation/routes/app_router.dart';
 
 class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({super.key});
@@ -13,7 +14,10 @@ class ScheduleScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Navigate to Add Schedule Screen
+          Navigator.pushNamed(context, Routes.addSchedule);
         },
+        tooltip: 'Add Schedule',
         child: const Icon(Icons.add),
       ),
     );

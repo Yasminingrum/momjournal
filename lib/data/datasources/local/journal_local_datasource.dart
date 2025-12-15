@@ -178,11 +178,11 @@ class JournalLocalDataSource {
   /// Returns journals sorted by date descending
   List<JournalModel> getJournalsByMood(String mood) {
     try {
-      final journals = _journalBox.values.where((journal) {
+      final journals = _journalBox.values.where((journal) =>
         // Convert Mood enum to string for comparison
-        return journal.mood.toString().split('.').last.toLowerCase() == 
-               mood.toLowerCase();
-      }).toList()
+        journal.mood.toString().split('.').last.toLowerCase() == 
+               mood.toLowerCase(),
+      ).toList()
 
       // Sort by date descending
       ..sort((a, b) => b.date.compareTo(a.date));

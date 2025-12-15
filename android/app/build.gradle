@@ -7,9 +7,17 @@ plugins {
 
 android {
     namespace "com.momjournal.app"
+
     compileSdk 36
 
-    ndkVersion flutter.ndkVersion
+    defaultConfig {
+        applicationId "com.momjournal.app"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -21,21 +29,11 @@ android {
         jvmTarget = "17"
     }
 
-    defaultConfig {
-        applicationId "com.momjournal.app"
-        minSdk 24
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
-        multiDexEnabled true
-    }
-
     buildTypes {
         debug {
             minifyEnabled false
             shrinkResources false
         }
-
         release {
             signingConfig signingConfigs.debug
             minifyEnabled false

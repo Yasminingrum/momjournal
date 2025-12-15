@@ -20,10 +20,7 @@ class CreateScheduleUseCase {
       
       // Create schedule
       await repository.createSchedule(schedule);
-      
-      print('✅ UseCase: Schedule created successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to create schedule: $e');
       rethrow;
     }
   }

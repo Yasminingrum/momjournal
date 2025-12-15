@@ -40,10 +40,11 @@ void main() async {
 
 /// Root widget aplikasi MomJournal
 class MomJournalApp extends StatelessWidget {
-
   const MomJournalApp({
-    required this.hiveDatabase, super.key,
+    required this.hiveDatabase,
+    super.key,
   });
+
   final HiveDatabase hiveDatabase;
 
   @override
@@ -51,43 +52,38 @@ class MomJournalApp extends StatelessWidget {
       providers: [
         // Schedule Provider
         ChangeNotifierProvider(
-          create: (_) => ScheduleProvider(),
+          create: (_) => ScheduleProvider()..loadAllSchedules(),
         ),
 
         // Journal Provider
         ChangeNotifierProvider(
-          create: (_) => JournalProvider(),
+          create: (_) => JournalProvider()..loadAllJournals(),
         ),
 
         // Photo Provider
         ChangeNotifierProvider(
-          create: (_) => PhotoProvider(),
+          create: (_) => PhotoProvider()..loadPhotos(),
         ),
       ],
-      child: Consumer<ScheduleProvider>(
-        builder: (context, scheduleProvider, _) {
-          // Get theme mode from provider (atau bisa dari settings)
-          // For now, we'll use system theme
-          return MaterialApp(
-            title: 'MomJournal',
-            debugShowCheckedModeBanner: false,
+      child: MaterialApp(
+        title: 'MomJournal',
+        debugShowCheckedModeBanner: false,
 
-            // Theme configuration
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: ThemeMode.system, // Follow system theme
+        // Theme configuration
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system, // Follow system theme
 
-            // Initial route
-            home: const HomeScreen(),
+        // Initial route
+        home: const HomeScreen(),
 
-            // Error handling
-            builder: (context, child) {
-              // Global error boundary
-              ErrorWidget.builder = (FlutterErrorDetails errorDetails) => _ErrorScreen(errorDetails: errorDetails);
+        // Error handling
+        builder: (context, child) {
+          // Global error boundary
+          ErrorWidget.builder = (FlutterErrorDetails errorDetails) =>
+              _ErrorScreen(errorDetails: errorDetails);
 
-              return child ?? const SizedBox.shrink();
-            },
-          );
+          return child ?? const SizedBox.shrink();
         },
       ),
     );
@@ -95,8 +91,8 @@ class MomJournalApp extends StatelessWidget {
 
 /// Error screen yang ditampilkan saat terjadi error
 class _ErrorScreen extends StatelessWidget {
-
   const _ErrorScreen({required this.errorDetails});
+
   final FlutterErrorDetails errorDetails;
 
   @override
@@ -140,7 +136,7 @@ class _ErrorScreen extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Error details (hanya di debug mode)
-              if (const bool.fromEnvironment('dart.vm.product') == false) ...[
+              if (!const bool.fromEnvironment('dart.vm.product')) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(

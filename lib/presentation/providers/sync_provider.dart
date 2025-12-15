@@ -1,7 +1,3 @@
-/// Sync Provider
-/// 
-/// State management untuk cloud synchronization
-/// Location: lib/presentation/providers/sync_provider.dart
 library;
 
 import 'package:flutter/foundation.dart';
@@ -53,15 +49,12 @@ class SyncProvider with ChangeNotifier {
   /// Perform full sync
   Future<bool> syncAll() async {
     if (_status == SyncStatus.syncing) {
-      print('⚠️ Sync already in progress');
       return false;
     }
 
     try {
       _setStatus(SyncStatus.syncing);
       _errorMessage = null;
-
-      print('🔄 Provider: Starting sync...');
       
       final result = await _repository.syncAll();
       
@@ -71,11 +64,9 @@ class SyncProvider with ChangeNotifier {
       if (result.hasErrors) {
         _errorMessage = result.errors.join(', ');
         _setStatus(SyncStatus.error);
-        print('⚠️ Provider: Sync completed with errors');
         return false;
       } else {
         _setStatus(SyncStatus.success);
-        print('✅ Provider: Sync completed successfully');
         
         // Auto-reset to idle after 2 seconds
         Future.delayed(const Duration(seconds: 2), () {
@@ -87,12 +78,10 @@ class SyncProvider with ChangeNotifier {
         return true;
       }
     } on SyncException catch (e) {
-      print('❌ Provider: Sync failed: ${e.message}');
       _errorMessage = e.message;
       _setStatus(SyncStatus.error);
       return false;
     } catch (e) {
-      print('❌ Provider: Unexpected error during sync: $e');
       _errorMessage = 'Terjadi kesalahan saat sync';
       _setStatus(SyncStatus.error);
       return false;
@@ -166,10 +155,9 @@ class SyncProvider with ChangeNotifier {
   }
 
   /// Toggle auto sync
-  void toggleAutoSync(bool enabled) {
+  void toggleAutoSync({required bool enabled}) {
     _autoSyncEnabled = enabled;
     notifyListeners();
-    print('🔄 Auto sync ${enabled ? 'enabled' : 'disabled'}');
   }
 
   /// Clear error

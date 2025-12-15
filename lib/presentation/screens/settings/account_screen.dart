@@ -1,7 +1,3 @@
-/// Account Screen
-/// 
-/// Screen untuk account settings dan user info
-/// Location: lib/presentation/screens/settings/account_screen.dart
 // ignore_for_file: lines_longer_than_80_chars
 
 library;
@@ -271,7 +267,14 @@ class AccountScreen extends StatelessWidget {
       return;
     }
 
+    // Read provider before any async call
+    final authProvider = context.read<AuthProvider>();
+
     // Show loading
+    if (!context.mounted) {
+      return;
+    }
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -280,7 +283,6 @@ class AccountScreen extends StatelessWidget {
       ),
     );
 
-    final authProvider = context.read<AuthProvider>();
     final success = await authProvider.deleteAccount();
 
     if (!context.mounted) {

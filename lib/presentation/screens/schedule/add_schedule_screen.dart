@@ -26,7 +26,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  DateTime? _selectedDateTime;
+  late DateTime _selectedDateTime;
   ScheduleCategory _selectedCategory = ScheduleCategory.other;
   bool _reminderEnabled = false;
   int _reminderMinutes = 15;
@@ -192,7 +192,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                         children: [
                           const Icon(Icons.calendar_today, size: 20),
                           const SizedBox(width: 8),
-                          Text(_formatDate(_selectedDateTime!)),
+                          Text(_formatDate(_selectedDateTime)),
                         ],
                       ),
                     ),
@@ -212,7 +212,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                         children: [
                           const Icon(Icons.access_time, size: 20),
                           const SizedBox(width: 8),
-                          Text(_formatTime(_selectedDateTime!)),
+                          Text(_formatTime(_selectedDateTime)),
                         ],
                       ),
                     ),
@@ -305,7 +305,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   Future<void> _selectDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDateTime!,
+      initialDate: _selectedDateTime,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
     );
@@ -316,8 +316,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           picked.year,
           picked.month,
           picked.day,
-          _selectedDateTime!.hour,
-          _selectedDateTime!.minute,
+          _selectedDateTime.hour,
+          _selectedDateTime.minute,
         );
       });
     }
@@ -326,15 +326,15 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   Future<void> _selectTime() async {
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime!),
+      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
     );
 
     if (picked != null) {
       setState(() {
         _selectedDateTime = DateTime(
-          _selectedDateTime!.year,
-          _selectedDateTime!.month,
-          _selectedDateTime!.day,
+          _selectedDateTime.year,
+          _selectedDateTime.month,
+          _selectedDateTime.day,
           picked.hour,
           picked.minute,
         );
@@ -368,7 +368,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     final success = await scheduleProvider.createSchedule(
       title: _titleController.text.trim(),
       category: _selectedCategory,
-      dateTime: _selectedDateTime!,
+      dateTime: _selectedDateTime,
       notes: _descriptionController.text.trim().isEmpty 
           ? null 
           : _descriptionController.text.trim(),

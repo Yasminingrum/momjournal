@@ -1,7 +1,3 @@
-/// Update Schedule Use Case
-/// 
-/// Use case untuk update schedule
-/// Location: lib/domain/usecases/schedule/update_schedule.dart
 library;
 
 import '../../../core/errors/exceptions.dart';
@@ -20,10 +16,7 @@ class UpdateScheduleUseCase {
       
       // Update schedule
       await repository.updateSchedule(schedule);
-      
-      print('✅ UseCase: Schedule updated successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to update schedule: $e');
       rethrow;
     }
   }

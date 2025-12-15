@@ -80,7 +80,62 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// Create a new photo entry
+  /// Upload photo to Firebase Storage and save to local DB
+  /// This is the MAIN method to use for adding new photos
+  Future<bool> uploadPhoto({
+    required String imagePath,
+    String? caption,
+    bool isMilestone = false,
+    DateTime? dateTaken,
+    String? userId,
+  }) async {
+    try {
+      _isUploading = true;
+      _uploadProgress = 0.0;
+      notifyListeners();
+
+      // Create photo entity
+      final photo = PhotoEntity(
+        id: _uuid.v4(),
+        userId: userId ?? 'default_user',
+        localPath: imagePath,
+        caption: caption,
+        isMilestone: isMilestone,
+        dateTaken: dateTaken ?? DateTime.now(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // Upload to Firebase Storage and save to DB
+      await _repository.uploadPhoto(
+        photo: photo,
+        imagePath: imagePath,
+        onProgress: (progress) {
+          _uploadProgress = progress;
+          notifyListeners();
+        },
+      );
+
+      // Reload photos
+      await loadPhotos(refresh: true);
+      
+      if (isMilestone) {
+        await loadMilestonePhotos();
+      }
+
+      _clearError();
+      return true;
+    } catch (e) {
+      _setError('Failed to upload photo: $e');
+      return false;
+    } finally {
+      _isUploading = false;
+      _uploadProgress = 0.0;
+      notifyListeners();
+    }
+  }
+
+  /// Create a new photo entry (without upload - for local only)
   Future<bool> createPhoto({
     required String localPath,
     String? caption,
@@ -200,8 +255,8 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// Simulate upload progress (for demo purposes)
-  /// In production, this would track actual Firebase Storage upload
+  /// Simulate upload progress (for demo/testing purposes)
+  /// In production, use uploadPhoto() which tracks actual Firebase upload
   Future<void> simulateUpload() async {
     _isUploading = true;
     _uploadProgress = 0.0;

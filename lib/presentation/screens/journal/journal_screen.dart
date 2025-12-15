@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '/presentation/routes/app_router.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -13,7 +14,10 @@ class JournalScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          // Navigate to Add Journal Screen
+          Navigator.pushNamed(context, Routes.addJournal);
         },
+        tooltip: 'Add Journal',
         child: const Icon(Icons.edit),
       ),
     );

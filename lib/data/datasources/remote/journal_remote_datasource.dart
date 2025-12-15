@@ -36,10 +36,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
       await _journalsCollection!
           .doc(journal.id)
           .set(_journalToFirestore(journal));
-
-      print('✅ Journal created: ${journal.id}');
     } catch (e) {
-      print('❌ Error creating journal: $e');
       throw DatabaseException('Gagal membuat jurnal: $e');
     }
   }
@@ -94,7 +91,6 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
       data['updatedAt'] = FieldValue.serverTimestamp();
 
       await _journalsCollection!.doc(journal.id).update(data);
-      print('✅ Journal updated: ${journal.id}');
     } catch (e) {
       throw DatabaseException('Gagal memperbarui jurnal: $e');
     }
@@ -108,7 +104,6 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
       }
 
       await _journalsCollection!.doc(journalId).delete();
-      print('✅ Journal deleted: $journalId');
     } catch (e) {
       throw DatabaseException('Gagal menghapus jurnal: $e');
     }

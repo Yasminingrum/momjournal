@@ -1,8 +1,11 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'dart:io';
+
 import 'package:hive_flutter/hive_flutter.dart';
+
 import '/core/errors/exceptions.dart';
+import '../../../core/errors/exceptions.dart' show CacheException, NotFoundException;
 import '../../models/photo_model.dart';
 
 

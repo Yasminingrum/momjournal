@@ -76,7 +76,6 @@ class NotificationService {
   void _onNotificationTap(NotificationResponse response) {
     final payload = response.payload;
     if (payload != null) {
-      print('Notification tapped with payload: $payload');
     }
   }
   

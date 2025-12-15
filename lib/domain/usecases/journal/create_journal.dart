@@ -1,7 +1,3 @@
-/// Create Journal Use Case
-/// 
-/// Use case untuk membuat journal entry baru
-/// Location: lib/domain/usecases/journal/create_journal.dart
 library;
 
 import '../../../core/errors/exceptions.dart';
@@ -20,10 +16,7 @@ class CreateJournalUseCase {
       
       // Create journal
       await repository.createJournal(journal);
-      
-      print('✅ UseCase: Journal created successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to create journal: $e');
       rethrow;
     }
   }

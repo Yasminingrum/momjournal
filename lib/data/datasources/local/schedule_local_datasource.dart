@@ -297,7 +297,7 @@ class ScheduleLocalDataSource {
   }
 
   /// Update sync status
-  Future<void> updateSyncStatus(String id, bool isSynced) async {
+  Future<void> updateSyncStatus(String id, {required bool isSynced}) async {
     try {
       final schedule = _scheduleBox.get(id);
       if (schedule == null) {

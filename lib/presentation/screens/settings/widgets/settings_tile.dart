@@ -105,7 +105,7 @@ class SettingsSwitchTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final void Function(bool) onChanged;
+  final void Function({required bool value}) onChanged;
   final bool enabled;
   final bool showDivider;
 
@@ -119,10 +119,10 @@ class SettingsSwitchTile extends StatelessWidget {
       showDivider: showDivider,
       trailing: Switch(
         value: value,
-        onChanged: enabled ? onChanged : null,
+        onChanged: enabled ? (newValue) => onChanged(value: newValue) : null,
         activeThumbColor: iconColor ?? Theme.of(context).primaryColor,
       ),
-      onTap: enabled ? () => onChanged(!value) : null,
+      onTap: enabled ? () => onChanged(value: !value) : null,
     );
 }
 
@@ -386,7 +386,7 @@ class SettingsCheckboxTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final void Function(bool?) onChanged;
+  final void Function({required bool value}) onChanged;
   final bool enabled;
   final bool showDivider;
 
@@ -400,9 +400,9 @@ class SettingsCheckboxTile extends StatelessWidget {
       showDivider: showDivider,
       trailing: Checkbox(
         value: value,
-        onChanged: enabled ? onChanged : null,
+        onChanged: enabled ? (newValue) => onChanged(value: newValue ?? false) : null,
         activeColor: iconColor ?? Theme.of(context).primaryColor,
       ),
-      onTap: enabled ? () => onChanged(!value) : null,
+      onTap: enabled ? () => onChanged(value: !value) : null,
     );
 }

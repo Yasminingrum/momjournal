@@ -19,10 +19,7 @@ class DeleteScheduleUseCase {
       }
 
       await repository.deleteSchedule(scheduleId);
-      
-      print('✅ UseCase: Schedule deleted successfully');
     } catch (e) {
-      print('❌ UseCase: Failed to delete schedule: $e');
       rethrow;
     }
   }
