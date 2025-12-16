@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 // Core
 import 'core/themes/app_theme.dart';
-
 // Data Layer
 import 'data/datasources/local/hive_database.dart';
+import 'data/datasources/remote/auth_remote_datasource.dart';
+import 'data/datasources/remote/firebase_service.dart';
+import 'data/repositories/auth_repository.dart';
 
 // Presentation Layer - Providers
+import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/journal_provider.dart';
 import 'presentation/providers/photo_provider.dart';
 import 'presentation/providers/schedule_provider.dart';
-
-// Presentation Layer - Screens
-import 'presentation/screens/home/home_screen.dart';
+// Presentation Layer - Routes
+import 'presentation/routes/app_router.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Indonesian locale untuk DateFormat
+  await initializeDateFormatting('id_ID', null);
 
   // Lock orientation to portrait only
   await SystemChrome.setPreferredOrientations([
@@ -34,9 +40,13 @@ void main() async {
   // Debug: Print box statistics
   await hiveDatabase.printBoxStats();
 
+  // Initialize Firebase menggunakan FirebaseService
+  await FirebaseService().initialize();  // ← GANTI BARIS INI
+
   // Run the app
   runApp(MomJournalApp(hiveDatabase: hiveDatabase));
 }
+
 
 /// Root widget aplikasi MomJournal
 class MomJournalApp extends StatelessWidget {
@@ -50,18 +60,40 @@ class MomJournalApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MultiProvider(
       providers: [
-        // Schedule Provider
-        ChangeNotifierProvider(
+        // ==================== DATASOURCES ====================
+        // Auth Remote Datasource
+        Provider<AuthRemoteDatasource>(
+          create: (_) => AuthRemoteDatasourceImpl(),
+        ),
+
+        // ==================== REPOSITORIES ====================
+        // Auth Repository Implementation (not abstract)
+        Provider<AuthRepository>(
+          create: (context) => AuthRepositoryImpl(
+            remoteDatasource: context.read<AuthRemoteDatasource>(),
+          ),
+        ),
+
+        // ==================== PROVIDERS ====================
+        // Auth Provider (independent)
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(
+            authRepository: context.read<AuthRepository>(),
+          ),
+        ),
+
+        // Schedule Provider - creates its own repository instance
+        ChangeNotifierProvider<ScheduleProvider>(
           create: (_) => ScheduleProvider()..loadAllSchedules(),
         ),
 
-        // Journal Provider
-        ChangeNotifierProvider(
+        // Journal Provider - creates its own repository instance
+        ChangeNotifierProvider<JournalProvider>(
           create: (_) => JournalProvider()..loadAllJournals(),
         ),
 
-        // Photo Provider
-        ChangeNotifierProvider(
+        // Photo Provider - creates its own repository instance
+        ChangeNotifierProvider<PhotoProvider>(
           create: (_) => PhotoProvider()..loadPhotos(),
         ),
       ],
@@ -74,8 +106,10 @@ class MomJournalApp extends StatelessWidget {
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system, // Follow system theme
 
-        // Initial route
-        home: const HomeScreen(),
+        // ==================== ROUTING ====================
+        // Initial route - mulai dari splash screen untuk auth check
+        initialRoute: Routes.splash,
+        onGenerateRoute: AppRouter.generateRoute,
 
         // Error handling
         builder: (context, child) {

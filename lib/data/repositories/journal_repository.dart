@@ -1,86 +1,156 @@
 import 'package:hive/hive.dart';
+
+import '/data/datasources/local/hive_database.dart';
+import '/data/models/journal_model.dart';
 import '/domain/entities/journal_entity.dart';
 
-/// Repository for Journal data management
-/// Implements offline-first approach with cloud sync capability
+/// Repository for Journal data management (Fixed Version)
+/// Menggunakan JournalModel (data layer) alih-alih JournalEntity langsung
+/// 
+/// Pattern: Repository mengakses data layer (JournalModel dari Hive)
+/// kemudian mengkonversi ke domain layer (JournalEntity) untuk business logic
 class JournalRepository {
-  static const String _boxName = 'journals';
-  Box<JournalEntity>? _box;
+  /// Get the already opened Hive box for journals
+  Box<JournalModel> get _box => Hive.box<JournalModel>(HiveDatabase.journalBoxName);
 
-  /// Initialize the Hive box for journals
-  Future<void> init() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<JournalEntity>(_boxName);
+  /// Convert JournalModel to JournalEntity
+  JournalEntity _modelToEntity(JournalModel model) => JournalEntity(
+      id: model.id,
+      userId: model.userId,
+      date: model.date,
+      mood: _convertMood(model.mood),
+      content: model.content,
+      createdAt: model.createdAt,
+      updatedAt: model.updatedAt,
+      isSynced: model.isSynced,
+    );
+
+  /// Convert JournalEntity to JournalModel
+  JournalModel _entityToModel(JournalEntity entity) => JournalModel(
+      id: entity.id,
+      userId: entity.userId,
+      date: entity.date,
+      mood: _convertMoodType(entity.mood),
+      content: entity.content,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: entity.isSynced,
+    );
+
+  /// Convert Mood (model) to MoodType (entity)
+  MoodType _convertMood(Mood mood) {
+    switch (mood) {
+      case Mood.veryHappy:
+        return MoodType.veryHappy;
+      case Mood.happy:
+        return MoodType.happy;
+      case Mood.neutral:
+        return MoodType.neutral;
+      case Mood.sad:
+        return MoodType.sad;
+      case Mood.verySad:
+        return MoodType.verySad;
+    }
+  }
+
+  /// Convert MoodType (entity) to Mood (model)
+  Mood _convertMoodType(MoodType moodType) {
+    switch (moodType) {
+      case MoodType.veryHappy:
+        return Mood.veryHappy;
+      case MoodType.happy:
+        return Mood.happy;
+      case MoodType.neutral:
+        return Mood.neutral;
+      case MoodType.sad:
+        return Mood.sad;
+      case MoodType.verySad:
+        return Mood.verySad;
     }
   }
 
   /// Create a new journal entry
   Future<void> createJournal(JournalEntity journal) async {
-    await init();
-    await _box!.put(journal.id, journal);
+    final model = _entityToModel(journal);
+    await _box.put(model.id, model);
   }
 
   /// Get all journals
   Future<List<JournalEntity>> getAllJournals() async {
-    await init();
-    final journals = _box!.values.toList()
-    ..sort((a, b) => b.date.compareTo(a.date)); // Most recent first
-    return journals;
+    final models = _box.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date)); // Most recent first
+    return models.map(_modelToEntity).toList();
   }
 
-  /// Get journal for a specific date
-  Future<JournalEntity?> getJournalByDate(DateTime date) async {
-    await init();
-    try {
-      return _box!.values.firstWhere(
-        (journal) =>
-            journal.date.year == date.year &&
-            journal.date.month == date.month &&
-            journal.date.day == date.day,
-      );
-    } catch (e) {
-      return null;
-    }
+  /// Get journals for a specific date
+  Future<List<JournalEntity>> getJournalsByDate(DateTime date) async {
+    final models = _box.values.where((journal) {
+      final journalDate = journal.date;
+      return journalDate.year == date.year &&
+          journalDate.month == date.month &&
+          journalDate.day == date.day;
+    }).toList();
+    return models.map(_modelToEntity).toList();
   }
 
-  /// Get journals for a date range
+  /// Get journals for a specific month
+  Future<List<JournalEntity>> getJournalsByMonth(int year, int month) async {
+    final models = _box.values
+        .where((journal) =>
+            journal.date.year == year && journal.date.month == month,)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return models.map(_modelToEntity).toList();
+  }
+
+  /// Get journals by date range
   Future<List<JournalEntity>> getJournalsByDateRange(
-      DateTime start, DateTime end,) async {
-    await init();
-    final journals = _box!.values.where((journal) => journal.date.isAfter(start.subtract(const Duration(days: 1))) &&
-          journal.date.isBefore(end.add(const Duration(days: 1))),).toList()
-    
-    ..sort((a, b) => b.date.compareTo(a.date));
-    return journals;
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final models = _box.values
+        .where((journal) =>
+            journal.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
+            journal.date
+                .isBefore(endDate.add(const Duration(days: 1))),)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return models.map(_modelToEntity).toList();
+  }
+
+  /// Get journals by mood
+  Future<List<JournalEntity>> getJournalsByMood(MoodType mood) async {
+    final modelMood = _convertMoodType(mood);
+    final models = _box.values
+        .where((journal) => journal.mood == modelMood)
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return models.map(_modelToEntity).toList();
   }
 
   /// Get a specific journal by ID
   Future<JournalEntity?> getJournalById(String id) async {
-    await init();
-    return _box!.get(id);
+    final model = _box.get(id);
+    return model != null ? _modelToEntity(model) : null;
   }
 
   /// Update an existing journal
   Future<void> updateJournal(JournalEntity journal) async {
-    await init();
-    final updatedJournal = journal.copyWith(
+    final updatedEntity = journal.copyWith(
       updatedAt: DateTime.now(),
       isSynced: false,
     );
-    await _box!.put(journal.id, updatedJournal);
+    final model = _entityToModel(updatedEntity);
+    await _box.put(model.id, model);
   }
 
   /// Delete a journal
   Future<void> deleteJournal(String id) async {
-    await init();
-    await _box!.delete(id);
+    await _box.delete(id);
   }
 
-  /// Get mood statistics for a date range
-  Future<Map<MoodType, int>> getMoodStats(DateTime start, DateTime end) async {
-    await init();
-    final journals = await getJournalsByDateRange(start, end);
-    
+  /// Get mood statistics
+  Future<Map<MoodType, int>> getMoodStats() async {
     final stats = <MoodType, int>{
       MoodType.veryHappy: 0,
       MoodType.happy: 0,
@@ -89,8 +159,9 @@ class JournalRepository {
       MoodType.verySad: 0,
     };
 
-    for (final journal in journals) {
-      stats[journal.mood] = (stats[journal.mood] ?? 0) + 1;
+    for (final model in _box.values) {
+      final moodType = _convertMood(model.mood);
+      stats[moodType] = (stats[moodType] ?? 0) + 1;
     }
 
     return stats;
@@ -98,36 +169,34 @@ class JournalRepository {
 
   /// Get recent journals (last N entries)
   Future<List<JournalEntity>> getRecentJournals(int count) async {
-    await init();
-    final journals = _box!.values.toList()
-    ..sort((a, b) => b.date.compareTo(a.date));
-    return journals.take(count).toList();
+    final models = _box.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return models.take(count).map(_modelToEntity).toList();
   }
 
   /// Get unsynced journals for cloud sync
   Future<List<JournalEntity>> getUnsyncedJournals() async {
-    await init();
-    return _box!.values.where((journal) => !journal.isSynced).toList();
+    final models = _box.values.where((journal) => !journal.isSynced).toList();
+    return models.map(_modelToEntity).toList();
   }
 
   /// Mark journal as synced
   Future<void> markAsSynced(String id) async {
-    await init();
-    final journal = _box!.get(id);
-    if (journal != null) {
-      final synced = journal.copyWith(isSynced: true);
-      await _box!.put(id, synced);
+    final model = _box.get(id);
+    if (model != null) {
+      final synced = model.copyWith(isSynced: true);
+      await _box.put(id, synced);
     }
   }
 
   /// Clear all journals (for testing or logout)
   Future<void> clearAll() async {
-    await init();
-    await _box!.clear();
+    await _box.clear();
   }
 
-  /// Close the box
+  /// Close the box - tidak diperlukan karena box dikelola oleh HiveDatabase
   Future<void> close() async {
-    await _box?.close();
+    // Box akan ditutup oleh HiveDatabase saat app terminate
+    // Tidak perlu close di sini
   }
 }

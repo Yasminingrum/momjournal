@@ -26,13 +26,6 @@ class ScheduleProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// Initialize provider
-  Future<void> init() async {
-    await _repository.init();
-    await loadAllSchedules();
-    await loadTodaySchedules();
-  }
-
   /// Load all schedules
   Future<void> loadAllSchedules() async {
     try {

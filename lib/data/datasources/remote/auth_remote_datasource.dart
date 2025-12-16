@@ -77,26 +77,28 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       );
 
       // Sign in to Firebase with credential
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      // ⚠️ FIXED: Using workaround for PigeonUserDetails bug
+      await _auth.signInWithCredential(credential);
+      final User? user = _auth.currentUser; 
 
-      if (userCredential.user == null) {
+      if (user == null) {
         throw const AuthenticationException ('Gagal masuk ke Firebase');
       }
 
-      debugPrint('✅ Signed in to Firebase: ${userCredential.user!.uid}');
+      debugPrint('✅ Signed in to Firebase: ${user.uid}');
 
       // Check if user document exists, create if not
-      final bool userExists = await userExistsInFirestore(userCredential.user!.uid);
+      final bool userExists = await userExistsInFirestore(user.uid);
       
       if (!userExists) {
         debugPrint('📝 Creating new user document...');
-        await createUserDocument(userCredential.user!);
+        await createUserDocument(user);
       } else {
         debugPrint('✅ User document already exists');
-        await updateUserLastLogin(userCredential.user!.uid);
+        await updateUserLastLogin(user.uid);
       }
 
-      return userCredential.user!;
+      return user;
     } on FirebaseAuthException catch (e) {
       debugPrint('❌ FirebaseAuthException: ${e.code} - ${e.message}');
       throw AuthenticationException (FirebaseErrorHandler.getErrorMessage(e));

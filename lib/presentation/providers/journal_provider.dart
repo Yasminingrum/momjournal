@@ -6,93 +6,155 @@ import '/domain/entities/journal_entity.dart';
 /// ViewModel for Journal management
 /// Manages journal state and business logic using Provider pattern
 class JournalProvider extends ChangeNotifier {
-
   JournalProvider();
+
   final JournalRepository _repository = JournalRepository();
   final Uuid _uuid = const Uuid();
 
   List<JournalEntity> _journals = [];
-  JournalEntity? _todayEntry;
   Map<MoodType, int> _moodStats = {};
+  DateTime _selectedDate = DateTime.now();
+  MoodType? _selectedMood;
   bool _isLoading = false;
   String? _error;
 
   // Getters
   List<JournalEntity> get journals => _journals;
-  JournalEntity? get todayEntry => _todayEntry;
   Map<MoodType, int> get moodStats => _moodStats;
+  DateTime get selectedDate => _selectedDate;
+  MoodType? get selectedMood => _selectedMood;
   bool get isLoading => _isLoading;
   String? get error => _error;
-
-  /// Initialize provider
-  Future<void> init() async {
-    await _repository.init();
-    await loadAllJournals();
-    await loadTodayEntry();
-    await loadWeeklyMoodStats();
-  }
 
   /// Load all journals
   Future<void> loadAllJournals() async {
     try {
       _setLoading(true);
       _journals = await _repository.getAllJournals();
+      await loadMoodStats();
       _clearError();
     } catch (e) {
       _setError('Failed to load journals: $e');
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// Load journals for selected date
+  Future<void> loadJournalsForDate(DateTime date) async {
+    try {
+      _setLoading(true);
+      _selectedDate = date;
+      _journals = await _repository.getJournalsByDate(date);
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load journals: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Load journals for a month
+  Future<void> loadJournalsForMonth(int year, int month) async {
+    try {
+      _setLoading(true);
+      _journals = await _repository.getJournalsByMonth(year, month);
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load journals: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Load journals by date range
+  Future<void> loadJournalsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      _setLoading(true);
+      _journals = await _repository.getJournalsByDateRange(startDate, endDate);
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load journals: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Filter by mood
+  Future<void> filterByMood(MoodType? mood) async {
+    try {
+      _setLoading(true);
+      _selectedMood = mood;
+
+      if (mood == null) {
+        await loadAllJournals();
+      } else {
+        _journals = await _repository.getJournalsByMood(mood);
+      }
+      _clearError();
+    } catch (e) {
+      _setError('Failed to filter journals: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Load mood statistics
+  Future<void> loadMoodStats() async {
+    try {
+      _moodStats = await _repository.getMoodStats();
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to load mood stats: $e');
     }
   }
 
   /// Load today's journal entry
   Future<void> loadTodayEntry() async {
     try {
-      _todayEntry = await _repository.getJournalByDate(DateTime.now());
+      final today = DateTime.now();
+      await _repository.getJournalsByDate(today);
+      // Just load for state, main list not affected
       notifyListeners();
     } catch (e) {
-      _setError('Failed to load today\'s entry: $e');
+      _setError('Failed to load today entry: $e');
     }
   }
 
-  /// Load journals for date range
-  Future<void> loadJournalsByDateRange(DateTime start, DateTime end) async {
-    try {
-      _setLoading(true);
-      _journals = await _repository.getJournalsByDateRange(start, end);
-      _clearError();
-    } catch (e) {
-      _setError('Failed to load journals: $e');
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  /// Load mood statistics for this week
+  /// Load weekly mood statistics
   Future<void> loadWeeklyMoodStats() async {
     try {
       final now = DateTime.now();
-      final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-      final endOfWeek = startOfWeek.add(const Duration(days: 6));
+      final weekAgo = now.subtract(const Duration(days: 7));
+      final weeklyJournals = await _repository.getJournalsByDateRange(
+        weekAgo,
+        now,
+      );
       
-      _moodStats = await _repository.getMoodStats(startOfWeek, endOfWeek);
+      // Calculate mood stats for the week
+      final stats = <MoodType, int>{
+        MoodType.veryHappy: 0,
+        MoodType.happy: 0,
+        MoodType.neutral: 0,
+        MoodType.sad: 0,
+        MoodType.verySad: 0,
+      };
+      
+      for (final journal in weeklyJournals) {
+        stats[journal.mood] = (stats[journal.mood] ?? 0) + 1;
+      }
+      
+      _moodStats = stats;
       notifyListeners();
     } catch (e) {
-      _setError('Failed to load mood stats: $e');
+      _setError('Failed to load weekly mood stats: $e');
     }
   }
 
-  /// Load mood statistics for a custom date range
-  Future<void> loadMoodStats(DateTime start, DateTime end) async {
-    try {
-      _moodStats = await _repository.getMoodStats(start, end);
-      notifyListeners();
-    } catch (e) {
-      _setError('Failed to load mood stats: $e');
-    }
-  }
-
-  /// Create a new journal entry
+  /// Create a new journal
   Future<bool> createJournal({
     required MoodType mood,
     required String content,
@@ -101,20 +163,11 @@ class JournalProvider extends ChangeNotifier {
   }) async {
     try {
       _setLoading(true);
-      
-      final journalDate = date ?? DateTime.now();
-      
-      // Check if entry already exists for this date
-      final existing = await _repository.getJournalByDate(journalDate);
-      if (existing != null) {
-        _setError('Journal entry already exists for this date');
-        return false;
-      }
 
       final journal = JournalEntity(
         id: _uuid.v4(),
         userId: userId ?? 'default_user',
-        date: journalDate,
+        date: date ?? DateTime.now(),
         mood: mood,
         content: content,
         createdAt: DateTime.now(),
@@ -123,8 +176,6 @@ class JournalProvider extends ChangeNotifier {
 
       await _repository.createJournal(journal);
       await loadAllJournals();
-      await loadTodayEntry();
-      await loadWeeklyMoodStats();
       _clearError();
       return true;
     } catch (e) {
@@ -135,14 +186,12 @@ class JournalProvider extends ChangeNotifier {
     }
   }
 
-  /// Update an existing journal entry
+  /// Update an existing journal
   Future<bool> updateJournal(JournalEntity journal) async {
     try {
       _setLoading(true);
       await _repository.updateJournal(journal);
       await loadAllJournals();
-      await loadTodayEntry();
-      await loadWeeklyMoodStats();
       _clearError();
       return true;
     } catch (e) {
@@ -153,14 +202,12 @@ class JournalProvider extends ChangeNotifier {
     }
   }
 
-  /// Delete a journal entry
+  /// Delete a journal
   Future<bool> deleteJournal(String id) async {
     try {
       _setLoading(true);
       await _repository.deleteJournal(id);
       await loadAllJournals();
-      await loadTodayEntry();
-      await loadWeeklyMoodStats();
       _clearError();
       return true;
     } catch (e) {
@@ -171,7 +218,7 @@ class JournalProvider extends ChangeNotifier {
     }
   }
 
-  /// Get recent journal entries
+  /// Get recent journals
   Future<List<JournalEntity>> getRecentJournals(int count) async {
     try {
       return await _repository.getRecentJournals(count);
@@ -181,14 +228,10 @@ class JournalProvider extends ChangeNotifier {
     }
   }
 
-  /// Get journal by ID
-  Future<JournalEntity?> getJournalById(String id) async {
-    try {
-      return await _repository.getJournalById(id);
-    } catch (e) {
-      _setError('Failed to get journal: $e');
-      return null;
-    }
+  /// Set selected date
+  void setSelectedDate(DateTime date) {
+    _selectedDate = date;
+    loadJournalsForDate(date);
   }
 
   // Helper methods

@@ -1,7 +1,3 @@
-/// Login Screen
-/// 
-/// Screen untuk login dengan Google Sign-In
-/// Location: lib/presentation/screens/auth/login_screen.dart
 library;
 
 import 'package:flutter/material.dart';

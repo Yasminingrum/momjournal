@@ -6,56 +6,38 @@ import '/domain/entities/photo_entity.dart';
 /// ViewModel for Photo management
 /// Manages photo state and business logic using Provider pattern
 class PhotoProvider extends ChangeNotifier {
-
   PhotoProvider();
+
   final PhotoRepository _repository = PhotoRepository();
   final Uuid _uuid = const Uuid();
 
   List<PhotoEntity> _photos = [];
   List<PhotoEntity> _milestonePhotos = [];
+  DateTime _selectedDate = DateTime.now();
+  bool _showMilestonesOnly = false;
   bool _isLoading = false;
-  bool _isUploading = false;
-  double _uploadProgress = 0;
   String? _error;
-  int _currentPage = 0;
-  static const int _pageSize = 20;
 
   // Getters
   List<PhotoEntity> get photos => _photos;
   List<PhotoEntity> get milestonePhotos => _milestonePhotos;
+  DateTime get selectedDate => _selectedDate;
+  bool get showMilestonesOnly => _showMilestonesOnly;
   bool get isLoading => _isLoading;
-  bool get isUploading => _isUploading;
-  double get uploadProgress => _uploadProgress;
   String? get error => _error;
-  String? get errorMessage => _error;
+  String? get errorMessage => _error; // Alias untuk compatibility
 
-  /// Initialize provider
+  /// Initialize provider - for compatibility
   Future<void> init() async {
-    await _repository.init();
     await loadPhotos();
-    await loadMilestonePhotos();
   }
 
-  /// Load all photos (with pagination)
-  Future<void> loadPhotos({bool refresh = false}) async {
+  /// Load all photos
+  Future<void> loadPhotos() async {
     try {
       _setLoading(true);
-      
-      if (refresh) {
-        _currentPage = 0;
-      }
-      
-      final newPhotos = await _repository.getPhotosPaginated(
-        _currentPage,
-        _pageSize,
-      );
-      
-      if (refresh) {
-        _photos = newPhotos;
-      } else {
-        _photos.addAll(newPhotos);
-      }
-      
+      _photos = await _repository.getAllPhotos();
+      _milestonePhotos = await _repository.getMilestonePhotos();
       _clearError();
     } catch (e) {
       _setError('Failed to load photos: $e');
@@ -64,106 +46,117 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// Load more photos (pagination)
-  Future<void> loadMorePhotos() async {
-    _currentPage++;
-    await loadPhotos();
-  }
-
-  /// Load milestone photos only
-  Future<void> loadMilestonePhotos() async {
+  /// Load photos for selected date
+  Future<void> loadPhotosForDate(DateTime date) async {
     try {
-      _milestonePhotos = await _repository.getMilestonePhotos();
-      notifyListeners();
+      _setLoading(true);
+      _selectedDate = date;
+      _photos = await _repository.getPhotosByDate(date);
+      _clearError();
     } catch (e) {
-      _setError('Failed to load milestone photos: $e');
+      _setError('Failed to load photos: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 
-  /// Upload photo to Firebase Storage and save to local DB
-  /// This is the MAIN method to use for adding new photos
+  /// Load photos for a month
+  Future<void> loadPhotosForMonth(int year, int month) async {
+    try {
+      _setLoading(true);
+      _photos = await _repository.getPhotosByMonth(year, month);
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load photos: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Load photos by date range
+  Future<void> loadPhotosByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      _setLoading(true);
+      _photos = await _repository.getPhotosByDateRange(startDate, endDate);
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load photos: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Toggle milestone filter
+  Future<void> toggleMilestoneFilter() async {
+    _showMilestonesOnly = !_showMilestonesOnly;
+    notifyListeners();
+
+    if (_showMilestonesOnly) {
+      try {
+        _setLoading(true);
+        _photos = await _repository.getMilestonePhotos();
+        _clearError();
+      } catch (e) {
+        _setError('Failed to load milestone photos: $e');
+      } finally {
+        _setLoading(false);
+      }
+    } else {
+      await loadPhotos();
+    }
+  }
+
+  /// Upload photo - simplified version
   Future<bool> uploadPhoto({
     required String imagePath,
     String? caption,
     bool isMilestone = false,
-    DateTime? dateTaken,
     String? userId,
-  }) async {
+  }) async => createPhoto(
+      localPath: imagePath,
+      dateTaken: DateTime.now(),
+      caption: caption,
+      isMilestone: isMilestone,
+      userId: userId,
+    );
+
+  /// Get photo count
+  Future<int> getPhotoCount() async {
     try {
-      _isUploading = true;
-      _uploadProgress = 0.0;
-      notifyListeners();
-
-      // Create photo entity
-      final photo = PhotoEntity(
-        id: _uuid.v4(),
-        userId: userId ?? 'default_user',
-        localPath: imagePath,
-        caption: caption,
-        isMilestone: isMilestone,
-        dateTaken: dateTaken ?? DateTime.now(),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-
-      // Upload to Firebase Storage and save to DB
-      await _repository.uploadPhoto(
-        photo: photo,
-        imagePath: imagePath,
-        onProgress: (progress) {
-          _uploadProgress = progress;
-          notifyListeners();
-        },
-      );
-
-      // Reload photos
-      await loadPhotos(refresh: true);
-      
-      if (isMilestone) {
-        await loadMilestonePhotos();
-      }
-
-      _clearError();
-      return true;
+      final allPhotos = await _repository.getAllPhotos();
+      return allPhotos.length;
     } catch (e) {
-      _setError('Failed to upload photo: $e');
-      return false;
-    } finally {
-      _isUploading = false;
-      _uploadProgress = 0.0;
-      notifyListeners();
+      return 0;
     }
   }
 
-  /// Create a new photo entry (without upload - for local only)
+  /// Create a new photo
   Future<bool> createPhoto({
     required String localPath,
+    required DateTime dateTaken,
     String? caption,
     bool isMilestone = false,
-    DateTime? dateTaken,
     String? userId,
   }) async {
     try {
       _setLoading(true);
-      
+
       final photo = PhotoEntity(
         id: _uuid.v4(),
         userId: userId ?? 'default_user',
         localPath: localPath,
         caption: caption,
+        dateTaken: dateTaken,
         isMilestone: isMilestone,
-        dateTaken: dateTaken ?? DateTime.now(),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       await _repository.createPhoto(photo);
-      await loadPhotos(refresh: true);
-      
-      if (isMilestone) {
-        await loadMilestonePhotos();
-      }
-      
+      await loadPhotos();
       _clearError();
       return true;
     } catch (e) {
@@ -179,12 +172,7 @@ class PhotoProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       await _repository.updatePhoto(photo);
-      await loadPhotos(refresh: true);
-      
-      if (photo.isMilestone) {
-        await loadMilestonePhotos();
-      }
-      
+      await loadPhotos();
       _clearError();
       return true;
     } catch (e) {
@@ -195,26 +183,12 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// Update cloud URL after upload
-  Future<bool> updateCloudUrl(String id, String cloudUrl) async {
-    try {
-      await _repository.updateCloudUrl(id, cloudUrl);
-      await loadPhotos(refresh: true);
-      _clearError();
-      return true;
-    } catch (e) {
-      _setError('Failed to update cloud URL: $e');
-      return false;
-    }
-  }
-
   /// Delete a photo
   Future<bool> deletePhoto(String id) async {
     try {
       _setLoading(true);
       await _repository.deletePhoto(id);
-      await loadPhotos(refresh: true);
-      await loadMilestonePhotos();
+      await loadPhotos();
       _clearError();
       return true;
     } catch (e) {
@@ -225,56 +199,20 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// Get photo by ID
-  Future<PhotoEntity?> getPhotoById(String id) async {
+  /// Get recent photos
+  Future<List<PhotoEntity>> getRecentPhotos(int count) async {
     try {
-      return await _repository.getPhotoById(id);
+      return await _repository.getRecentPhotos(count);
     } catch (e) {
-      _setError('Failed to get photo: $e');
-      return null;
+      _setError('Failed to get recent photos: $e');
+      return [];
     }
   }
 
-  /// Get photo count
-  Future<int> getPhotoCount() async {
-    try {
-      return await _repository.getPhotoCount();
-    } catch (e) {
-      _setError('Failed to get photo count: $e');
-      return 0;
-    }
-  }
-
-  /// Get milestone count
-  Future<int> getMilestoneCount() async {
-    try {
-      return await _repository.getMilestoneCount();
-    } catch (e) {
-      _setError('Failed to get milestone count: $e');
-      return 0;
-    }
-  }
-
-  /// Simulate upload progress (for demo/testing purposes)
-  /// In production, use uploadPhoto() which tracks actual Firebase upload
-  Future<void> simulateUpload() async {
-    _isUploading = true;
-    _uploadProgress = 0.0;
-    notifyListeners();
-
-    for (int i = 0; i <= 100; i += 10) {
-      await Future<void>.delayed(const Duration(milliseconds: 200));
-      _uploadProgress = i / 100;
-      notifyListeners();
-    }
-
-    _isUploading = false;
-    notifyListeners();
-  }
-
-  /// Clear error message
-  void clearError() {
-    _clearError();
+  /// Set selected date
+  void setSelectedDate(DateTime date) {
+    _selectedDate = date;
+    loadPhotosForDate(date);
   }
 
   // Helper methods
@@ -291,6 +229,11 @@ class PhotoProvider extends ChangeNotifier {
   void _clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Clear error - public method
+  void clearError() {
+    _clearError();
   }
 
   @override
