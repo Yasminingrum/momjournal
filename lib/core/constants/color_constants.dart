@@ -6,26 +6,30 @@ import 'package:flutter/material.dart';
 class ColorConstants {
   ColorConstants._();
   
-  // Primary Colors
-  static const Color primaryColor = Color(0xFF6750A4);
-  static const Color primaryLight = Color(0xFFEADDFF);
-  static const Color primaryDark = Color(0xFF4F378B);
+  // Primary Colors - Soft Pastel Purple/Pink
+  static const Color primaryColor = Color(0xFFB39DDB);        // Soft purple
+  static const Color primaryLight = Color(0xFFE1BEE7);        // Light lavender
+  static const Color primaryDark = Color(0xFF9575CD);         // Medium purple
   
-  // Secondary Colors
-  static const Color secondaryColor = Color(0xFF625B71);
-  static const Color secondaryLight = Color(0xFFE8DEF8);
+  // Secondary Colors - Soft Pastel Blue
+  static const Color secondaryColor = Color(0xFF90CAF9);      // Soft blue
+  static const Color secondaryLight = Color(0xFFBBDEFB);      // Light blue
   
-  // Background Colors
-  static const Color backgroundLight = Color(0xFFFFFBFE);
-  static const Color backgroundDark = Color(0xFF1C1B1F);
-  static const Color surfaceLight = Color(0xFFFEF7FF);
-  static const Color surfaceDark = Color(0xFF2B2930);
+  // Background Colors - Warm and Soft
+  static const Color backgroundLight = Color(0xFFFFF8F5);     // Warm white with slight peach
+  static const Color backgroundDark = Color(0xFF1A1625);      // Deep purple-black (not pure black)
+  static const Color surfaceLight = Color(0xFFFFFBF9);        // Slightly warm white
+  static const Color surfaceDark = Color(0xFF2D2438);         // Dark purple-grey (readable)
   
   // Text Colors
-  static const Color textPrimary = Color(0xFF1C1B1F);
-  static const Color textSecondary = Color(0xFF49454F);
+  static const Color textPrimary = Color(0xFF2D2438);         // Dark purple-grey (softer than black)
+  static const Color textSecondary = Color(0xFF6B5B7B);       // Medium purple-grey
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color white = Color(0xFFFFFFFF);
+  
+  // Text Colors for Dark Mode
+  static const Color textPrimaryDark = Color(0xFFE8E0F0);     // Light purple-white (very readable)
+  static const Color textSecondaryDark = Color(0xFFB8A8C8);   // Medium light purple-grey
   
   // Category Colors
   static const Color categoryFeeding = Color(0xFF2196F3);      // Blue

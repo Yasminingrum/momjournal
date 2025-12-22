@@ -18,7 +18,9 @@ import '../screens/schedule/add_schedule_screen.dart';
 import '../screens/schedule/schedule_detail_screen.dart';
 import '../screens/schedule/schedule_screen.dart';
 import '../screens/settings/account_screen.dart';
+import '../screens/settings/help_support_screen.dart';
 import '../screens/settings/notification_settings_screen.dart';
+import '../screens/settings/privacy_policy_screen.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/splash/splash_screen.dart';
 
@@ -52,6 +54,8 @@ class Routes {
   static const String settings = '/settings';
   static const String notificationSettings = '/settings/notifications';
   static const String account = '/settings/account';
+  static const String privacyPolicy = '/settings/privacy-policy';
+  static const String helpSupport = '/settings/help-support';
 }
 
 /// App Router class
@@ -156,6 +160,16 @@ class AppRouter {
       case Routes.account:
         return MaterialPageRoute(
           builder: (_) => const AccountScreen(),
+        );
+      
+      case Routes.privacyPolicy:
+        return MaterialPageRoute(
+          builder: (_) => const PrivacyPolicyScreen(),
+        );
+      
+      case Routes.helpSupport:
+        return MaterialPageRoute(
+          builder: (_) => const HelpSupportScreen(),
         );
       
       // ==================== 404 ====================

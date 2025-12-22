@@ -3,19 +3,32 @@ import 'package:flutter/services.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
+// Services
+import '/services/notification_service.dart';
 // Core
 import 'core/themes/app_theme.dart';
-// Data Layer
+// Data Layer - Local Datasources
 import 'data/datasources/local/hive_database.dart';
+import 'data/datasources/local/journal_local_datasource.dart';
+import 'data/datasources/local/photo_local_datasource.dart';
+import 'data/datasources/local/schedule_local_datasource.dart';
+// Data Layer - Remote Datasources
 import 'data/datasources/remote/auth_remote_datasource.dart';
 import 'data/datasources/remote/firebase_service.dart';
+import 'data/datasources/remote/journal_remote_datasource.dart';
+import 'data/datasources/remote/photo_remote_datasource.dart';
+import 'data/datasources/remote/schedule_remote_datasource.dart';
+// Data Layer - Repositories
 import 'data/repositories/auth_repository.dart';
-
+import 'data/repositories/sync_repository.dart';
 // Presentation Layer - Providers
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/journal_provider.dart';
+import 'presentation/providers/notification_provider.dart';
 import 'presentation/providers/photo_provider.dart';
 import 'presentation/providers/schedule_provider.dart';
+import 'presentation/providers/sync_provider.dart';
+import 'presentation/providers/theme_provider.dart';
 // Presentation Layer - Routes
 import 'presentation/routes/app_router.dart';
 
@@ -41,10 +54,28 @@ void main() async {
   await hiveDatabase.printBoxStats();
 
   // Initialize Firebase menggunakan FirebaseService
-  await FirebaseService().initialize();  // ← GANTI BARIS INI
+  await FirebaseService().initialize();
+
+  // Initialize Notification Service
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
+  // Initialize local datasources
+  final journalLocalDataSource = JournalLocalDataSource();
+  await journalLocalDataSource.init();
+
+  final photoLocalDataSource = PhotoLocalDataSource();
+  await photoLocalDataSource.init();
 
   // Run the app
-  runApp(MomJournalApp(hiveDatabase: hiveDatabase));
+  runApp(
+    MomJournalApp(
+      hiveDatabase: hiveDatabase,
+      notificationService: notificationService,
+      journalLocalDataSource: journalLocalDataSource,
+      photoLocalDataSource: photoLocalDataSource,
+    ),
+  );
 }
 
 
@@ -52,30 +83,87 @@ void main() async {
 class MomJournalApp extends StatelessWidget {
   const MomJournalApp({
     required this.hiveDatabase,
+    required this.notificationService,
+    required this.journalLocalDataSource,
+    required this.photoLocalDataSource,
     super.key,
   });
 
   final HiveDatabase hiveDatabase;
+  final NotificationService notificationService;
+  final JournalLocalDataSource journalLocalDataSource;
+  final PhotoLocalDataSource photoLocalDataSource;
 
   @override
-  Widget build(BuildContext context) => MultiProvider(
+  Widget build(BuildContext context) {
+    return MultiProvider(
       providers: [
-        // ==================== DATASOURCES ====================
-        // Auth Remote Datasource
+        // ==================== LOCAL DATASOURCES ====================
+        Provider<ScheduleLocalDataSource>(
+          create: (_) => ScheduleLocalDataSource(hiveDatabase),
+        ),
+        Provider<JournalLocalDataSource>(
+          create: (_) => journalLocalDataSource,
+        ),
+        Provider<PhotoLocalDataSource>(
+          create: (_) => photoLocalDataSource,
+        ),
+
+        // ==================== REMOTE DATASOURCES ====================
         Provider<AuthRemoteDatasource>(
           create: (_) => AuthRemoteDatasourceImpl(),
         ),
+        Provider<ScheduleRemoteDatasource>(
+          create: (_) => ScheduleRemoteDatasourceImpl(),
+        ),
+        Provider<JournalRemoteDatasource>(
+          create: (_) => JournalRemoteDatasourceImpl(),
+        ),
+        Provider<PhotoRemoteDatasource>(
+          create: (_) => PhotoRemoteDatasourceImpl(),
+        ),
 
         // ==================== REPOSITORIES ====================
-        // Auth Repository Implementation (not abstract)
+        // Auth Repository
         Provider<AuthRepository>(
           create: (context) => AuthRepositoryImpl(
             remoteDatasource: context.read<AuthRemoteDatasource>(),
           ),
         ),
 
+        // Sync Repository
+        Provider<SyncRepository>(
+          create: (context) => SyncRepositoryImpl(
+            scheduleLocal: context.read<ScheduleLocalDataSource>(),
+            scheduleRemote: context.read<ScheduleRemoteDatasource>(),
+            journalLocal: context.read<JournalLocalDataSource>(),
+            journalRemote: context.read<JournalRemoteDatasource>(),
+            photoLocal: context.read<PhotoLocalDataSource>(),
+            photoRemote: context.read<PhotoRemoteDatasource>(),
+          ),
+        ),
+
         // ==================== PROVIDERS ====================
-        // Auth Provider (independent)
+        // Theme Provider (harus di atas MaterialApp)
+        ChangeNotifierProvider<ThemeProvider>(
+          create: (_) => ThemeProvider(hiveDatabase: hiveDatabase),
+        ),
+
+        // Notification Provider
+        ChangeNotifierProvider<NotificationProvider>(
+          create: (_) => NotificationProvider(
+            notificationService: notificationService,
+          ),
+        ),
+
+        // Sync Provider
+        ChangeNotifierProvider<SyncProvider>(
+          create: (context) => SyncProvider(
+            repository: context.read<SyncRepository>(),
+          ),
+        ),
+
+        // Auth Provider
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(
             authRepository: context.read<AuthRepository>(),
@@ -97,30 +185,35 @@ class MomJournalApp extends StatelessWidget {
           create: (_) => PhotoProvider()..loadPhotos(),
         ),
       ],
-      child: MaterialApp(
-        title: 'MomJournal',
-        debugShowCheckedModeBanner: false,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'MomJournal',
+            debugShowCheckedModeBanner: false,
 
-        // Theme configuration
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system, // Follow system theme
+            // Theme configuration - menggunakan ThemeProvider
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
 
-        // ==================== ROUTING ====================
-        // Initial route - mulai dari splash screen untuk auth check
-        initialRoute: Routes.splash,
-        onGenerateRoute: AppRouter.generateRoute,
+            // ==================== ROUTING ====================
+            // Initial route - mulai dari splash screen untuk auth check
+            initialRoute: Routes.splash,
+            onGenerateRoute: AppRouter.generateRoute,
 
-        // Error handling
-        builder: (context, child) {
-          // Global error boundary
-          ErrorWidget.builder = (FlutterErrorDetails errorDetails) =>
-              _ErrorScreen(errorDetails: errorDetails);
+            // Error handling
+            builder: (context, child) {
+              // Global error boundary
+              ErrorWidget.builder = (FlutterErrorDetails errorDetails) =>
+                  _ErrorScreen(errorDetails: errorDetails);
 
-          return child ?? const SizedBox.shrink();
+              return child ?? const SizedBox.shrink();
+            },
+          );
         },
       ),
     );
+  }
 }
 
 /// Error screen yang ditampilkan saat terjadi error
@@ -130,7 +223,8 @@ class _ErrorScreen extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -209,4 +303,5 @@ class _ErrorScreen extends StatelessWidget {
         ),
       ),
     );
+  }
 }

@@ -5,6 +5,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../data/models/journal_model.dart';
+import '../data/models/photo_model.dart';
+import '../data/models/schedule_model.dart';
+
 /// SyncService
 /// Handles automatic background synchronization between local Hive database
 /// and Firebase Cloud Firestore. Implements offline-first architecture with
@@ -132,7 +136,8 @@ class SyncService extends ChangeNotifier {
   /// Sync schedules
   Future<void> _syncSchedules() async {
     try {
-      final schedulesBox = await Hive.openBox<Map<dynamic, dynamic>>('schedules');
+      // Get the already-opened box (opened by HiveDatabase)
+      final schedulesBox = Hive.box<ScheduleModel>('schedules');
       final cloudSchedules = await _firestore
           .collection('users')
           .doc(_userId)
@@ -147,14 +152,12 @@ class SyncService extends ChangeNotifier {
 
       // Sync local to cloud
       for (final key in schedulesBox.keys) {
-        final localScheduleRaw = schedulesBox.get(key);
-        if (localScheduleRaw == null) {
+        final localSchedule = schedulesBox.get(key);
+        if (localSchedule == null) {
           continue;
         }
         
-        // Convert to Map<String, dynamic>
-        final localSchedule = Map<String, dynamic>.from(localScheduleRaw);
-        final scheduleId = localSchedule['id'] as String;
+        final scheduleId = localSchedule.id;
         final cloudDoc = cloudScheduleMap[scheduleId];
 
         if (cloudDoc == null) {
@@ -169,7 +172,9 @@ class SyncService extends ChangeNotifier {
       // Sync cloud to local (download new schedules)
       for (final doc in cloudSchedules.docs) {
         if (!schedulesBox.containsKey(doc.id)) {
-          await schedulesBox.put(doc.id, doc.data());
+          final cloudData = doc.data();
+          final scheduleModel = ScheduleModel.fromJson(cloudData);
+          await schedulesBox.put(doc.id, scheduleModel);
         }
       }
 
@@ -182,33 +187,30 @@ class SyncService extends ChangeNotifier {
   }
 
   /// Upload schedule to cloud
-  Future<void> _uploadSchedule(Map<String, dynamic> schedule) async {
+  Future<void> _uploadSchedule(ScheduleModel schedule) async {
     await _firestore
         .collection('users')
         .doc(_userId)
         .collection('schedules')
-        .doc(schedule['id'] as String)
-        .set(schedule);
+        .doc(schedule.id)
+        .set(schedule.toJson());
   }
 
   /// Resolve schedule sync conflict (last-write-wins)
   Future<void> _syncScheduleConflict(
-    Map<String, dynamic> localSchedule,
+    ScheduleModel localSchedule,
     DocumentSnapshot cloudDoc,
   ) async {
-    final cloudSchedule = cloudDoc.data() as Map<String, dynamic>;
+    final cloudData = cloudDoc.data() as Map<String, dynamic>;
+    final cloudSchedule = ScheduleModel.fromJson(cloudData);
 
-    final localUpdated = DateTime.parse(localSchedule['updatedAt'] as String);
-    final cloudUpdated = DateTime.parse(cloudSchedule['updatedAt'] as String);
-
-    if (localUpdated.isAfter(cloudUpdated)) {
+    if (localSchedule.updatedAt.isAfter(cloudSchedule.updatedAt)) {
       // Local is newer, upload
       await _uploadSchedule(localSchedule);
-    } else if (cloudUpdated.isAfter(localUpdated)) {
+    } else if (cloudSchedule.updatedAt.isAfter(localSchedule.updatedAt)) {
       // Cloud is newer, download
-      final schedulesBox = 
-          await Hive.openBox<Map<dynamic, dynamic>>('schedules');
-      await schedulesBox.put(cloudSchedule['id'], cloudSchedule);
+      final schedulesBox = Hive.box<ScheduleModel>('schedules');
+      await schedulesBox.put(cloudSchedule.id, cloudSchedule);
     }
     // If equal, no sync needed
   }
@@ -216,7 +218,8 @@ class SyncService extends ChangeNotifier {
   /// Sync journals
   Future<void> _syncJournals() async {
     try {
-      final journalsBox = await Hive.openBox<Map<dynamic, dynamic>>('journals');
+      // Get the already-opened box (opened by HiveDatabase)
+      final journalsBox = Hive.box<JournalModel>('journals');
       final cloudJournals = await _firestore
           .collection('users')
           .doc(_userId)
@@ -231,14 +234,12 @@ class SyncService extends ChangeNotifier {
 
       // Sync local to cloud
       for (final key in journalsBox.keys) {
-        final localJournalRaw = journalsBox.get(key);
-        if (localJournalRaw == null) {
+        final localJournal = journalsBox.get(key);
+        if (localJournal == null) {
           continue;
         }
         
-        // Convert to Map<String, dynamic>
-        final localJournal = Map<String, dynamic>.from(localJournalRaw);
-        final journalId = localJournal['id'] as String;
+        final journalId = localJournal.id;
         final cloudDoc = cloudJournalMap[journalId];
 
         if (cloudDoc == null) {
@@ -253,7 +254,9 @@ class SyncService extends ChangeNotifier {
       // Sync cloud to local
       for (final doc in cloudJournals.docs) {
         if (!journalsBox.containsKey(doc.id)) {
-          await journalsBox.put(doc.id, doc.data());
+          final cloudData = doc.data();
+          final journalModel = JournalModel.fromJson(cloudData);
+          await journalsBox.put(doc.id, journalModel);
         }
       }
 
@@ -266,37 +269,36 @@ class SyncService extends ChangeNotifier {
   }
 
   /// Upload journal to cloud
-  Future<void> _uploadJournal(Map<String, dynamic> journal) async {
+  Future<void> _uploadJournal(JournalModel journal) async {
     await _firestore
         .collection('users')
         .doc(_userId)
         .collection('journals')
-        .doc(journal['id'] as String)
-        .set(journal);
+        .doc(journal.id)
+        .set(journal.toJson());
   }
 
   /// Resolve journal sync conflict
   Future<void> _syncJournalConflict(
-    Map<String, dynamic> localJournal,
+    JournalModel localJournal,
     DocumentSnapshot cloudDoc,
   ) async {
-    final cloudJournal = cloudDoc.data() as Map<String, dynamic>;
+    final cloudData = cloudDoc.data() as Map<String, dynamic>;
+    final cloudJournal = JournalModel.fromJson(cloudData);
 
-    final localUpdated = DateTime.parse(localJournal['updatedAt'] as String);
-    final cloudUpdated = DateTime.parse(cloudJournal['updatedAt'] as String);
-
-    if (localUpdated.isAfter(cloudUpdated)) {
+    if (localJournal.updatedAt.isAfter(cloudJournal.updatedAt)) {
       await _uploadJournal(localJournal);
-    } else if (cloudUpdated.isAfter(localUpdated)) {
-      final journalsBox = await Hive.openBox<Map<dynamic, dynamic>>('journals');
-      await journalsBox.put(cloudJournal['id'], cloudJournal);
+    } else if (cloudJournal.updatedAt.isAfter(localJournal.updatedAt)) {
+      final journalsBox = Hive.box<JournalModel>('journals');
+      await journalsBox.put(cloudJournal.id, cloudJournal);
     }
   }
 
   /// Sync photos metadata
   Future<void> _syncPhotos() async {
     try {
-      final photosBox = await Hive.openBox<Map<dynamic, dynamic>>('photos');
+      // Get the already-opened box (opened by HiveDatabase)
+      final photosBox = Hive.box<PhotoModel>('photos');
       final cloudPhotos = await _firestore
           .collection('users')
           .doc(_userId)
@@ -311,14 +313,12 @@ class SyncService extends ChangeNotifier {
 
       // Sync local to cloud
       for (final key in photosBox.keys) {
-        final localPhotoRaw = photosBox.get(key);
-        if (localPhotoRaw == null) {
+        final localPhoto = photosBox.get(key);
+        if (localPhoto == null) {
           continue;
         }
         
-        // Convert to Map<String, dynamic>
-        final localPhoto = Map<String, dynamic>.from(localPhotoRaw);
-        final photoId = localPhoto['id'] as String;
+        final photoId = localPhoto.id;
         final cloudDoc = cloudPhotoMap[photoId];
 
         if (cloudDoc == null) {
@@ -333,7 +333,9 @@ class SyncService extends ChangeNotifier {
       // Sync cloud to local
       for (final doc in cloudPhotos.docs) {
         if (!photosBox.containsKey(doc.id)) {
-          await photosBox.put(doc.id, doc.data());
+          final cloudData = doc.data();
+          final photoModel = PhotoModel.fromJson(cloudData);
+          await photosBox.put(doc.id, photoModel);
         }
       }
 
@@ -346,30 +348,28 @@ class SyncService extends ChangeNotifier {
   }
 
   /// Upload photo metadata to cloud
-  Future<void> _uploadPhotoMetadata(Map<String, dynamic> photo) async {
+  Future<void> _uploadPhotoMetadata(PhotoModel photo) async {
     await _firestore
         .collection('users')
         .doc(_userId)
         .collection('photos')
-        .doc(photo['id'] as String)
-        .set(photo);
+        .doc(photo.id)
+        .set(photo.toJson());
   }
 
   /// Resolve photo sync conflict
   Future<void> _syncPhotoConflict(
-    Map<String, dynamic> localPhoto,
+    PhotoModel localPhoto,
     DocumentSnapshot cloudDoc,
   ) async {
-    final cloudPhoto = cloudDoc.data() as Map<String, dynamic>;
+    final cloudData = cloudDoc.data() as Map<String, dynamic>;
+    final cloudPhoto = PhotoModel.fromJson(cloudData);
 
-    final localUpdated = DateTime.parse(localPhoto['updatedAt'] as String);
-    final cloudUpdated = DateTime.parse(cloudPhoto['updatedAt'] as String);
-
-    if (localUpdated.isAfter(cloudUpdated)) {
+    if (localPhoto.updatedAt.isAfter(cloudPhoto.updatedAt)) {
       await _uploadPhotoMetadata(localPhoto);
-    } else if (cloudUpdated.isAfter(localUpdated)) {
-      final photosBox = await Hive.openBox<Map<dynamic, dynamic>>('photos');
-      await photosBox.put(cloudPhoto['id'], cloudPhoto);
+    } else if (cloudPhoto.updatedAt.isAfter(localPhoto.updatedAt)) {
+      final photosBox = Hive.box<PhotoModel>('photos');
+      await photosBox.put(cloudPhoto.id, cloudPhoto);
     }
   }
 

@@ -1,12 +1,9 @@
-/// Auth Repository
-/// 
-/// Repository layer for authentication operations
-/// Location: lib/data/repositories/auth_repository.dart
 library;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '/core/errors/exceptions.dart';
+import '../datasources/local/hive_database.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
 
 
@@ -39,8 +36,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   AuthRepositoryImpl({
     required AuthRemoteDatasource remoteDatasource,
-  }) : _remoteDatasource = remoteDatasource;
+    HiveDatabase? hiveDatabase,
+  })  : _remoteDatasource = remoteDatasource,
+        _hiveDatabase = hiveDatabase ?? HiveDatabase();
   final AuthRemoteDatasource _remoteDatasource;
+  final HiveDatabase _hiveDatabase;
 
   @override
   Future<User> signInWithGoogle() async {
@@ -60,14 +60,40 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      debugPrint('🚪 Repository: Signing out...');
+      debugPrint('🚪 Repository: Starting sign-out process...');
+      
+      // Step 1: Sign out from Firebase & Google
+      debugPrint('📤 Repository: Signing out from Firebase & Google...');
       await _remoteDatasource.signOut();
-      debugPrint('✅ Repository: Sign-Out successful');
+      debugPrint('✅ Repository: Remote sign-out successful');
+      
+      // Step 2: Clear all local data (Hive)
+      debugPrint('🗑️ Repository: Clearing local data...');
+      await _clearLocalData();
+      debugPrint('✅ Repository: Local data cleared');
+      
+      debugPrint('✅ Repository: Sign-Out completed successfully');
     } on AuthorizationException {
       rethrow;
     } catch (e) {
       debugPrint('❌ Repository: Sign-Out failed: $e');
       throw AuthorizationException('Gagal keluar: $e');
+    }
+  }
+  
+  /// Clear all local data from Hive database
+  /// 
+  /// This ensures user privacy and prevents data leakage between accounts
+  Future<void> _clearLocalData() async {
+    try {
+      // Clear all Hive boxes
+      await _hiveDatabase.clearAllData();
+      
+      debugPrint('✓ All local data cleared successfully');
+    } catch (e) {
+      debugPrint('⚠️ Warning: Failed to clear some local data: $e');
+      // Don't throw error here - logout should still succeed even if
+      // local data clearing fails (user can manually clear app data)
     }
   }
 

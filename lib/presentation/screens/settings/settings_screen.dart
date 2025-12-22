@@ -1,44 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '/presentation/providers/auth_provider.dart';
+import '/presentation/providers/theme_provider.dart';
+import '/presentation/routes/app_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final authProvider = context.watch<AuthProvider>();
+    
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: const Text('Pengaturan'),
       ),
       body: ListView(
         children: [
           // Profile Section
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
-            subtitle: const Text('Edit your profile information'),
+            title: const Text('Profil'),
+            subtitle: Text(authProvider.userEmail ?? 'Atur informasi profil Anda'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Profile tapped');
-              _showComingSoonDialog(context, 'Profile');
+              Navigator.pushNamed(context, Routes.account);
             },
           ),
 
           // Notifications Section
           ListTile(
             leading: const Icon(Icons.notifications),
-            title: const Text('Notifications'),
-            subtitle: const Text('Manage notification preferences'),
+            title: const Text('Notifikasi'),
+            subtitle: const Text('Atur preferensi notifikasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Notifications tapped');
-              _showComingSoonDialog(context, 'Notifications');
+              Navigator.pushNamed(context, Routes.notificationSettings);
             },
           ),
 
           // Theme Section
           ListTile(
             leading: const Icon(Icons.palette),
-            title: const Text('Theme'),
-            subtitle: const Text('Change app appearance'),
+            title: const Text('Tema'),
+            subtitle: Text(themeProvider.currentThemeModeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Theme tapped');
@@ -51,8 +60,8 @@ class SettingsScreen extends StatelessWidget {
           // About Section
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('About'),
-            subtitle: const Text('App version and information'),
+            title: const Text('Tentang'),
+            subtitle: const Text('Versi aplikasi dan informasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 About tapped');
@@ -63,22 +72,22 @@ class SettingsScreen extends StatelessWidget {
           // Privacy Policy
           ListTile(
             leading: const Icon(Icons.privacy_tip),
-            title: const Text('Privacy Policy'),
+            title: const Text('Kebijakan Privasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Privacy Policy tapped');
-              _showComingSoonDialog(context, 'Privacy Policy');
+              Navigator.pushNamed(context, Routes.privacyPolicy);
             },
           ),
 
           // Help & Support
           ListTile(
             leading: const Icon(Icons.help),
-            title: const Text('Help & Support'),
+            title: const Text('Bantuan & Dukungan'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Help & Support tapped');
-              _showComingSoonDialog(context, 'Help & Support');
+              Navigator.pushNamed(context, Routes.helpSupport);
             },
           ),
 
@@ -88,7 +97,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text(
-              'Sign Out',
+              'Keluar',
               style: TextStyle(color: Colors.red),
             ),
             onTap: () {
@@ -113,7 +122,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Version 1.0.0',
+                    'Versi 1.0.0',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.grey[500],
                         ),
@@ -125,184 +134,241 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
-
-  // Show "Coming Soon" dialog for features not yet implemented
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coming Soon'),
-        content: Text(
-          '$feature feature will be available in the next update.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   // Show theme selection dialog
   void _showThemeDialog(BuildContext context) {
+    final themeProvider = context.read<ThemeProvider>();
+    final currentMode = themeProvider.themeMode;
+    
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.brightness_auto),
-              title: const Text('System Default'),
-              trailing: const Icon(Icons.check, color: Colors.blue),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Theme set to System Default'),
-                    duration: Duration(seconds: 2),
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Pilih Tema'),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RadioListTile<ThemeMode>(
+                    title: const Text('Sistem'),
+                    subtitle: const Text('Ikuti pengaturan sistem'),
+                    secondary: const Icon(Icons.brightness_auto),
+                    value: ThemeMode.system,
+                    groupValue: currentMode,
+                    onChanged: (ThemeMode? value) {
+                      if (value != null) {
+                        _handleThemeChange(context, dialogContext, themeProvider, value, 'Tema diatur mengikuti sistem');
+                      }
+                    },
                   ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.light_mode),
-              title: const Text('Light Mode'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Light mode - Coming soon'),
-                    duration: Duration(seconds: 2),
+                  RadioListTile<ThemeMode>(
+                    title: const Text('Terang'),
+                    subtitle: const Text('Mode terang'),
+                    secondary: const Icon(Icons.light_mode),
+                    value: ThemeMode.light,
+                    groupValue: currentMode,
+                    onChanged: (ThemeMode? value) {
+                      if (value != null) {
+                        _handleThemeChange(context, dialogContext, themeProvider, value, 'Mode terang diaktifkan');
+                      }
+                    },
                   ),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.dark_mode),
-              title: const Text('Dark Mode'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Dark mode - Coming soon'),
-                    duration: Duration(seconds: 2),
+                  RadioListTile<ThemeMode>(
+                    title: const Text('Gelap'),
+                    subtitle: const Text('Mode gelap'),
+                    secondary: const Icon(Icons.dark_mode),
+                    value: ThemeMode.dark,
+                    groupValue: currentMode,
+                    onChanged: (ThemeMode? value) {
+                      if (value != null) {
+                        _handleThemeChange(context, dialogContext, themeProvider, value, 'Mode gelap diaktifkan');
+                      }
+                    },
                   ),
-                );
+                ],
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
               },
+              child: const Text('BATAL'),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  // Handle theme change
+  Future<void> _handleThemeChange(
+    BuildContext context,
+    BuildContext dialogContext,
+    ThemeProvider themeProvider,
+    ThemeMode value,
+    String message,
+  ) async {
+    await themeProvider.setThemeMode(value);
+    if (dialogContext.mounted) {
+      Navigator.pop(dialogContext);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   // Show about dialog with app information
   void _showAboutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About MomJournal'),
-        content: const SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // App Icon/Logo placeholder
-              Center(
-                child: Icon(
-                  Icons.book,
-                  size: 64,
-                  color: Colors.blue,
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // App Name
-              Center(
-                child: Text(
-                  'MomJournal',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Tentang MomJournal'),
+          content: const SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // App Icon/Logo placeholder
+                Center(
+                  child: Icon(
+                    Icons.book,
+                    size: 64,
+                    color: Colors.blue,
                   ),
                 ),
-              ),
-              Center(
-                child: Text(
-                  'Version 1.0.0',
-                  style: TextStyle(color: Colors.grey),
+                SizedBox(height: 16),
+
+                // App Name
+                Center(
+                  child: Text(
+                    'MomJournal',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    'Versi 1.0.0',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                SizedBox(height: 16),
 
-              // Description
-              Text(
-                'Your companion app for managing schedules, journaling moments, '
-                'and preserving precious memories of your parenting journey.',
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
+                // Description
+                Text(
+                  'Aplikasi pendamping Anda untuk mengelola jadwal, mencatat momen, '
+                  'dan menyimpan kenangan berharga perjalanan parenting Anda.',
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
 
-              // Contact
-              Text(
-                '© 2025 MomJournal. All rights reserved.',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ],
+                // Contact
+                Text(
+                  '© 2025 MomJournal. Hak cipta dilindungi.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CLOSE'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('TUTUP'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   // Show sign out confirmation dialog
   void _showSignOutDialog(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text(
-          'Are you sure you want to sign out? '
-          'Your data is safely synced to the cloud.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Keluar'),
+          content: const Text(
+            'Apakah Anda yakin ingin keluar? '
+            'Data Anda telah tersimpan dengan aman di cloud.',
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Sign out - Coming soon'),
-                  backgroundColor: Colors.orange,
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('SIGN OUT'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('BATAL'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _performSignOut(context, authProvider);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('KELUAR'),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  // Perform sign out
+  Future<void> _performSignOut(BuildContext context, AuthProvider authProvider) async {
+    // Show loading indicator
+    if (context.mounted) {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+    }
+    
+    // Sign out
+    final success = await authProvider.signOut();
+    
+    if (context.mounted) {
+      // Close loading
+      Navigator.pop(context);
+      
+      if (success) {
+        // Navigate to login
+        await Navigator.pushNamedAndRemoveUntil(
+          context,
+          Routes.login,
+          (route) => false,
+        );
+      } else {
+        // Show error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authProvider.errorMessage ?? 'Gagal keluar'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 }

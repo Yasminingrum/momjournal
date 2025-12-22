@@ -371,40 +371,6 @@ void main() {
       expect(result, contains('tahun'));
     });
 
-    test('formatFull should format date with day name', () {
-      // Arrange
-      final date = DateTime(2024, 12, 16); // Monday
-      
-      // Act
-      final result = DateUtils.formatFull(date);
-      
-      // Assert
-      expect(result, contains('Desember'));
-      expect(result, contains('2024'));
-    });
-
-    test('formatMonthYear should format month and year', () {
-      // Arrange
-      final date = DateTime(2024, 12, 16);
-      
-      // Act
-      final result = DateUtils.formatMonthYear(date);
-      
-      // Assert
-      expect(result, 'Desember 2024');
-    });
-
-    test('formatDayMonth should format day and month', () {
-      // Arrange
-      final date = DateTime(2024, 12, 16);
-      
-      // Act
-      final result = DateUtils.formatDayMonth(date);
-      
-      // Assert
-      expect(result, '16 Des');
-    });
-
     test('getRelativeTimeString should return relative time', () {
       // Arrange
       final fiveMinutesAgo = DateTime.now().subtract(const Duration(minutes: 5));

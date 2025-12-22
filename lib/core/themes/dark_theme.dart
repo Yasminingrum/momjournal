@@ -21,10 +21,10 @@ class DarkTheme {
           tertiary: ColorConstants.secondaryColor,
           surface: ColorConstants.surfaceDark,
           error: Color(0xFFCF6679), // Material Design dark error color
-          onPrimary: ColorConstants.textPrimary,
-          onSecondary: ColorConstants.textPrimary,
-          onSurface: ColorConstants.textPrimary,
-          onError: ColorConstants.textPrimary,
+          onPrimary: ColorConstants.textPrimaryDark,
+          onSecondary: ColorConstants.textPrimaryDark,
+          onSurface: ColorConstants.textPrimaryDark,
+          onError: ColorConstants.textPrimaryDark,
         ),
 
         // Scaffold Background
@@ -38,12 +38,12 @@ class DarkTheme {
           foregroundColor: ColorConstants.textPrimary,
           systemOverlayStyle: SystemUiOverlayStyle.light,
           titleTextStyle: TextStyle(
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
           iconTheme: IconThemeData(
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
         ),
 
@@ -60,8 +60,8 @@ class DarkTheme {
         // Elevated Button Theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: ColorConstants.primaryLight,
-            foregroundColor: ColorConstants.textPrimary,
+            backgroundColor: ColorConstants.primaryDark,
+            foregroundColor: ColorConstants.textPrimaryDark,
             elevation: 2,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
@@ -110,8 +110,8 @@ class DarkTheme {
 
         // Floating Action Button Theme
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: ColorConstants.primaryLight,
-          foregroundColor: ColorConstants.textPrimary,
+          backgroundColor: ColorConstants.primaryDark,
+          foregroundColor: ColorConstants.textPrimaryDark,
           elevation: 4,
           shape: CircleBorder(),
         ),
@@ -149,11 +149,11 @@ class DarkTheme {
             ),
           ),
           labelStyle: const TextStyle(
-            color: Color(0xFFBDBDBD), // grey400
+            color: ColorConstants.textSecondaryDark,
             fontSize: 16,
           ),
           hintStyle: const TextStyle(
-            color: Color(0xFF757575), // grey600
+            color: ColorConstants.textSecondaryDark,
             fontSize: 16,
           ),
           errorStyle: const TextStyle(
@@ -207,11 +207,11 @@ class DarkTheme {
           selectedColor: ColorConstants.primaryDark,
           disabledColor: const Color(0xFF424242), // grey800
           labelStyle: const TextStyle(
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
             fontSize: 14,
           ),
           secondaryLabelStyle: const TextStyle(
-            color: Color(0xFFBDBDBD), // grey400
+            color: ColorConstants.textSecondaryDark,
             fontSize: 14,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -228,12 +228,12 @@ class DarkTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           titleTextStyle: const TextStyle(
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
             fontSize: 20,
             fontWeight: FontWeight.w600,
           ),
           contentTextStyle: const TextStyle(
-            color: Color(0xFFBDBDBD), // grey400
+            color: ColorConstants.textSecondaryDark,
             fontSize: 16,
           ),
         ),
@@ -249,9 +249,9 @@ class DarkTheme {
 
         // Snack Bar Theme
         snackBarTheme: SnackBarThemeData(
-          backgroundColor: const Color(0xFF757575), // grey600
+          backgroundColor: ColorConstants.surfaceDark,
           contentTextStyle: const TextStyle(
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
             fontSize: 14,
           ),
           behavior: SnackBarBehavior.floating,
@@ -264,7 +264,7 @@ class DarkTheme {
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: ColorConstants.surfaceDark,
           selectedItemColor: ColorConstants.primaryLight,
-          unselectedItemColor: Color(0xFF757575), // grey600
+          unselectedItemColor: ColorConstants.textSecondaryDark,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
           selectedLabelStyle: TextStyle(
@@ -279,14 +279,14 @@ class DarkTheme {
 
         // Divider Theme
         dividerTheme: const DividerThemeData(
-          color: Color(0xFF757575), // grey600
+          color: Color(0xFF4A3F5C), // Darker purple-grey for dividers
           thickness: 1,
           space: 1,
         ),
 
         // Icon Theme
         iconTheme: const IconThemeData(
-          color: ColorConstants.textPrimary,
+          color: ColorConstants.textPrimaryDark,
           size: 24,
         ),
 
@@ -296,85 +296,85 @@ class DarkTheme {
           displayLarge: TextStyle(
             fontSize: 57,
             fontWeight: FontWeight.w400,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           displayMedium: TextStyle(
             fontSize: 45,
             fontWeight: FontWeight.w400,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           displaySmall: TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w400,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
 
           // Headline styles
           headlineLarge: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           headlineMedium: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           headlineSmall: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
 
           // Title styles
           titleLarge: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           titleMedium: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           titleSmall: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
 
           // Body styles
           bodyLarge: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           bodyMedium: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           bodySmall: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: Color(0xFFBDBDBD), // grey400
+            color: ColorConstants.textSecondaryDark,
           ),
 
           // Label styles (buttons, etc)
           labelLarge: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           labelMedium: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
           labelSmall: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: ColorConstants.textPrimary,
+            color: ColorConstants.textPrimaryDark,
           ),
         ),
       );
