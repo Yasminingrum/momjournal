@@ -80,6 +80,8 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
 
       final schedules = snapshot.docs
           .map(_scheduleFromFirestore)
+          .where((schedule) => schedule != null)  // Filter out nulls
+          .cast<ScheduleEntity>()
           .toList();
 
       debugPrint('✅ Fetched ${schedules.length} schedules from Firestore');
@@ -114,6 +116,8 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
 
       final schedules = snapshot.docs
           .map(_scheduleFromFirestore)
+          .where((schedule) => schedule != null)
+          .cast<ScheduleEntity>()
           .toList();
 
       debugPrint('✅ Fetched ${schedules.length} schedules for date range');
@@ -190,6 +194,8 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         .snapshots()
         .map((snapshot) => snapshot.docs
           .map(_scheduleFromFirestore)
+          .where((schedule) => schedule != null)
+          .cast<ScheduleEntity>()
           .toList(),).handleError((Object error) {
       debugPrint('❌ Error in schedules stream: $error');
       if (error is FirebaseException) {
@@ -214,24 +220,65 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     };
 
   /// Convert Firestore document to ScheduleEntity
-  ScheduleEntity _scheduleFromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    
-    return ScheduleEntity(
-      id: data['id'] as String,
-      userId: data['userId'] as String,
-      title: data['title'] as String,
-      notes: data['notes'] as String?,
-      dateTime: (data['dateTime'] as Timestamp).toDate(),
-      category: ScheduleCategory.values.firstWhere(
-        (e) => e.name == data['category'],
-        orElse: () => ScheduleCategory.other,
-      ),
-      hasReminder: data['hasReminder'] as bool? ?? false,
-      reminderMinutes: data['reminderMinutes'] as int? ?? 15,
-      isCompleted: data['isCompleted'] as bool? ?? false,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-    );
+  /// 
+  /// Returns null if document is invalid/corrupt to prevent crashes
+  ScheduleEntity? _scheduleFromFirestore(DocumentSnapshot doc) {
+    try {
+      final data = doc.data() as Map<String, dynamic>?;
+      
+      // Return null if no data
+      if (data == null) {
+        debugPrint('⚠️ Skipping document ${doc.id}: no data');
+        return null;
+      }
+      
+      // Helper to safely get Timestamp and convert to DateTime
+      DateTime? _parseTimestamp(dynamic value) {
+        if (value == null) return null;
+        if (value is Timestamp) return value.toDate();
+        if (value is DateTime) return value;
+        return null;
+      }
+      
+      // Validate required fields
+      final id = data['id'] as String?;
+      final title = data['title'] as String?;
+      final dateTime = _parseTimestamp(data['dateTime']);
+      
+      if (id == null || id.isEmpty) {
+        debugPrint('⚠️ Skipping document ${doc.id}: missing id');
+        return null;
+      }
+      
+      if (title == null || title.isEmpty) {
+        debugPrint('⚠️ Skipping document ${doc.id}: missing title');
+        return null;
+      }
+      
+      if (dateTime == null) {
+        debugPrint('⚠️ Skipping document ${doc.id}: missing dateTime');
+        return null;
+      }
+      
+      return ScheduleEntity(
+        id: id,
+        userId: data['userId'] as String? ?? '',
+        title: title,
+        notes: data['notes'] as String?,
+        dateTime: dateTime,
+        category: ScheduleCategory.values.firstWhere(
+          (e) => e.name == data['category'],
+          orElse: () => ScheduleCategory.other,
+        ),
+        hasReminder: data['hasReminder'] as bool? ?? false,
+        reminderMinutes: data['reminderMinutes'] as int? ?? 15,
+        isCompleted: data['isCompleted'] as bool? ?? false,
+        createdAt: _parseTimestamp(data['createdAt']) ?? DateTime.now(),
+        updatedAt: _parseTimestamp(data['updatedAt']) ?? DateTime.now(),
+      );
+    } catch (e) {
+      debugPrint('⚠️ Error parsing document ${doc.id}: $e');
+      return null;  // Return null instead of crashing
+    }
   }
 }

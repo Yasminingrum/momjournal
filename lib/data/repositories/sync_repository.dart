@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/exceptions.dart';
@@ -232,24 +234,68 @@ class SyncRepositoryImpl implements SyncRepository {
 
         if (localModel == null) {
           await photoLocal.createPhoto(remoteModel);
+          debugPrint('✅ Photo downloaded from remote: ${remoteModel.id}');
         } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
           await photoLocal.updatePhoto(remoteModel);
+          debugPrint('✅ Photo updated from remote: ${remoteModel.id}');
         }
       }
 
-      // Sync local -> remote
+      // Sync local -> remote with photo upload
       for (final localModel in localModels) {
         final remoteModel = remoteMap[localModel.id];
 
-        final hasImageUrl = localModel.imageUrl != null && localModel.imageUrl!.isNotEmpty;
+        final hasImageUrl = localModel.imageUrl != null && 
+                            localModel.imageUrl!.isNotEmpty;
+        final hasLocalPath = localModel.localFilePath != null && 
+                             localModel.localFilePath!.isNotEmpty;
 
-        if (remoteModel == null && hasImageUrl) {
-          final entity = _photoModelToEntity(localModel);
-          await photoRemote.createPhotoMetadata(entity);
-        } else if (remoteModel != null &&
-            localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
+        if (remoteModel == null) {
+          // Photo belum ada di remote
+          
+          if (!hasImageUrl && hasLocalPath) {
+            // ✅ FIX: Upload photo file ke Firebase Storage
+            try {
+              debugPrint('📤 Uploading photo to Firebase Storage: ${localModel.id}');
+              final file = File(localModel.localFilePath!);
+              
+              if (await file.exists()) {
+                // Upload file ke storage
+                final cloudUrl = await photoRemote.uploadPhoto(file, localModel.id);
+                debugPrint('✅ Photo uploaded: $cloudUrl');
+                
+                // Update local model dengan cloudUrl
+                final updatedModel = localModel.copyWith(
+                  imageUrl: cloudUrl,
+                  uploadStatus: 'completed',
+                  isSynced: true,
+                );
+                await photoLocal.updatePhoto(updatedModel);
+                
+                // Create metadata di Firestore
+                final entity = _photoModelToEntity(updatedModel);
+                await photoRemote.createPhotoMetadata(entity);
+                debugPrint('✅ Photo metadata synced: ${localModel.id}');
+              } else {
+                debugPrint('⚠️ Photo file not found: ${localModel.localFilePath}');
+              }
+            } catch (e) {
+              debugPrint('⚠️ Failed to upload photo ${localModel.id}: $e');
+              // Continue dengan photo lainnya, jangan stop sync
+            }
+          } else if (hasImageUrl) {
+            // Photo sudah punya cloudUrl, langsung sync metadata
+            final entity = _photoModelToEntity(localModel);
+            await photoRemote.createPhotoMetadata(entity);
+            debugPrint('✅ Photo metadata synced: ${localModel.id}');
+          } else {
+            debugPrint('⚠️ Photo has no cloudUrl or localPath: ${localModel.id}');
+          }
+        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
+          // Update remote dengan data local yang lebih baru
           final entity = _photoModelToEntity(localModel);
           await photoRemote.updatePhoto(entity);
+          debugPrint('✅ Photo updated on remote: ${localModel.id}');
         }
       }
 
@@ -342,6 +388,8 @@ class SyncRepositoryImpl implements SyncRepository {
       dateTaken: model.date,
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
+      isUploaded: model.uploadStatus == 'completed',
+      isSynced: model.isSynced,
     );
 
   // ==================== ENUM MAPPERS ====================

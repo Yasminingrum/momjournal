@@ -22,12 +22,12 @@ class ScheduleEntityAdapter extends TypeAdapter<ScheduleEntity> {
       title: fields[2] as String,
       category: fields[3] as ScheduleCategory,
       dateTime: fields[4] as DateTime,
+      createdAt: fields[9] as DateTime,
+      updatedAt: fields[10] as DateTime,
       notes: fields[5] as String?,
       hasReminder: fields[6] as bool,
       reminderMinutes: fields[7] as int?,
       isCompleted: fields[8] as bool,
-      createdAt: fields[9] as DateTime,
-      updatedAt: fields[10] as DateTime,
       isSynced: fields[11] as bool,
     );
   }

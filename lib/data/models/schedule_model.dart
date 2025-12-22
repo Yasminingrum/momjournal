@@ -98,36 +98,45 @@ class ScheduleModel extends HiveObject {
   });
 
   /// Factory constructor dari JSON (Firestore)
-  factory ScheduleModel.fromJson(Map<String, dynamic> json) => ScheduleModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      title: json['title'] as String,
+  /// 
+  /// Handles null values safely to prevent type casting errors
+  factory ScheduleModel.fromJson(Map<String, dynamic> json) {
+    // Helper function untuk safely parse DateTime
+    DateTime? _parseDateTime(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+    
+    return ScheduleModel(
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      title: json['title'] as String? ?? '',
       description: json['description'] as String?,
       category: ScheduleCategory.values.firstWhere(
         (e) => e.toString() == 'ScheduleCategory.${json['category']}',
         orElse: () => ScheduleCategory.other,
       ),
-      scheduledTime: json['scheduledTime'] is DateTime
-          ? json['scheduledTime'] as DateTime
-          : DateTime.parse(json['scheduledTime'] as String),
+      scheduledTime: _parseDateTime(json['scheduledTime']) ?? DateTime.now(),
       reminderEnabled: json['reminderEnabled'] as bool? ?? true,
       reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
       isCompleted: json['isCompleted'] as bool? ?? false,
-      completedAt: json['completedAt'] != null
-          ? (json['completedAt'] is DateTime
-              ? json['completedAt'] as DateTime
-              : DateTime.parse(json['completedAt'] as String))
-          : null,
+      completedAt: _parseDateTime(json['completedAt']),
       completionNotes: json['completionNotes'] as String?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       notificationId: json['notificationId'] as int?,
     );
+  }
+  
   /// ID unik untuk schedule
   @HiveField(0)
   final String id;

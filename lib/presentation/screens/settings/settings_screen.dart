@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '/presentation/providers/auth_provider.dart';
+import '/presentation/providers/sync_provider.dart';
 import '/presentation/providers/theme_provider.dart';
 import '/presentation/routes/app_router.dart';
 
@@ -204,49 +205,47 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Handle theme change
-  Future<void> _handleThemeChange(
+  // Handle theme change with feedback
+  void _handleThemeChange(
     BuildContext context,
     BuildContext dialogContext,
     ThemeProvider themeProvider,
     ThemeMode value,
     String message,
-  ) async {
-    await themeProvider.setThemeMode(value);
-    if (dialogContext.mounted) {
-      Navigator.pop(dialogContext);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    }
+  ) {
+    themeProvider.setThemeMode(value);
+    Navigator.pop(dialogContext);
+    
+    // Show feedback
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
-  // Show about dialog with app information
+  // Show about dialog
   void _showAboutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Tentang MomJournal'),
-          content: const SingleChildScrollView(
+          content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // App Icon/Logo placeholder
+                // Logo/Icon
                 Center(
                   child: Icon(
                     Icons.book,
                     size: 64,
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 // App Name
                 Center(
@@ -307,7 +306,7 @@ class SettingsScreen extends StatelessWidget {
           title: const Text('Keluar'),
           content: const Text(
             'Apakah Anda yakin ingin keluar? '
-            'Data Anda telah tersimpan dengan aman di cloud.',
+            'Semua data akan disinkronkan sebelum keluar.',
           ),
           actions: [
             TextButton(
@@ -330,22 +329,81 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Perform sign out
+  // Perform sign out with data synchronization
   Future<void> _performSignOut(BuildContext context, AuthProvider authProvider) async {
-    // Show loading indicator
+    // Show loading indicator with sync message
     if (context.mounted) {
       showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return const AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Menyinkronkan data...'),
+              ],
+            ),
           );
         },
       );
     }
     
-    // Sign out
+    // Step 1: Sync all data to Firebase before logout
+    final syncProvider = context.read<SyncProvider>();
+    final syncSuccess = await syncProvider.syncAll();
+    
+    if (!syncSuccess && context.mounted) {
+      // Close loading
+      Navigator.pop(context);
+      
+      // Show warning but allow user to proceed
+      final shouldProceed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Peringatan'),
+            content: const Text(
+              'Gagal menyinkronkan beberapa data. '
+              'Data yang belum tersinkronisasi akan hilang jika Anda keluar sekarang. '
+              'Apakah Anda tetap ingin keluar?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text('BATAL'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('TETAP KELUAR'),
+              ),
+            ],
+          );
+        },
+      );
+      
+      if (shouldProceed != true) {
+        return; // User cancelled
+      }
+      
+      // Show loading again
+      if (context.mounted) {
+        showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        );
+      }
+    }
+    
+    // Step 2: Sign out
     final success = await authProvider.signOut();
     
     if (context.mounted) {

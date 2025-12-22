@@ -1,7 +1,3 @@
-/// Photo Remote Datasource
-/// 
-/// Handles photo operations with Firebase Storage and Firestore
-/// Location: lib/data/datasources/remote/photo_remote_datasource.dart
 library;
 
 import 'dart:io';
@@ -93,7 +89,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
           .orderBy('dateTaken', descending: true)
           .get();
 
-      return snapshot.docs.map(_photoFromFirestore).toList();
+      return snapshot.docs
+          .map(_photoFromFirestore)
+          .where((photo) => photo != null)
+          .cast<PhotoEntity>()
+          .toList();
     } catch (e) {
       throw DatabaseException('Gagal mengambil foto: $e');
     }
@@ -106,10 +106,13 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      final data = _photoToFirestore(photo);
-      data['updatedAt'] = FieldValue.serverTimestamp();
+      final photoData = _photoToFirestore(photo);
+      photoData['updatedAt'] = FieldValue.serverTimestamp();
 
-      await _photosCollection!.doc(photo.id).update(data);
+      await _photosCollection!
+          .doc(photo.id)
+          .update(photoData);
+
       debugPrint('✅ Photo updated: ${photo.id}');
     } catch (e) {
       throw DatabaseException('Gagal memperbarui foto: $e');
@@ -123,23 +126,20 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      // Delete from Storage
-      final ref = _firebaseService.storage.refFromURL(downloadUrl);
-      await ref.delete();
-      debugPrint('✅ Photo deleted from Storage');
-
-      // Delete metadata
+      // Delete from Firestore
       await _photosCollection!.doc(photoId).delete();
-      debugPrint('✅ Photo metadata deleted: $photoId');
-    } on FirebaseException catch (e) {
-      if (e.code == 'object-not-found') {
-        // File already deleted, just remove metadata
-        await _photosCollection!.doc(photoId).delete();
-      } else {
-        throw StorageException(FirebaseErrorHandler.getErrorMessage(e));
+
+      // Delete from Storage
+      try {
+        final ref = FirebaseStorage.instance.refFromURL(downloadUrl);
+        await ref.delete();
+      } catch (e) {
+        debugPrint('⚠️ Failed to delete from storage, but metadata removed: $e');
       }
+
+      debugPrint('✅ Photo deleted: $photoId');
     } catch (e) {
-      throw StorageException('Gagal menghapus foto: $e');
+      throw DatabaseException('Gagal menghapus foto: $e');
     }
   }
 
@@ -152,7 +152,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
     return _photosCollection!
         .orderBy('dateTaken', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(_photoFromFirestore).toList());
+        .map((snapshot) => snapshot.docs
+            .map(_photoFromFirestore)
+            .where((photo) => photo != null)
+            .cast<PhotoEntity>()
+            .toList());
   }
 
   Map<String, dynamic> _photoToFirestore(PhotoEntity photo) => {
@@ -166,17 +170,69 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       'updatedAt': Timestamp.fromDate(photo.updatedAt),
     };
 
-  PhotoEntity _photoFromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return PhotoEntity(
-      id: data['id'] as String,
-      userId: data['userId'] as String,
-      cloudUrl: data['cloudUrl'] as String,
-      caption: data['caption'] as String? ?? '',
-      isMilestone: data['isMilestone'] as bool,
-      dateTaken: (data['dateTaken'] as Timestamp).toDate(),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-    );
+  /// Convert Firestore document to PhotoEntity
+  /// 
+  /// Returns null if document is invalid/corrupt to prevent crashes
+  PhotoEntity? _photoFromFirestore(DocumentSnapshot doc) {
+    try {
+      final data = doc.data() as Map<String, dynamic>?;
+      
+      // Return null if no data
+      if (data == null) {
+        debugPrint('⚠️ Skipping photo document ${doc.id}: no data');
+        return null;
+      }
+      
+      // Helper to safely get Timestamp and convert to DateTime
+      DateTime? _parseTimestamp(dynamic value) {
+        if (value == null) return null;
+        if (value is Timestamp) return value.toDate();
+        if (value is DateTime) return value;
+        return null;
+      }
+      
+      // Validate required fields
+      final id = data['id'] as String?;
+      final userId = data['userId'] as String?;
+      final cloudUrl = data['cloudUrl'] as String?;
+      final dateTaken = _parseTimestamp(data['dateTaken']);
+      
+      if (id == null || id.isEmpty) {
+        debugPrint('⚠️ Skipping photo document ${doc.id}: missing id');
+        return null;
+      }
+      
+      if (userId == null || userId.isEmpty) {
+        debugPrint('⚠️ Skipping photo document ${doc.id}: missing userId');
+        return null;
+      }
+      
+      if (cloudUrl == null || cloudUrl.isEmpty) {
+        debugPrint('⚠️ Skipping photo document ${doc.id}: missing cloudUrl');
+        return null;
+      }
+      
+      if (dateTaken == null) {
+        debugPrint('⚠️ Skipping photo document ${doc.id}: missing dateTaken');
+        return null;
+      }
+      
+      return PhotoEntity(
+        id: id,
+        userId: userId,
+        cloudUrl: cloudUrl,
+        caption: data['caption'] as String?,
+        isMilestone: data['isMilestone'] as bool? ?? false,
+        dateTaken: dateTaken,
+        createdAt: _parseTimestamp(data['createdAt']) ?? DateTime.now(),
+        updatedAt: _parseTimestamp(data['updatedAt']) ?? DateTime.now(),
+        localPath: null,  // Will be populated from local storage if available
+        isUploaded: true, // If it's in Firestore, it's uploaded
+        isSynced: true,   // If it's in Firestore, it's synced
+      );
+    } catch (e) {
+      debugPrint('⚠️ Error parsing photo document ${doc.id}: $e');
+      return null;  // Return null instead of crashing
+    }
   }
 }

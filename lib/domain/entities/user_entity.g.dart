@@ -20,11 +20,11 @@ class UserEntityAdapter extends TypeAdapter<UserEntity> {
       id: fields[0] as String,
       email: fields[1] as String,
       displayName: fields[2] as String,
+      createdAt: fields[6] as DateTime,
+      updatedAt: fields[7] as DateTime,
       photoUrl: fields[3] as String?,
       childName: fields[4] as String?,
       childDateOfBirth: fields[5] as DateTime?,
-      createdAt: fields[6] as DateTime,
-      updatedAt: fields[7] as DateTime,
     );
   }
 

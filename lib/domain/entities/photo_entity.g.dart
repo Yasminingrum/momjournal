@@ -19,13 +19,13 @@ class PhotoEntityAdapter extends TypeAdapter<PhotoEntity> {
     return PhotoEntity(
       id: fields[0] as String,
       userId: fields[1] as String,
+      dateTaken: fields[6] as DateTime,
+      createdAt: fields[7] as DateTime,
+      updatedAt: fields[8] as DateTime,
       localPath: fields[2] as String?,
       cloudUrl: fields[3] as String?,
       caption: fields[4] as String?,
       isMilestone: fields[5] as bool,
-      dateTaken: fields[6] as DateTime,
-      createdAt: fields[7] as DateTime,
-      updatedAt: fields[8] as DateTime,
       isSynced: fields[9] as bool,
       isUploaded: fields[10] as bool,
     );

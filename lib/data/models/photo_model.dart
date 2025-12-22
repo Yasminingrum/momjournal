@@ -15,7 +15,10 @@ class PhotoModel extends HiveObject {
   PhotoModel({
     required this.id,
     required this.userId,
-    required this.date, required this.createdAt, required this.updatedAt, this.caption,
+    required this.date, 
+    required this.createdAt, 
+    required this.updatedAt, 
+    this.caption,
     this.imageUrl,
     this.thumbnailUrl,
     this.localFilePath,
@@ -31,13 +34,28 @@ class PhotoModel extends HiveObject {
   });
 
   /// Factory constructor dari JSON (Firestore)
-  factory PhotoModel.fromJson(Map<String, dynamic> json) => PhotoModel(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
+  /// 
+  /// Handles null values safely to prevent type casting errors
+  factory PhotoModel.fromJson(Map<String, dynamic> json) {
+    // Helper function untuk safely parse DateTime
+    DateTime? _parseDateTime(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+    
+    return PhotoModel(
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
       caption: json['caption'] as String?,
-      date: json['date'] is DateTime
-          ? json['date'] as DateTime
-          : DateTime.parse(json['date'] as String),
+      date: _parseDateTime(json['date']) ?? DateTime.now(),
       imageUrl: json['imageUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
       localFilePath: json['localFilePath'] as String?,
@@ -48,17 +66,14 @@ class PhotoModel extends HiveObject {
       fileSizeBytes: json['fileSizeBytes'] as int?,
       imageWidth: json['imageWidth'] as int?,
       imageHeight: json['imageHeight'] as int?,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: _parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       uploadStatus: json['uploadStatus'] as String? ?? 'completed',
       uploadProgress: json['uploadProgress'] as int?,
       uploadError: json['uploadError'] as String?,
     );
+  }
 
   /// Factory constructor dari PhotoEntity
   factory PhotoModel.fromEntity(PhotoEntity entity) => PhotoModel(
@@ -98,23 +113,23 @@ class PhotoModel extends HiveObject {
   @HiveField(3)
   final DateTime date;
 
-  /// URL foto full size di Firebase Storage
+  /// URL foto di Firebase Storage (full resolution)
   @HiveField(4)
   final String? imageUrl;
 
-  /// URL thumbnail di Firebase Storage (compressed)
+  /// URL thumbnail foto (untuk preview di gallery)
   @HiveField(5)
   final String? thumbnailUrl;
 
-  /// Local file path (untuk offline mode)
+  /// Local file path (untuk offline access)
   @HiveField(6)
   final String? localFilePath;
 
-  /// Apakah foto ini milestone penting
+  /// Flag apakah foto ini adalah milestone
   @HiveField(7)
   final bool isMilestone;
 
-  /// Tags/labels untuk foto (optional)
+  /// Tags untuk search dan filter
   @HiveField(8)
   final List<String>? tags;
 
@@ -122,19 +137,19 @@ class PhotoModel extends HiveObject {
   @HiveField(9)
   final int? fileSizeBytes;
 
-  /// Dimensi foto: width
+  /// Dimensi foto - width
   @HiveField(10)
   final int? imageWidth;
 
-  /// Dimensi foto: height
+  /// Dimensi foto - height
   @HiveField(11)
   final int? imageHeight;
 
-  /// Timestamp kapan photo entry dibuat
+  /// Timestamp kapan photo dibuat
   @HiveField(12)
   final DateTime createdAt;
 
-  /// Timestamp terakhir kali photo entry diupdate
+  /// Timestamp terakhir kali photo diupdate
   @HiveField(13)
   final DateTime updatedAt;
 
@@ -146,28 +161,13 @@ class PhotoModel extends HiveObject {
   @HiveField(15)
   final String uploadStatus;
 
-  /// Progress upload (0-100)
+  /// Progress upload dalam persen (0-100)
   @HiveField(16)
   final int? uploadProgress;
 
   /// Error message jika upload failed
   @HiveField(17)
   final String? uploadError;
-
-  /// Convert to PhotoEntity
-  PhotoEntity toEntity() => PhotoEntity(
-      id: id,
-      userId: userId,
-      localPath: localFilePath,
-      cloudUrl: imageUrl,
-      caption: caption,
-      isMilestone: isMilestone,
-      dateTaken: date,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      isSynced: isSynced,
-      isUploaded: uploadStatus == 'completed' && imageUrl != null,
-    );
 
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
@@ -190,6 +190,21 @@ class PhotoModel extends HiveObject {
       'uploadProgress': uploadProgress,
       'uploadError': uploadError,
     };
+
+  /// Convert ke PhotoEntity untuk domain layer
+  PhotoEntity toEntity() => PhotoEntity(
+      id: id,
+      userId: userId,
+      caption: caption,
+      dateTaken: date,
+      localPath: localFilePath,
+      cloudUrl: imageUrl,
+      isMilestone: isMilestone,
+      isUploaded: uploadStatus == 'completed',
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      isSynced: isSynced,
+    );
 
   /// Create copy with updated fields
   PhotoModel copyWith({
@@ -232,80 +247,32 @@ class PhotoModel extends HiveObject {
       uploadError: uploadError ?? this.uploadError,
     );
 
-  /// Getter untuk display URL (prioritas: imageUrl > thumbnailUrl > localFilePath)
-  String? get displayUrl => imageUrl ?? thumbnailUrl ?? localFilePath;
-
-  /// Getter untuk cek apakah photo sudah terupload
+  /// Getter untuk mengecek apakah foto sudah diupload ke cloud
   bool get isUploaded => uploadStatus == 'completed' && imageUrl != null;
 
-  /// Getter untuk cek apakah sedang uploading
+  /// Getter untuk mengecek apakah sedang proses upload
   bool get isUploading => uploadStatus == 'uploading';
 
-  /// Getter untuk cek apakah upload failed
-  bool get isUploadFailed => uploadStatus == 'failed';
+  /// Getter untuk mengecek apakah upload gagal
+  bool get hasUploadFailed => uploadStatus == 'failed';
 
-  /// Getter untuk file size yang readable (KB, MB)
+  /// Getter untuk readable file size
   String get readableFileSize {
-    if (fileSizeBytes == null) {
-      return 'Unknown';
-    }
+    if (fileSizeBytes == null) return 'Unknown';
 
-    if (fileSizeBytes! < 1024) {
-      return '$fileSizeBytes B';
-    } else if (fileSizeBytes! < 1024 * 1024) {
-      return '${(fileSizeBytes! / 1024).toStringAsFixed(1)} KB';
+    final bytes = fileSizeBytes!;
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
     } else {
-      return '${(fileSizeBytes! / (1024 * 1024)).toStringAsFixed(1)} MB';
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
-  }
-
-  /// Getter untuk aspect ratio
-  double? get aspectRatio {
-    if (imageWidth == null || imageHeight == null || imageHeight == 0) {
-      return null;
-    }
-    return imageWidth! / imageHeight!;
-  }
-
-  /// Getter untuk date string yang user-friendly
-  String get dateString {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final photoDate = DateTime(date.year, date.month, date.day);
-
-    if (photoDate == today) {
-      return 'Hari Ini';
-    } else if (photoDate == yesterday) {
-      return 'Kemarin';
-    } else {
-      // Format: "5 Jan 2025"
-      final month = _getMonthName(date.month);
-      return '${date.day} $month ${date.year}';
-    }
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    return months[month - 1];
   }
 
   @override
-  String toString() => 'PhotoModel(id: $id, caption: $caption, date: $date, '
-        'isMilestone: $isMilestone, uploadStatus: $uploadStatus, isSynced: $isSynced)';
+  String toString() =>
+      'PhotoModel(id: $id, caption: $caption, date: $date, uploadStatus: $uploadStatus)';
 
   @override
   bool operator ==(Object other) {
@@ -328,23 +295,28 @@ class PhotoModel extends HiveObject {
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.isSynced == isSynced &&
-        other.uploadStatus == uploadStatus;
+        other.uploadStatus == uploadStatus &&
+        other.uploadProgress == uploadProgress &&
+        other.uploadError == uploadError;
   }
 
   @override
-  int get hashCode => id.hashCode ^
-        userId.hashCode ^
-        caption.hashCode ^
-        date.hashCode ^
-        imageUrl.hashCode ^
-        thumbnailUrl.hashCode ^
-        localFilePath.hashCode ^
-        isMilestone.hashCode ^
-        fileSizeBytes.hashCode ^
-        imageWidth.hashCode ^
-        imageHeight.hashCode ^
-        createdAt.hashCode ^
-        updatedAt.hashCode ^
-        isSynced.hashCode ^
-        uploadStatus.hashCode;
+  int get hashCode =>
+      id.hashCode ^
+      userId.hashCode ^
+      caption.hashCode ^
+      date.hashCode ^
+      imageUrl.hashCode ^
+      thumbnailUrl.hashCode ^
+      localFilePath.hashCode ^
+      isMilestone.hashCode ^
+      fileSizeBytes.hashCode ^
+      imageWidth.hashCode ^
+      imageHeight.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      isSynced.hashCode ^
+      uploadStatus.hashCode ^
+      uploadProgress.hashCode ^
+      uploadError.hashCode;
 }
