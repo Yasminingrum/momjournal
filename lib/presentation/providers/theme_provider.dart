@@ -1,7 +1,3 @@
-/// Theme Provider
-/// 
-/// Manages app theme mode (Light, Dark, System)
-/// Persists theme preference using Hive
 library;
 
 import 'package:flutter/material.dart';
@@ -76,6 +72,8 @@ class ThemeProvider with ChangeNotifier {
     switch (mode.toLowerCase()) {
       case 'light':
         return ThemeMode.light;
+      case 'lazydays':
+        return ThemeMode.light; 
       case 'dark':
         return ThemeMode.dark;
       case 'system':

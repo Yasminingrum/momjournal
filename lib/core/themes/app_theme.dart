@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import 'dark_theme.dart';
+import 'lazydays_theme.dart';
 import 'light_theme.dart';
 
 /// App Theme Factory
@@ -16,6 +17,9 @@ class AppTheme {
   
   /// Get dark theme
   static ThemeData get darkTheme => DarkTheme.theme;
+
+  /// Get Lazydays theme
+  static ThemeData get lazydaysTheme => LazydaysTheme.theme;
   
   /// Get theme mode based on system settings
   static ThemeMode get systemThemeMode => ThemeMode.system;
