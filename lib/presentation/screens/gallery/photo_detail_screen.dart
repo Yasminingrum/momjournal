@@ -1,4 +1,4 @@
-library;
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -41,22 +41,7 @@ class PhotoDetailScreen extends StatelessWidget {
                 child: InteractiveViewer(
                   minScale: 0.5,
                   maxScale: 4,
-                  child: CachedNetworkImage(
-                    imageUrl: photo.downloadUrl,
-                    fit: BoxFit.contain,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => const Center(
-                      child: Icon(
-                        Icons.error_outline,
-                        color: Colors.white,
-                        size: 48,
-                      ),
-                    ),
-                  ),
+                  child: _buildPhotoImage(),
                 ),
               ),
             ),
@@ -133,6 +118,59 @@ class PhotoDetailScreen extends StatelessWidget {
                   ],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+  /// Build photo image - prioritas: localPath > cloudUrl
+  Widget _buildPhotoImage() {
+    // Prioritaskan local file jika ada
+    if (photo.localPath != null && photo.localPath!.isNotEmpty) {
+      final file = File(photo.localPath!);
+      if (file.existsSync()) {
+        return Image.file(
+          file,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+        );
+      }
+    }
+
+    // Fallback ke cloud URL jika ada
+    if (photo.cloudUrl != null && photo.cloudUrl!.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: photo.cloudUrl!,
+        fit: BoxFit.contain,
+        placeholder: (context, url) => const Center(
+          child: CircularProgressIndicator(
+            color: Colors.white,
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildErrorWidget(),
+      );
+    }
+
+    // Jika tidak ada keduanya, tampilkan error
+    return _buildErrorWidget();
+  }
+
+  Widget _buildErrorWidget() => const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.white,
+            size: 48,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Foto tidak dapat dimuat',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
             ),
           ),
         ],

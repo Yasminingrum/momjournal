@@ -351,6 +351,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   /// Pick image and upload
+
+  /// Pick image and upload
   Future<void> _pickAndUploadImage(
     BuildContext context,
     ImageSource source,
@@ -376,7 +378,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       final photoProvider = context.read<PhotoProvider>();
 
       // Show loading indicator
-      await showDialog<void>(
+      showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext dialogContext) => const Center(
@@ -384,40 +386,62 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
       );
 
-      // Upload photo using provider
-      final success = await photoProvider.uploadPhoto(
-        imagePath: image.path,
-        caption: '',
-        isMilestone: false,
-      );
-
-      if (!context.mounted) {
-        return;
-      }
-
-      // Close loading dialog
-      Navigator.pop(context);
-
-      if (!context.mounted) {
-        return;
-      }
-
-      if (success) {
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Foto berhasil ditambahkan!'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
+      try {
+        // Upload photo using provider
+        final success = await photoProvider.uploadPhoto(
+          imagePath: image.path,
+          caption: '',
+          isMilestone: false,
         );
-      } else {
+
+        if (!context.mounted) {
+          return;
+        }
+
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        if (!context.mounted) {
+          return;
+        }
+
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Foto berhasil ditambahkan!'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Gagal menambahkan foto: ${photoProvider.errorMessage ?? "Terjadi kesalahan"}',
+              ),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      } catch (uploadError) {
+        if (!context.mounted) {
+          return;
+        }
+
+        // Make sure dialog is closed
+        Navigator.of(context).pop();
+
+        if (!context.mounted) {
+          return;
+        }
+
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Gagal menambahkan foto: ${photoProvider.errorMessage ?? "Terjadi kesalahan"}',
-            ),
+            content: Text('Gagal menambahkan foto: $uploadError'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -430,13 +454,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
       // Close loading dialog if open
       if (Navigator.canPop(context)) {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
       }
 
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Gagal menambahkan foto: $e'),
+          content: Text('Gagal memilih foto: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),

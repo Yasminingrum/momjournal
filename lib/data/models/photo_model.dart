@@ -1,6 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:hive/hive.dart';
+import '/domain/entities/photo_entity.dart';
 
 part 'photo_model.g.dart';
 
@@ -58,6 +59,29 @@ class PhotoModel extends HiveObject {
       uploadProgress: json['uploadProgress'] as int?,
       uploadError: json['uploadError'] as String?,
     );
+
+  /// Factory constructor dari PhotoEntity
+  factory PhotoModel.fromEntity(PhotoEntity entity) => PhotoModel(
+      id: entity.id,
+      userId: entity.userId,
+      caption: entity.caption,
+      date: entity.dateTaken,
+      imageUrl: entity.cloudUrl,
+      thumbnailUrl: null,
+      localFilePath: entity.localPath,
+      isMilestone: entity.isMilestone,
+      tags: null,
+      fileSizeBytes: null,
+      imageWidth: null,
+      imageHeight: null,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: entity.isSynced,
+      uploadStatus: entity.isUploaded ? 'completed' : 'pending',
+      uploadProgress: null,
+      uploadError: null,
+    );
+
   /// ID unik untuk photo
   @HiveField(0)
   final String id;
@@ -129,6 +153,21 @@ class PhotoModel extends HiveObject {
   /// Error message jika upload failed
   @HiveField(17)
   final String? uploadError;
+
+  /// Convert to PhotoEntity
+  PhotoEntity toEntity() => PhotoEntity(
+      id: id,
+      userId: userId,
+      localPath: localFilePath,
+      cloudUrl: imageUrl,
+      caption: caption,
+      isMilestone: isMilestone,
+      dateTaken: date,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      isSynced: isSynced,
+      isUploaded: uploadStatus == 'completed' && imageUrl != null,
+    );
 
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
