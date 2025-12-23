@@ -102,7 +102,7 @@ class ScheduleModel extends HiveObject {
   /// Handles null values safely to prevent type casting errors
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
     // Helper function untuk safely parse DateTime
-    DateTime? _parseDateTime(dynamic value) {
+    DateTime? parseDateTime(dynamic value) {
       if (value == null) {
         return null;
       }
@@ -128,14 +128,14 @@ class ScheduleModel extends HiveObject {
         (e) => e.toString() == 'ScheduleCategory.${json['category']}',
         orElse: () => ScheduleCategory.other,
       ),
-      scheduledTime: _parseDateTime(json['scheduledTime']) ?? DateTime.now(),
+      scheduledTime: parseDateTime(json['scheduledTime']) ?? DateTime.now(),
       reminderEnabled: json['reminderEnabled'] as bool? ?? true,
       reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
       isCompleted: json['isCompleted'] as bool? ?? false,
-      completedAt: _parseDateTime(json['completedAt']),
+      completedAt: parseDateTime(json['completedAt']),
       completionNotes: json['completionNotes'] as String?,
-      createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: _parseDateTime(json['updatedAt']) ?? DateTime.now(),
+      createdAt: parseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       notificationId: json['notificationId'] as int?,
     );

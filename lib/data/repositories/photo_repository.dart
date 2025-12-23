@@ -28,8 +28,7 @@ class PhotoRepository {
   }
 
   /// Get photos for a specific date
-  Future<List<PhotoEntity>> getPhotosByDate(DateTime date) async {
-    return _box.values
+  Future<List<PhotoEntity>> getPhotosByDate(DateTime date) async => _box.values
         .map((model) => model.toEntity())
         .where((photo) {
           final photoDate = photo.dateTaken;
@@ -39,40 +38,33 @@ class PhotoRepository {
         })
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
-  }
 
   /// Get photos for a specific month
-  Future<List<PhotoEntity>> getPhotosByMonth(int year, int month) async {
-    return _box.values
+  Future<List<PhotoEntity>> getPhotosByMonth(int year, int month) async => _box.values
         .map((model) => model.toEntity())
         .where((photo) =>
             photo.dateTaken.year == year && photo.dateTaken.month == month,)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
-  }
 
   /// Get photos by date range
   Future<List<PhotoEntity>> getPhotosByDateRange(
     DateTime startDate,
     DateTime endDate,
-  ) async {
-    return _box.values
+  ) async => _box.values
         .map((model) => model.toEntity())
         .where((photo) =>
             photo.dateTaken.isAfter(startDate.subtract(const Duration(days: 1))) &&
             photo.dateTaken.isBefore(endDate.add(const Duration(days: 1))),)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
-  }
 
   /// Get milestone photos only
-  Future<List<PhotoEntity>> getMilestonePhotos() async {
-    return _box.values
+  Future<List<PhotoEntity>> getMilestonePhotos() async => _box.values
         .map((model) => model.toEntity())
         .where((photo) => photo.isMilestone)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
-  }
 
   /// Get a specific photo by ID
   Future<PhotoEntity?> getPhotoById(String id) async {
@@ -123,12 +115,10 @@ class PhotoRepository {
   }
 
   /// Get unsynced photos for cloud sync
-  Future<List<PhotoEntity>> getUnsyncedPhotos() async {
-    return _box.values
+  Future<List<PhotoEntity>> getUnsyncedPhotos() async => _box.values
         .map((model) => model.toEntity())
         .where((photo) => !photo.isSynced)
         .toList();
-  }
 
   /// Mark photo as synced
   Future<void> markAsSynced(String id) async {

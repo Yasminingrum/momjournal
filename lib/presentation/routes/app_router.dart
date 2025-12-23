@@ -118,12 +118,26 @@ class AppRouter {
         );
       
       case Routes.addJournal:
-        final args = settings.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-          builder: (_) => AddJournalScreen(
-            selectedDate: args?['selectedDate'] as DateTime?,
-          ),
-        );
+        final args = settings.arguments;
+        
+        // Handle both Map and JournalEntity arguments
+        if (args is Map<String, dynamic>) {
+          return MaterialPageRoute(
+            builder: (_) => AddJournalScreen(
+              selectedDate: args['selectedDate'] as DateTime?,
+            ),
+          );
+        } else if (args is JournalEntity) {
+          return MaterialPageRoute(
+            builder: (_) => AddJournalScreen(
+              journalToEdit: args,
+            ),
+          );
+        } else {
+          return MaterialPageRoute(
+            builder: (_) => const AddJournalScreen(),
+          );
+        }
       
       case Routes.journalDetail:
         final journal = settings.arguments as JournalEntity;

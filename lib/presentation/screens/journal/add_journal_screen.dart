@@ -13,8 +13,10 @@ class AddJournalScreen extends StatefulWidget {
   const AddJournalScreen({
     super.key,
     this.selectedDate,
+    this.journalToEdit,
   });
   final DateTime? selectedDate;
+  final JournalEntity? journalToEdit;
 
   @override
   State<AddJournalScreen> createState() => _AddJournalScreenState();
@@ -26,12 +28,24 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
   DateTime? _selectedDate;
   bool _isLoading = false;
   int _characterCount = 0;
+  bool _isEditMode = false;
 
   @override
   void initState() {
     super.initState();
-    _selectedDate = widget.selectedDate ?? DateTime.now();
+    _isEditMode = widget.journalToEdit != null;
+    
+    if (_isEditMode) {
+      // Load existing journal data for editing
+      _contentController.text = widget.journalToEdit!.content;
+      _selectedMood = widget.journalToEdit!.mood;
+      _selectedDate = widget.journalToEdit!.date;
+    } else {
+      _selectedDate = widget.selectedDate ?? DateTime.now();
+    }
+    
     _contentController.addListener(_updateCharacterCount);
+    _updateCharacterCount();
   }
 
   @override
@@ -52,7 +66,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tulis Jurnal'),
+        title: Text(_isEditMode ? 'Edit Jurnal' : 'Tulis Jurnal'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -104,7 +118,9 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
           // Save button
           CustomButton(
             onPressed: _isLoading ? null : _handleSave,
-            text: _isLoading ? 'Menyimpan...' : 'Simpan Jurnal',
+            text: _isLoading 
+                ? (_isEditMode ? 'Mengupdate...' : 'Menyimpan...') 
+                : (_isEditMode ? 'Update Jurnal' : 'Simpan Jurnal'),
             type: ButtonType.elevated,
             isFullWidth: true,
           ),
@@ -234,11 +250,24 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
     });
 
     final journalProvider = context.read<JournalProvider>();
-    final success = await journalProvider.createJournal(
-      mood: _selectedMood,
-      content: content,
-      date: _selectedDate,
-    );
+    bool success;
+
+    if (_isEditMode) {
+      // Update existing journal
+      success = await journalProvider.updateJournal(
+        id: widget.journalToEdit!.id,
+        mood: _selectedMood,
+        content: content,
+        date: _selectedDate,
+      );
+    } else {
+      // Create new journal
+      success = await journalProvider.createJournal(
+        mood: _selectedMood,
+        content: content,
+        date: _selectedDate,
+      );
+    }
 
     if (!mounted) {
       return;
@@ -246,12 +275,14 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Jurnal berhasil disimpan'),
+        SnackBar(
+          content: Text(_isEditMode 
+              ? 'Jurnal berhasil diupdate' 
+              : 'Jurnal berhasil disimpan'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Return true to indicate success
     } else {
       setState(() {
         _isLoading = false;

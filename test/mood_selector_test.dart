@@ -79,8 +79,7 @@ class MoodSelector extends StatefulWidget {
 
 class _MoodSelectorState extends State<MoodSelector> {
   @override
-  Widget build(BuildContext context) {
-    return Column(
+  Widget build(BuildContext context) => Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -102,7 +101,6 @@ class _MoodSelectorState extends State<MoodSelector> {
         ],
       ],
     );
-  }
 
   Widget _buildMoodButton(MoodLevel mood) {
     final isSelected = widget.selectedMood == mood;
@@ -146,8 +144,7 @@ class CompactMoodSelector extends StatelessWidget {
   final void Function(MoodLevel) onMoodSelected;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+  Widget build(BuildContext context) => Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -180,7 +177,6 @@ class CompactMoodSelector extends StatelessWidget {
         }).toList(),
       ),
     );
-  }
 }
 
 void main() {
@@ -361,14 +357,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StatefulBuilder(
-              builder: (context, setState) {
-                return MoodSelector(
+              builder: (context, setState) => MoodSelector(
                   selectedMood: currentMood,
                   onMoodSelected: (mood) {
                     setState(() => currentMood = mood);
                   },
-                );
-              },
+                ),
             ),
           ),
         ),
@@ -506,14 +500,12 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StatefulBuilder(
-              builder: (context, setState) {
-                return MoodSelector(
+              builder: (context, setState) => MoodSelector(
                   selectedMood: currentMood,
                   onMoodSelected: (mood) {
                     setState(() => currentMood = mood);
                   },
-                );
-              },
+                ),
             ),
           ),
         ),

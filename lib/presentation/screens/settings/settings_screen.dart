@@ -144,8 +144,7 @@ class SettingsScreen extends StatelessWidget {
     
     showDialog<void>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
+      builder: (dialogContext) => AlertDialog(
           title: const Text('Pilih Tema'),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -200,8 +199,7 @@ class SettingsScreen extends StatelessWidget {
               child: const Text('BATAL'),
             ),
           ],
-        );
-      },
+        ),
     );
   }
 
@@ -229,8 +227,7 @@ class SettingsScreen extends StatelessWidget {
   void _showAboutDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
+      builder: (BuildContext context) => AlertDialog(
           title: const Text('Tentang MomJournal'),
           content: SingleChildScrollView(
             child: Column(
@@ -290,8 +287,7 @@ class SettingsScreen extends StatelessWidget {
               child: const Text('TUTUP'),
             ),
           ],
-        );
-      },
+        ),
     );
   }
 
@@ -301,8 +297,7 @@ class SettingsScreen extends StatelessWidget {
     
     showDialog<void>(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
+      builder: (BuildContext dialogContext) => AlertDialog(
           title: const Text('Keluar'),
           content: const Text(
             'Apakah Anda yakin ingin keluar? '
@@ -324,8 +319,7 @@ class SettingsScreen extends StatelessWidget {
               child: const Text('KELUAR'),
             ),
           ],
-        );
-      },
+        ),
     );
   }
 
@@ -336,8 +330,7 @@ class SettingsScreen extends StatelessWidget {
       showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const AlertDialog(
+        builder: (BuildContext context) => const AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -346,8 +339,7 @@ class SettingsScreen extends StatelessWidget {
                 Text('Menyinkronkan data...'),
               ],
             ),
-          );
-        },
+          ),
       );
     }
     
@@ -362,8 +354,7 @@ class SettingsScreen extends StatelessWidget {
       // Show warning but allow user to proceed
       final shouldProceed = await showDialog<bool>(
         context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
+        builder: (BuildContext dialogContext) => AlertDialog(
             title: const Text('Peringatan'),
             content: const Text(
               'Gagal menyinkronkan beberapa data. '
@@ -381,8 +372,7 @@ class SettingsScreen extends StatelessWidget {
                 child: const Text('TETAP KELUAR'),
               ),
             ],
-          );
-        },
+          ),
       );
       
       if (shouldProceed != true) {
@@ -394,11 +384,9 @@ class SettingsScreen extends StatelessWidget {
         showDialog<void>(
           context: context,
           barrierDismissible: false,
-          builder: (BuildContext context) {
-            return const Center(
+          builder: (BuildContext context) => const Center(
               child: CircularProgressIndicator(),
-            );
-          },
+            ),
         );
       }
     }

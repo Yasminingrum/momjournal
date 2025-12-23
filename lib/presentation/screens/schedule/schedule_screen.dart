@@ -406,7 +406,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 ),
               );
               // Reload schedules if edit was successful
-              if (result == true && mounted) {
+              if ((result ?? false) && mounted) {
                 await context.read<ScheduleProvider>().loadSchedulesForDate(_selectedDate);
               }
             },

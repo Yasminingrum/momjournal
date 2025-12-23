@@ -233,7 +233,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       }
       
       // Helper to safely get Timestamp and convert to DateTime
-      DateTime? _parseTimestamp(dynamic value) {
+      DateTime? parseTimestamp(dynamic value) {
         if (value == null) {
           return null;
         }
@@ -249,7 +249,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       // Validate required fields
       final id = data['id'] as String?;
       final title = data['title'] as String?;
-      final dateTime = _parseTimestamp(data['dateTime']);
+      final dateTime = parseTimestamp(data['dateTime']);
       
       if (id == null || id.isEmpty) {
         debugPrint('⚠️ Skipping document ${doc.id}: missing id');
@@ -279,8 +279,8 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         hasReminder: data['hasReminder'] as bool? ?? false,
         reminderMinutes: data['reminderMinutes'] as int? ?? 15,
         isCompleted: data['isCompleted'] as bool? ?? false,
-        createdAt: _parseTimestamp(data['createdAt']) ?? DateTime.now(),
-        updatedAt: _parseTimestamp(data['updatedAt']) ?? DateTime.now(),
+        createdAt: parseTimestamp(data['createdAt']) ?? DateTime.now(),
+        updatedAt: parseTimestamp(data['updatedAt']) ?? DateTime.now(),
       );
     } catch (e) {
       debugPrint('⚠️ Error parsing document ${doc.id}: $e');

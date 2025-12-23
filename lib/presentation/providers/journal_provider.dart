@@ -187,10 +187,33 @@ class JournalProvider extends ChangeNotifier {
   }
 
   /// Update an existing journal
-  Future<bool> updateJournal(JournalEntity journal) async {
+  Future<bool> updateJournal({
+    required String id,
+    required MoodType mood,
+    required String content,
+    DateTime? date,
+  }) async {
     try {
       _setLoading(true);
-      await _repository.updateJournal(journal);
+
+      // Find the existing journal
+      final existingJournal = _journals.firstWhere(
+        (j) => j.id == id,
+        orElse: () => throw Exception('Journal not found'),
+      );
+
+      // Create updated journal entity
+      final updatedJournal = JournalEntity(
+        id: id,
+        userId: existingJournal.userId,
+        date: date ?? existingJournal.date,
+        mood: mood,
+        content: content,
+        createdAt: existingJournal.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      await _repository.updateJournal(updatedJournal);
       await loadAllJournals();
       _clearError();
       return true;

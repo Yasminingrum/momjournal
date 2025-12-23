@@ -38,7 +38,7 @@ class PhotoModel extends HiveObject {
   /// Handles null values safely to prevent type casting errors
   factory PhotoModel.fromJson(Map<String, dynamic> json) {
     // Helper function untuk safely parse DateTime
-    DateTime? _parseDateTime(dynamic value) {
+    DateTime? parseDateTime(dynamic value) {
       if (value == null) {
         return null;
       }
@@ -59,7 +59,7 @@ class PhotoModel extends HiveObject {
       id: json['id'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
       caption: json['caption'] as String?,
-      date: _parseDateTime(json['date']) ?? DateTime.now(),
+      date: parseDateTime(json['date']) ?? DateTime.now(),
       imageUrl: json['imageUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
       localFilePath: json['localFilePath'] as String?,
@@ -70,8 +70,8 @@ class PhotoModel extends HiveObject {
       fileSizeBytes: json['fileSizeBytes'] as int?,
       imageWidth: json['imageWidth'] as int?,
       imageHeight: json['imageHeight'] as int?,
-      createdAt: _parseDateTime(json['createdAt']) ?? DateTime.now(),
-      updatedAt: _parseDateTime(json['updatedAt']) ?? DateTime.now(),
+      createdAt: parseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       uploadStatus: json['uploadStatus'] as String? ?? 'completed',
       uploadProgress: json['uploadProgress'] as int?,

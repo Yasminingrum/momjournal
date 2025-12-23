@@ -184,7 +184,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       }
       
       // Helper to safely get Timestamp and convert to DateTime
-      DateTime? _parseTimestamp(dynamic value) {
+      DateTime? parseTimestamp(dynamic value) {
         if (value == null) {
           return null;
         }
@@ -201,7 +201,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       final id = data['id'] as String?;
       final userId = data['userId'] as String?;
       final cloudUrl = data['cloudUrl'] as String?;
-      final dateTaken = _parseTimestamp(data['dateTaken']);
+      final dateTaken = parseTimestamp(data['dateTaken']);
       
       if (id == null || id.isEmpty) {
         debugPrint('⚠️ Skipping photo document ${doc.id}: missing id');
@@ -230,8 +230,8 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         caption: data['caption'] as String?,
         isMilestone: data['isMilestone'] as bool? ?? false,
         dateTaken: dateTaken,
-        createdAt: _parseTimestamp(data['createdAt']) ?? DateTime.now(),
-        updatedAt: _parseTimestamp(data['updatedAt']) ?? DateTime.now(),
+        createdAt: parseTimestamp(data['createdAt']) ?? DateTime.now(),
+        updatedAt: parseTimestamp(data['updatedAt']) ?? DateTime.now(),
         localPath: null,  // Will be populated from local storage if available
         isUploaded: true, // If it's in Firestore, it's uploaded
         isSynced: true,   // If it's in Firestore, it's synced

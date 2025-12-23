@@ -381,10 +381,10 @@ void main() {
     testWidgets('should render multiple buttons correctly', (tester) async {
       // Arrange & Act: Build multiple buttons
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: Column(
-              children: const [
+              children: [
                 CustomButton(text: 'Button 1'),
                 CustomButton(text: 'Button 2', type: ButtonType.outlined),
                 CustomButton(text: 'Button 3', type: ButtonType.text),

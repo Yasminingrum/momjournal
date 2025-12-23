@@ -97,8 +97,7 @@ class MomJournalApp extends StatelessWidget {
   final PhotoLocalDataSource photoLocalDataSource;
 
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
+  Widget build(BuildContext context) => MultiProvider(
       providers: [
         // ==================== LOCAL DATASOURCES ====================
         Provider<ScheduleLocalDataSource>(
@@ -233,7 +232,6 @@ class MomJournalApp extends StatelessWidget {
         },
       ),
     );
-  }
 }
 
 /// Error screen yang ditampilkan saat terjadi error
@@ -243,8 +241,7 @@ class _ErrorScreen extends StatelessWidget {
   final FlutterErrorDetails errorDetails;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
@@ -323,5 +320,4 @@ class _ErrorScreen extends StatelessWidget {
         ),
       ),
     );
-  }
 }

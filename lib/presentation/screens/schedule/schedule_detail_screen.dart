@@ -233,7 +233,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     );
 
     // Jika edit berhasil, pop screen ini juga untuk kembali ke list
-    if (result == true && context.mounted) {
+    if ((result ?? false) && context.mounted) {
       Navigator.pop(context);
     }
   }

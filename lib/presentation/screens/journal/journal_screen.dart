@@ -336,7 +336,7 @@ class _JournalScreenState extends State<JournalScreen> {
                         Navigator.pop(context);
                         Navigator.pushNamed(
                           context,
-                          Routes.journalDetail,
+                          Routes.addJournal,
                           arguments: journal,
                         ).then((result) {
                           if (result == true) {
