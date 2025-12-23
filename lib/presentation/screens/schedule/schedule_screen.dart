@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '/domain/entities/schedule_entity.dart';
 import '/presentation/providers/schedule_provider.dart';
 import '/presentation/routes/app_router.dart';
+import '/presentation/screens/schedule/edit_schedule_screen.dart';
+import '/presentation/screens/schedule/schedule_detail_screen.dart';
 
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
@@ -367,9 +369,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ListTile(
             leading: const Icon(Icons.visibility),
             title: const Text('Lihat Detail'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              _showScheduleDetail(schedule);
+              // ✅ NEW - Navigate to detail screen
+              await Navigator.push<void>(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => ScheduleDetailScreen(schedule: schedule),
+                ),
+              );
+              // Reload schedules after returning from detail
+              if (mounted) {
+                await context.read<ScheduleProvider>().loadSchedulesForDate(_selectedDate);
+              }
             },
           ),
           if (!schedule.isCompleted)
@@ -384,13 +396,19 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           ListTile(
             leading: const Icon(Icons.edit),
             title: const Text('Edit'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              Navigator.pushNamed(
+              // ✅ NEW - Navigate to edit screen
+              final result = await Navigator.push<bool>(
                 context,
-                Routes.addSchedule,
-                arguments: schedule,
+                MaterialPageRoute<bool>(
+                  builder: (context) => EditScheduleScreen(schedule: schedule),
+                ),
               );
+              // Reload schedules if edit was successful
+              if (result == true && mounted) {
+                await context.read<ScheduleProvider>().loadSchedulesForDate(_selectedDate);
+              }
             },
           ),
           ListTile(
@@ -406,84 +424,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
     );
   }
-
-  void _showScheduleDetail(ScheduleEntity schedule) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(schedule.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow(
-              Icons.category,
-              'Kategori',
-              _getCategoryDisplayName(schedule.category),
-            ),
-            _buildDetailRow(
-              Icons.access_time,
-              'Waktu',
-              DateFormat('dd MMM yyyy, HH:mm', 'id_ID')
-                  .format(schedule.dateTime),
-            ),
-            if (schedule.notes != null && schedule.notes!.isNotEmpty)
-              _buildDetailRow(Icons.notes, 'Catatan', schedule.notes!),
-            if (schedule.hasReminder)
-              _buildDetailRow(
-                Icons.notifications_active,
-                'Pengingat',
-                '${schedule.reminderMinutes} menit sebelumnya',
-              ),
-            _buildDetailRow(
-              Icons.check_circle,
-              'Status',
-              schedule.isCompleted ? 'Selesai' : 'Belum Selesai',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
 
   Future<void> _markAsCompleted(ScheduleEntity schedule) async {
     final provider = context.read<ScheduleProvider>();

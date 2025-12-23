@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
-// Services
-import '/services/notification_service.dart';
 // Core
 import 'core/themes/app_theme.dart';
 import 'core/themes/lazydays_theme.dart';
@@ -32,6 +31,8 @@ import 'presentation/providers/sync_provider.dart';
 import 'presentation/providers/theme_provider.dart';
 // Presentation Layer - Routes
 import 'presentation/routes/app_router.dart';
+// Services
+import 'services/notification_service.dart';
 
 void main() async {
   // Ensure Flutter binding is initialized
@@ -193,6 +194,20 @@ class MomJournalApp extends StatelessWidget {
             key: ValueKey(themeProvider.themeType), // Key untuk proper rebuild
             title: 'MomJournal',
             debugShowCheckedModeBanner: false,
+
+            // ==================== LOCALIZATION FIX ====================
+            // Add localization delegates to fix MaterialLocalizations error
+            // IMPORTANT: Remove 'const' because delegates are not compile-time constants
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('id', 'ID'), // Indonesian
+              Locale('en', 'US'), // English
+            ],
+            locale: const Locale('id', 'ID'), // Default to Indonesian
 
             // Theme configuration - support multiple themes
             theme: themeProvider.isLazydaysTheme 

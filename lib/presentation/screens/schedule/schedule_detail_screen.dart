@@ -6,10 +6,12 @@ import '../../../domain/entities/schedule_entity.dart';
 import '../../providers/schedule_provider.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
+import 'edit_schedule_screen.dart';
 
 class ScheduleDetailScreen extends StatelessWidget {
   const ScheduleDetailScreen({
-    required this.schedule, super.key,
+    required this.schedule,
+    super.key,
   });
 
   final ScheduleEntity schedule;
@@ -22,9 +24,17 @@ class ScheduleDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Detail Jadwal'),
         actions: [
+          // Edit button
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => _handleEdit(context),
+            tooltip: 'Edit Jadwal',
+          ),
+          // Delete button
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _handleDelete(context),
+            tooltip: 'Hapus Jadwal',
           ),
         ],
       ),
@@ -103,27 +113,19 @@ class ScheduleDetailScreen extends StatelessWidget {
 
             // Status card
             Card(
-              color: schedule.isCompleted
-                  ? Colors.green[50]
-                  : Colors.orange[50],
+              color: schedule.isCompleted ? Colors.green[50] : Colors.orange[50],
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Icon(
-                      schedule.isCompleted
-                          ? Icons.check_circle
-                          : Icons.pending,
-                      color: schedule.isCompleted
-                          ? Colors.green
-                          : Colors.orange,
+                      schedule.isCompleted ? Icons.check_circle : Icons.pending,
+                      color: schedule.isCompleted ? Colors.green : Colors.orange,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        schedule.isCompleted
-                            ? 'Selesai'
-                            : 'Belum Selesai',
+                        schedule.isCompleted ? 'Selesai' : 'Belum Selesai',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: schedule.isCompleted
@@ -142,20 +144,19 @@ class ScheduleDetailScreen extends StatelessWidget {
             // Toggle completion button
             Consumer<ScheduleProvider>(
               builder: (context, provider, child) => CustomButton(
-                  onPressed: provider.isLoading
-                      ? null
-                      : () => _handleToggleCompletion(context),
-                  text: schedule.isCompleted
-                      ? 'Tandai Belum Selesai'
-                      : 'Tandai Selesai',
-                  icon: schedule.isCompleted
-                      ? Icons.remove_done
-                      : Icons.check,
-                  type: schedule.isCompleted
-                      ? ButtonType.outlined
-                      : ButtonType.elevated,
-                  isFullWidth: true,
-                ),
+                onPressed: provider.isLoading
+                    ? null
+                    : () => _handleToggleCompletion(context),
+                text: schedule.isCompleted
+                    ? 'Tandai Belum Selesai'
+                    : 'Tandai Selesai',
+                icon:
+                    schedule.isCompleted ? Icons.remove_done : Icons.check,
+                type: schedule.isCompleted
+                    ? ButtonType.outlined
+                    : ButtonType.elevated,
+                isFullWidth: true,
+              ),
             ),
           ],
         ),
@@ -169,7 +170,7 @@ class ScheduleDetailScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: categoryColor.withValues (alpha:0.2),
+        color: categoryColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -198,29 +199,44 @@ class ScheduleDetailScreen extends StatelessWidget {
     required String label,
     required String value,
     required ThemeData theme,
-  }) => Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
+  }) =>
+      Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[600],
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              Text(
+                value,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      );
+
+  Future<void> _handleEdit(BuildContext context) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditScheduleScreen(schedule: schedule),
+      ),
     );
+
+    // Jika edit berhasil, pop screen ini juga untuk kembali ke list
+    if (result == true && context.mounted) {
+      Navigator.pop(context);
+    }
+  }
 
   Future<void> _handleToggleCompletion(BuildContext context) async {
     final provider = context.read<ScheduleProvider>();
@@ -228,7 +244,7 @@ class ScheduleDetailScreen extends StatelessWidget {
       isCompleted: !schedule.isCompleted,
       updatedAt: DateTime.now(),
     );
-    
+
     final success = await provider.updateSchedule(updated);
 
     if (!context.mounted) {
@@ -341,13 +357,24 @@ class ScheduleDetailScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  String _formatTime(DateTime time) =>
+      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
   String _formatReminderTime(int minutes) {
     if (minutes < 60) {

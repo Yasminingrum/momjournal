@@ -122,8 +122,10 @@ class ScheduleProvider extends ChangeNotifier {
       );
 
       await _repository.createSchedule(schedule);
-      await loadAllSchedules();
-      await loadTodaySchedules();
+      
+      // ✅ FIX: Reload data yang sesuai dengan context
+      await _reloadCurrentView();
+      
       _clearError();
       return true;
     } catch (e) {
@@ -139,8 +141,10 @@ class ScheduleProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       await _repository.updateSchedule(schedule);
-      await loadAllSchedules();
-      await loadTodaySchedules();
+      
+      // ✅ FIX: Reload data yang sesuai dengan context
+      await _reloadCurrentView();
+      
       _clearError();
       return true;
     } catch (e) {
@@ -155,8 +159,10 @@ class ScheduleProvider extends ChangeNotifier {
   Future<bool> markAsCompleted(String id) async {
     try {
       await _repository.markAsCompleted(id);
-      await loadAllSchedules();
-      await loadTodaySchedules();
+      
+      // ✅ FIX: Reload data yang sesuai dengan context
+      await _reloadCurrentView();
+      
       _clearError();
       return true;
     } catch (e) {
@@ -170,8 +176,10 @@ class ScheduleProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       await _repository.deleteSchedule(id);
-      await loadAllSchedules();
-      await loadTodaySchedules();
+      
+      // ✅ FIX: Reload data yang sesuai dengan context
+      await _reloadCurrentView();
+      
       _clearError();
       return true;
     } catch (e) {
@@ -196,6 +204,18 @@ class ScheduleProvider extends ChangeNotifier {
   void setSelectedDate(DateTime date) {
     _selectedDate = date;
     loadSchedulesForDate(date);
+  }
+
+  // ✅ NEW: Helper method to reload current view properly
+  /// Reload schedules for current view context
+  /// This ensures we only reload the data that's currently being displayed
+  Future<void> _reloadCurrentView() async {
+    // Always reload today's schedules for dashboard
+    await loadTodaySchedules();
+    
+    // Reload schedules for the currently selected date in schedule screen
+    // This prevents showing wrong schedules temporarily
+    await loadSchedulesForDate(_selectedDate);
   }
 
   // Helper methods
