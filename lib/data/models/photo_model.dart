@@ -39,8 +39,12 @@ class PhotoModel extends HiveObject {
   factory PhotoModel.fromJson(Map<String, dynamic> json) {
     // Helper function untuk safely parse DateTime
     DateTime? _parseDateTime(dynamic value) {
-      if (value == null) return null;
-      if (value is DateTime) return value;
+      if (value == null) {
+        return null;
+      }
+      if (value is DateTime) {
+        return value;
+      }
       if (value is String) {
         try {
           return DateTime.parse(value);
@@ -258,7 +262,9 @@ class PhotoModel extends HiveObject {
 
   /// Getter untuk readable file size
   String get readableFileSize {
-    if (fileSizeBytes == null) return 'Unknown';
+    if (fileSizeBytes == null) {
+      return 'Unknown';
+    }
 
     final bytes = fileSizeBytes!;
     if (bytes < 1024) {

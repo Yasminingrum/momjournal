@@ -46,7 +46,7 @@ class PhotoRepository {
     return _box.values
         .map((model) => model.toEntity())
         .where((photo) =>
-            photo.dateTaken.year == year && photo.dateTaken.month == month)
+            photo.dateTaken.year == year && photo.dateTaken.month == month,)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
   }
@@ -60,7 +60,7 @@ class PhotoRepository {
         .map((model) => model.toEntity())
         .where((photo) =>
             photo.dateTaken.isAfter(startDate.subtract(const Duration(days: 1))) &&
-            photo.dateTaken.isBefore(endDate.add(const Duration(days: 1))))
+            photo.dateTaken.isBefore(endDate.add(const Duration(days: 1))),)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
   }

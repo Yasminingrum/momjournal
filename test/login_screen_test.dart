@@ -244,7 +244,9 @@ class LoginScreen extends StatelessWidget {
     
     final success = await authProvider.signInWithGoogle();
     
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      return;
+    }
     
     if (success) {
       await Navigator.pushReplacementNamed(context, '/home');

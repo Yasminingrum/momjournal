@@ -48,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.palette),
             title: const Text('Tema'),
-            subtitle: Text(themeProvider.currentThemeModeName),
+            subtitle: Text(themeProvider.currentThemeTypeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               debugPrint('🔥 Theme tapped');
@@ -140,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
   // Show theme selection dialog
   void _showThemeDialog(BuildContext context) {
     final themeProvider = context.read<ThemeProvider>();
-    final currentMode = themeProvider.themeMode;
+    final currentType = themeProvider.themeType;
     
     showDialog<void>(
       context: context,
@@ -152,39 +152,39 @@ class SettingsScreen extends StatelessWidget {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  RadioListTile<ThemeMode>(
-                    title: const Text('Sistem'),
-                    subtitle: const Text('Ikuti pengaturan sistem'),
-                    secondary: const Icon(Icons.brightness_auto),
-                    value: ThemeMode.system,
-                    groupValue: currentMode,
-                    onChanged: (ThemeMode? value) {
-                      if (value != null) {
-                        _handleThemeChange(context, dialogContext, themeProvider, value, 'Tema diatur mengikuti sistem');
-                      }
-                    },
-                  ),
-                  RadioListTile<ThemeMode>(
+                  RadioListTile<AppThemeType>(
                     title: const Text('Terang'),
                     subtitle: const Text('Mode terang'),
                     secondary: const Icon(Icons.light_mode),
-                    value: ThemeMode.light,
-                    groupValue: currentMode,
-                    onChanged: (ThemeMode? value) {
+                    value: AppThemeType.light,
+                    groupValue: currentType,
+                    onChanged: (AppThemeType? value) {
                       if (value != null) {
                         _handleThemeChange(context, dialogContext, themeProvider, value, 'Mode terang diaktifkan');
                       }
                     },
                   ),
-                  RadioListTile<ThemeMode>(
+                  RadioListTile<AppThemeType>(
                     title: const Text('Gelap'),
                     subtitle: const Text('Mode gelap'),
                     secondary: const Icon(Icons.dark_mode),
-                    value: ThemeMode.dark,
-                    groupValue: currentMode,
-                    onChanged: (ThemeMode? value) {
+                    value: AppThemeType.dark,
+                    groupValue: currentType,
+                    onChanged: (AppThemeType? value) {
                       if (value != null) {
                         _handleThemeChange(context, dialogContext, themeProvider, value, 'Mode gelap diaktifkan');
+                      }
+                    },
+                  ),
+                  RadioListTile<AppThemeType>(
+                    title: const Text('LazyDays'),
+                    subtitle: const Text('Tema pastel yang lembut'),
+                    secondary: const Icon(Icons.palette),
+                    value: AppThemeType.lazydays,
+                    groupValue: currentType,
+                    onChanged: (AppThemeType? value) {
+                      if (value != null) {
+                        _handleThemeChange(context, dialogContext, themeProvider, value, 'Tema LazyDays diaktifkan');
                       }
                     },
                   ),
@@ -210,10 +210,10 @@ class SettingsScreen extends StatelessWidget {
     BuildContext context,
     BuildContext dialogContext,
     ThemeProvider themeProvider,
-    ThemeMode value,
+    AppThemeType value,
     String message,
   ) {
-    themeProvider.setThemeMode(value);
+    themeProvider.setThemeType(value);
     Navigator.pop(dialogContext);
     
     // Show feedback

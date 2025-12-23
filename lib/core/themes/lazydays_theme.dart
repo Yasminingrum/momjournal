@@ -28,7 +28,7 @@ class ColorConstants {
 class LazydaysTheme {
   const LazydaysTheme._();
 
-  static ThemeData get theme => ThemeData(
+  static final ThemeData theme = ThemeData(
         // Use Material 3
         useMaterial3: true,
 
@@ -65,7 +65,7 @@ class LazydaysTheme {
             color: ColorConstants.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
+            
           ),
           iconTheme: IconThemeData(
             color: ColorConstants.primaryLight,
@@ -100,7 +100,7 @@ class LazydaysTheme {
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
+              
             ),
           ),
         ),
@@ -116,7 +116,7 @@ class LazydaysTheme {
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
+              
             ),
           ),
         ),
@@ -136,7 +136,7 @@ class LazydaysTheme {
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
+              
             ),
           ),
         ),
@@ -190,17 +190,17 @@ class LazydaysTheme {
           labelStyle: const TextStyle(
             color: ColorConstants.textSecondary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           hintStyle: const TextStyle(
             color: ColorConstants.textHint,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           errorStyle: const TextStyle(
             color: ColorConstants.errorColor,
             fontSize: 12,
-            fontFamily: 'Inter',
+            
           ),
         ),
 
@@ -251,12 +251,12 @@ class LazydaysTheme {
           labelStyle: const TextStyle(
             color: ColorConstants.textPrimary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           secondaryLabelStyle: const TextStyle(
             color: ColorConstants.textSecondary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           shape: RoundedRectangleBorder(
@@ -275,12 +275,12 @@ class LazydaysTheme {
             color: ColorConstants.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
+            
           ),
           contentTextStyle: const TextStyle(
             color: ColorConstants.textSecondary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
         ),
 
@@ -299,7 +299,7 @@ class LazydaysTheme {
           contentTextStyle: const TextStyle(
             color: ColorConstants.textPrimary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -320,12 +320,12 @@ class LazydaysTheme {
           selectedLabelStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
+            
           ),
           unselectedLabelStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            fontFamily: 'Inter',
+            
           ),
         ),
 
@@ -349,17 +349,17 @@ class LazydaysTheme {
           titleTextStyle: TextStyle(
             color: ColorConstants.textPrimary,
             fontSize: 16,
-            fontFamily: 'Inter',
+            
           ),
           subtitleTextStyle: TextStyle(
             color: ColorConstants.textSecondary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
           leadingAndTrailingTextStyle: TextStyle(
             color: ColorConstants.textSecondary,
             fontSize: 14,
-            fontFamily: 'Inter',
+            
           ),
         ),
 
@@ -376,19 +376,19 @@ class LazydaysTheme {
             fontSize: 57,
             fontWeight: FontWeight.w300,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           displayMedium: TextStyle(
             fontSize: 45,
             fontWeight: FontWeight.w300,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           displaySmall: TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.w400,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
 
           // Headline styles
@@ -396,19 +396,19 @@ class LazydaysTheme {
             fontSize: 32,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           headlineMedium: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           headlineSmall: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
 
           // Title styles
@@ -416,19 +416,19 @@ class LazydaysTheme {
             fontSize: 22,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           titleMedium: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           titleSmall: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
 
           // Body styles
@@ -436,19 +436,19 @@ class LazydaysTheme {
             fontSize: 16,
             fontWeight: FontWeight.w400,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           bodyMedium: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           bodySmall: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
             color: ColorConstants.textSecondary,
-            fontFamily: 'Inter',
+            
           ),
 
           // Label styles (buttons, etc)
@@ -456,19 +456,19 @@ class LazydaysTheme {
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Colors.white,
-            fontFamily: 'Inter',
+            
           ),
           labelMedium: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textPrimary,
-            fontFamily: 'Inter',
+            
           ),
           labelSmall: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
             color: ColorConstants.textSecondary,
-            fontFamily: 'Inter',
+            
           ),
         ),
       );

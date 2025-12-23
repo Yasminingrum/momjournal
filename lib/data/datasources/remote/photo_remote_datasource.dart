@@ -156,7 +156,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
             .map(_photoFromFirestore)
             .where((photo) => photo != null)
             .cast<PhotoEntity>()
-            .toList());
+            .toList(),);
   }
 
   Map<String, dynamic> _photoToFirestore(PhotoEntity photo) => {
@@ -185,9 +185,15 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
       
       // Helper to safely get Timestamp and convert to DateTime
       DateTime? _parseTimestamp(dynamic value) {
-        if (value == null) return null;
-        if (value is Timestamp) return value.toDate();
-        if (value is DateTime) return value;
+        if (value == null) {
+          return null;
+        }
+        if (value is Timestamp) {
+          return value.toDate();
+        }
+        if (value is DateTime) {
+          return value;
+        }
         return null;
       }
       

@@ -103,8 +103,12 @@ class ScheduleModel extends HiveObject {
   factory ScheduleModel.fromJson(Map<String, dynamic> json) {
     // Helper function untuk safely parse DateTime
     DateTime? _parseDateTime(dynamic value) {
-      if (value == null) return null;
-      if (value is DateTime) return value;
+      if (value == null) {
+        return null;
+      }
+      if (value is DateTime) {
+        return value;
+      }
       if (value is String) {
         try {
           return DateTime.parse(value);

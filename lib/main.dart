@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '/services/notification_service.dart';
 // Core
 import 'core/themes/app_theme.dart';
+import 'core/themes/lazydays_theme.dart';
 // Data Layer - Local Datasources
 import 'data/datasources/local/hive_database.dart';
 import 'data/datasources/local/journal_local_datasource.dart';
@@ -147,6 +148,7 @@ class MomJournalApp extends StatelessWidget {
         // Theme Provider (harus di atas MaterialApp)
         ChangeNotifierProvider<ThemeProvider>(
           create: (_) => ThemeProvider(hiveDatabase: hiveDatabase),
+          lazy: false,
         ),
 
         // Notification Provider
@@ -188,11 +190,14 @@ class MomJournalApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
+            key: ValueKey(themeProvider.themeType), // Key untuk proper rebuild
             title: 'MomJournal',
             debugShowCheckedModeBanner: false,
 
-            // Theme configuration - menggunakan ThemeProvider
-            theme: AppTheme.lightTheme,
+            // Theme configuration - support multiple themes
+            theme: themeProvider.isLazydaysTheme 
+                ? LazydaysTheme.theme 
+                : AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
 

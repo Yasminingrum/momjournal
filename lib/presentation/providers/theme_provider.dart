@@ -1,111 +1,143 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import '../../data/datasources/local/hive_database.dart';
+
+/// Enum untuk jenis theme yang tersedia
+enum AppThemeType {
+  light,
+  dark,
+  lazydays,
+}
 
 class ThemeProvider with ChangeNotifier {
   ThemeProvider({required HiveDatabase hiveDatabase})
       : _hiveDatabase = hiveDatabase {
-    _loadThemeMode();
+    _loadThemeTypeSync();
   }
 
   final HiveDatabase _hiveDatabase;
-  static const String _themeModeKey = 'theme_mode';
+  static const String _themeTypeKey = 'theme_type';
 
-  ThemeMode _themeMode = ThemeMode.system;
+  AppThemeType _themeType = AppThemeType.light;
+  bool _isInitialized = false;
 
-  /// Current theme mode
-  ThemeMode get themeMode => _themeMode;
+  /// Current theme type
+  AppThemeType get themeType => _themeType;
 
-  /// Is dark mode active (considering system theme)
-  bool get isDarkMode {
-    if (_themeMode == ThemeMode.system) {
-      // This will be determined by the system
-      return false; // Default, will be overridden by system
+  /// Check if provider is initialized
+  bool get isInitialized => _isInitialized;
+
+  /// Get theme mode for MaterialApp
+  /// LazyDays theme always uses light mode
+  ThemeMode get themeMode {
+    switch (_themeType) {
+      case AppThemeType.light:
+        return ThemeMode.light;
+      case AppThemeType.dark:
+        return ThemeMode.dark;
+      case AppThemeType.lazydays:
+        return ThemeMode.light; // LazyDays menggunakan light mode
     }
-    return _themeMode == ThemeMode.dark;
   }
 
-  /// Load theme mode from storage
-  Future<void> _loadThemeMode() async {
+  /// Is dark mode active
+  bool get isDarkMode => _themeType == AppThemeType.dark;
+
+  /// Is LazyDays theme active
+  bool get isLazydaysTheme => _themeType == AppThemeType.lazydays;
+
+  /// Load theme type from storage synchronously (tanpa notifyListeners)
+  void _loadThemeTypeSync() {
     try {
       final box = _hiveDatabase.settingsBox;
-      final savedMode = box.get(_themeModeKey, defaultValue: 'system') as String;
+      final savedType = box.get(_themeTypeKey, defaultValue: 'light') as String;
       
-      _themeMode = _parseThemeMode(savedMode);
-      notifyListeners();
+      _themeType = _parseThemeType(savedType);
+      _isInitialized = true;
+      // TIDAK memanggil notifyListeners() di constructor
     } catch (e) {
-      debugPrint('❌ Error loading theme mode: $e');
-      _themeMode = ThemeMode.system;
+      debugPrint('❌ Error loading theme type: $e');
+      _themeType = AppThemeType.light;
+      _isInitialized = true;
     }
   }
 
-  /// Set theme mode
-  Future<void> setThemeMode(ThemeMode mode) async {
-    if (_themeMode == mode) {
+  /// Set theme type
+  Future<void> setThemeType(AppThemeType type) async {
+    if (_themeType == type) {
       return;
     }
 
-    _themeMode = mode;
-    notifyListeners();
+    _themeType = type;
+    
+    // Notify listeners setelah frame selesai untuk menghindari rebuild issues
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
 
     // Save to storage
     try {
       final box = _hiveDatabase.settingsBox;
-      await box.put(_themeModeKey, _themeModeToString(mode));
-      debugPrint('✅ Theme mode saved: ${_themeModeToString(mode)}');
+      await box.put(_themeTypeKey, _themeTypeToString(type));
+      debugPrint('✅ Theme type saved: ${_themeTypeToString(type)}');
     } catch (e) {
-      debugPrint('❌ Error saving theme mode: $e');
+      debugPrint('❌ Error saving theme type: $e');
     }
   }
 
-  /// Toggle between light and dark (skip system)
+  /// Toggle between themes (Light -> Dark -> LazyDays -> Light)
   Future<void> toggleTheme() async {
-    final newMode = _themeMode == ThemeMode.light 
-        ? ThemeMode.dark 
-        : ThemeMode.light;
-    await setThemeMode(newMode);
+    final newType = switch (_themeType) {
+      AppThemeType.light => AppThemeType.dark,
+      AppThemeType.dark => AppThemeType.lazydays,
+      AppThemeType.lazydays => AppThemeType.light,
+    };
+    await setThemeType(newType);
   }
 
-  /// Parse theme mode from string
-  ThemeMode _parseThemeMode(String mode) {
-    switch (mode.toLowerCase()) {
+  /// Parse theme type from string
+  AppThemeType _parseThemeType(String type) {
+    switch (type.toLowerCase()) {
       case 'light':
-        return ThemeMode.light;
-      case 'lazydays':
-        return ThemeMode.light; 
+        return AppThemeType.light;
       case 'dark':
-        return ThemeMode.dark;
-      case 'system':
+        return AppThemeType.dark;
+      case 'lazydays':
+        return AppThemeType.lazydays;
       default:
-        return ThemeMode.system;
+        return AppThemeType.light;
     }
   }
 
-  /// Convert theme mode to string
-  String _themeModeToString(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
+  /// Convert theme type to string
+  String _themeTypeToString(AppThemeType type) {
+    switch (type) {
+      case AppThemeType.light:
         return 'light';
-      case ThemeMode.dark:
+      case AppThemeType.dark:
         return 'dark';
-      case ThemeMode.system:
-        return 'system';
+      case AppThemeType.lazydays:
+        return 'lazydays';
     }
   }
 
-  /// Get theme mode display name
-  String getThemeModeName(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.light:
+  /// Get theme type display name
+  String getThemeTypeName(AppThemeType type) {
+    switch (type) {
+      case AppThemeType.light:
         return 'Terang';
-      case ThemeMode.dark:
+      case AppThemeType.dark:
         return 'Gelap';
-      case ThemeMode.system:
-        return 'Sistem';
+      case AppThemeType.lazydays:
+        return 'LazyDays';
     }
   }
 
-  /// Get current theme mode display name
-  String get currentThemeModeName => getThemeModeName(_themeMode);
+  /// Get current theme type display name
+  String get currentThemeTypeName => getThemeTypeName(_themeType);
+
+  /// Get all available themes
+  List<AppThemeType> get availableThemes => AppThemeType.values;
 }

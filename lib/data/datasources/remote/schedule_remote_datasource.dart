@@ -234,9 +234,15 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       
       // Helper to safely get Timestamp and convert to DateTime
       DateTime? _parseTimestamp(dynamic value) {
-        if (value == null) return null;
-        if (value is Timestamp) return value.toDate();
-        if (value is DateTime) return value;
+        if (value == null) {
+          return null;
+        }
+        if (value is Timestamp) {
+          return value.toDate();
+        }
+        if (value is DateTime) {
+          return value;
+        }
         return null;
       }
       
