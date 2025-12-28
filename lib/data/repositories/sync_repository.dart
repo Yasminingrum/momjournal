@@ -1,10 +1,11 @@
-import 'dart:io';
+// ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 import '../../core/errors/exceptions.dart';
-import '../../domain/entities/journal_entity.dart';
-import '../../domain/entities/photo_entity.dart';
+import '../../domain/entities/journal_entity.dart' as journal_entity;
+import '../../domain/entities/photo_entity.dart' as photo_entity;
 import '../../domain/entities/schedule_entity.dart' as schedule_entity;
 import '../datasources/local/journal_local_datasource.dart';
 import '../datasources/local/photo_local_datasource.dart';
@@ -16,11 +17,16 @@ import '../models/journal_model.dart';
 import '../models/photo_model.dart';
 import '../models/schedule_model.dart';
 
-/// HYBRID SYNC REPOSITORY
+/// COMPLETE SYNC REPOSITORY WITH SOFT DELETE SUPPORT
 /// 
-/// Handles the case where:
-/// - Local datasources work with MODEL types (Hive)
-/// - Remote datasources work with ENTITY types (Firestore)
+/// Handles synchronization between local (Hive) and remote (Firestore)
+/// for Schedule, Journal, and Photo data with soft delete support
+/// 
+/// Key Features:
+/// - Syncs ALL items including soft-deleted ones
+/// - Uses timestamp comparison for conflict resolution
+/// - Maintains deletion status across devices
+/// - Supports offline-first architecture
 
 enum SyncStatus {
   idle,
@@ -30,19 +36,20 @@ enum SyncStatus {
 }
 
 class SyncResult {
-
-  SyncResult({
+  const SyncResult({
     required this.schedulessynced,
     required this.journalsSynced,
     required this.photosSynced,
     required this.errors,
   });
+
   final int schedulessynced;
   final int journalsSynced;
   final int photosSynced;
   final List<String> errors;
 
   bool get hasErrors => errors.isNotEmpty;
+  bool get isSuccess => !hasErrors;
   int get totalSynced => schedulessynced + journalsSynced + photosSynced;
 }
 
@@ -54,7 +61,6 @@ abstract class SyncRepository {
 }
 
 class SyncRepositoryImpl implements SyncRepository {
-
   SyncRepositoryImpl({
     required this.scheduleLocal,
     required this.scheduleRemote,
@@ -63,6 +69,7 @@ class SyncRepositoryImpl implements SyncRepository {
     required this.photoLocal,
     required this.photoRemote,
   });
+
   final ScheduleLocalDataSource scheduleLocal;
   final ScheduleRemoteDatasource scheduleRemote;
   final JournalLocalDataSource journalLocal;
@@ -72,7 +79,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<SyncResult> syncAll() async {
-    debugPrint('🔄 Starting full sync...');
+    debugPrint('🔄 Starting full sync with soft delete support...');
 
     int schedulesCount = 0;
     int journalsCount = 0;
@@ -83,6 +90,7 @@ class SyncRepositoryImpl implements SyncRepository {
       await syncSchedules();
       final schedules = scheduleLocal.getAllSchedules();
       schedulesCount = schedules.length;
+      debugPrint('✅ Schedules synced: $schedulesCount items');
     } catch (e) {
       errors.add('Schedules: $e');
       debugPrint('❌ Schedule sync failed: $e');
@@ -92,6 +100,7 @@ class SyncRepositoryImpl implements SyncRepository {
       await syncJournals();
       final journals = journalLocal.getAllJournals();
       journalsCount = journals.length;
+      debugPrint('✅ Journals synced: $journalsCount items');
     } catch (e) {
       errors.add('Journals: $e');
       debugPrint('❌ Journal sync failed: $e');
@@ -101,6 +110,7 @@ class SyncRepositoryImpl implements SyncRepository {
       await syncPhotos();
       final photos = photoLocal.getAllPhotos();
       photosCount = photos.length;
+      debugPrint('✅ Photos synced: $photosCount items');
     } catch (e) {
       errors.add('Photos: $e');
       debugPrint('❌ Photo sync failed: $e');
@@ -114,53 +124,71 @@ class SyncRepositoryImpl implements SyncRepository {
     );
 
     if (errors.isEmpty) {
-      debugPrint('✅ Full sync completed: ${result.totalSynced} items');
+      debugPrint('✅ Full sync completed successfully: ${result.totalSynced} items');
     } else {
-      debugPrint('⚠️ Sync completed with errors: ${errors.length} errors');
+      debugPrint('⚠️ Sync completed with ${errors.length} error(s)');
     }
 
     return result;
   }
 
+  // ==================== SCHEDULE SYNC ====================
+
   @override
   Future<void> syncSchedules() async {
     try {
-      debugPrint('🔄 Syncing schedules...');
+      debugPrint('🔄 Syncing schedules with soft delete support...');
 
-      // Remote returns List<ScheduleEntity>
-      final remoteEntities = await scheduleRemote.getAllSchedules();
-      
-      // Local returns List<ScheduleModel>
-      final localModels = scheduleLocal.getAllSchedules();
+      // Get ALL items INCLUDING deleted from both sources
+      final remoteEntities = await scheduleRemote.getAllSchedulesIncludingDeleted();
+      final localModels = scheduleLocal.getAllSchedulesIncludingDeleted();
 
-      // Convert remote entities to models for comparison
-      final remoteModels = remoteEntities.map<ScheduleModel>(_entityToModel).toList();
-
-      // Create maps
-      final remoteMap = {for (final s in remoteModels) s.id: s};
+      // Convert to maps for easy lookup
+      final remoteMap = {for (final s in remoteEntities) s.id: s};
       final localMap = {for (final s in localModels) s.id: s};
 
-      // Sync remote -> local (Entity → Model)
-      for (final remoteModel in remoteModels) {
-        final localModel = localMap[remoteModel.id];
+      // SYNC REMOTE → LOCAL
+      for (final remoteEntity in remoteEntities) {
+        final localModel = localMap[remoteEntity.id];
 
         if (localModel == null) {
-          await scheduleLocal.addSchedule(remoteModel);
-        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
-          await scheduleLocal.updateSchedule(remoteModel);
+          // Not in local, add it (even if deleted)
+          final model = _scheduleEntityToModel(remoteEntity);
+          await scheduleLocal.createSchedule(model);
+          debugPrint('✅ Added schedule from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+        } else {
+          // Exists in local, check timestamps
+          if (remoteEntity.updatedAt.isAfter(localModel.updatedAt)) {
+            // Remote is newer, update local
+            final model = _scheduleEntityToModel(remoteEntity);
+            await scheduleLocal.updateSchedule(model);
+            debugPrint('✅ Updated schedule from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+          }
         }
       }
 
-      // Sync local -> remote (Model → Entity)
+      // SYNC LOCAL → REMOTE
       for (final localModel in localModels) {
-        final remoteModel = remoteMap[localModel.id];
+        final remoteEntity = remoteMap[localModel.id];
 
-        if (remoteModel == null) {
-          final entity = _modelToEntity(localModel);
-          await scheduleRemote.createSchedule(entity);
-        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
-          final entity = _modelToEntity(localModel);
-          await scheduleRemote.updateSchedule(entity);
+        if (remoteEntity == null) {
+          // Not in remote, upload it (even if deleted)
+          final entity = _scheduleModelToEntity(localModel);
+          if (localModel.isDeleted) {
+            // If already marked deleted, update on remote
+            await scheduleRemote.updateSchedule(entity);
+          } else {
+            await scheduleRemote.createSchedule(entity);
+          }
+          debugPrint('✅ Uploaded schedule to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+        } else {
+          // Exists in remote, check timestamps
+          if (localModel.updatedAt.isAfter(remoteEntity.updatedAt)) {
+            // Local is newer, update remote
+            final entity = _scheduleModelToEntity(localModel);
+            await scheduleRemote.updateSchedule(entity);
+            debugPrint('✅ Updated schedule on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+          }
         }
       }
 
@@ -171,40 +199,62 @@ class SyncRepositoryImpl implements SyncRepository {
     }
   }
 
+  // ==================== JOURNAL SYNC ====================
+
   @override
   Future<void> syncJournals() async {
     try {
-      debugPrint('🔄 Syncing journals...');
+      debugPrint('🔄 Syncing journals with soft delete support...');
 
-      final remoteEntities = await journalRemote.getAllJournals();
-      final localModels = journalLocal.getAllJournals();
+      // Get ALL items INCLUDING deleted from both sources
+      final remoteEntities = await journalRemote.getAllJournalsIncludingDeleted();
+      final localModels = journalLocal.getAllJournalsIncludingDeleted();
 
-      final remoteModels = remoteEntities.map(_journalEntityToModel).toList();
-
-      final remoteMap = {for (final j in remoteModels) j.id: j};
+      // Convert to maps for easy lookup
+      final remoteMap = {for (final j in remoteEntities) j.id: j};
       final localMap = {for (final j in localModels) j.id: j};
 
-      // Sync remote -> local
-      for (final remoteModel in remoteModels) {
-        final localModel = localMap[remoteModel.id];
+      // SYNC REMOTE → LOCAL
+      for (final remoteEntity in remoteEntities) {
+        final localModel = localMap[remoteEntity.id];
 
         if (localModel == null) {
-          await journalLocal.createJournal(remoteModel);
-        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
-          await journalLocal.updateJournal(remoteModel);
+          // Not in local, add it (even if deleted)
+          final model = _journalEntityToModel(remoteEntity);
+          await journalLocal.createJournal(model);
+          debugPrint('✅ Added journal from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+        } else {
+          // Exists in local, check timestamps
+          if (remoteEntity.updatedAt.isAfter(localModel.updatedAt)) {
+            // Remote is newer, update local
+            final model = _journalEntityToModel(remoteEntity);
+            await journalLocal.updateJournal(model);
+            debugPrint('✅ Updated journal from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+          }
         }
       }
 
-      // Sync local -> remote
+      // SYNC LOCAL → REMOTE
       for (final localModel in localModels) {
-        final remoteModel = remoteMap[localModel.id];
+        final remoteEntity = remoteMap[localModel.id];
+        final entity = _journalModelToEntity(localModel);
 
-        if (remoteModel == null) {
-          final entity = _journalModelToEntity(localModel);
-          await journalRemote.createJournal(entity);
-        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
-          final entity = _journalModelToEntity(localModel);
-          await journalRemote.updateJournal(entity);
+        if (remoteEntity == null) {
+          // Not in remote, upload it (even if deleted)
+          if (localModel.isDeleted) {
+            // If already marked deleted, update on remote
+            await journalRemote.updateJournal(entity);
+          } else {
+            await journalRemote.createJournal(entity);
+          }
+          debugPrint('✅ Uploaded journal to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+        } else {
+          // Exists in remote, check timestamps
+          if (localModel.updatedAt.isAfter(remoteEntity.updatedAt)) {
+            // Local is newer, update remote
+            await journalRemote.updateJournal(entity);
+            debugPrint('✅ Updated journal on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+          }
         }
       }
 
@@ -215,56 +265,56 @@ class SyncRepositoryImpl implements SyncRepository {
     }
   }
 
+  // ==================== PHOTO SYNC ====================
+
   @override
   Future<void> syncPhotos() async {
     try {
-      debugPrint('🔄 Syncing photos...');
+      debugPrint('🔄 Syncing photos with soft delete support...');
 
-      final remoteEntities = await photoRemote.getAllPhotos();
-      final localModels = photoLocal.getAllPhotos();
+      // Get ALL items INCLUDING deleted from both sources
+      final remoteEntities = await photoRemote.getAllPhotosIncludingDeleted();
+      final localModels = photoLocal.getAllPhotosIncludingDeleted();
 
-      final remoteModels = remoteEntities.map(_photoEntityToModel).toList();
-
-      final remoteMap = {for (final p in remoteModels) p.id: p};
+      // Convert to maps for easy lookup
+      final remoteMap = {for (final p in remoteEntities) p.id: p};
       final localMap = {for (final p in localModels) p.id: p};
 
-      // Sync remote -> local
-      for (final remoteModel in remoteModels) {
-        final localModel = localMap[remoteModel.id];
+      // SYNC REMOTE → LOCAL
+      for (final remoteEntity in remoteEntities) {
+        final localModel = localMap[remoteEntity.id];
 
         if (localModel == null) {
-          await photoLocal.createPhoto(remoteModel);
-          debugPrint('✅ Photo downloaded from remote: ${remoteModel.id}');
-        } else if (remoteModel.updatedAt.isAfter(localModel.updatedAt)) {
-          await photoLocal.updatePhoto(remoteModel);
-          debugPrint('✅ Photo updated from remote: ${remoteModel.id}');
+          // Not in local, add it
+          final model = _photoEntityToModel(remoteEntity);
+          await photoLocal.createPhoto(model);
+          debugPrint('✅ Added photo from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+        } else {
+          // Exists in local, check timestamps
+          if (remoteEntity.updatedAt.isAfter(localModel.updatedAt)) {
+            // Remote is newer, update local
+            final model = _photoEntityToModel(remoteEntity);
+            await photoLocal.updatePhoto(model);
+            debugPrint('✅ Updated photo from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+          }
         }
       }
 
-      // Sync local -> remote with photo upload
+      // SYNC LOCAL → REMOTE
       for (final localModel in localModels) {
-        final remoteModel = remoteMap[localModel.id];
+        final remoteEntity = remoteMap[localModel.id];
 
-        final hasImageUrl = localModel.imageUrl != null && 
-                            localModel.imageUrl!.isNotEmpty;
-        final hasLocalPath = localModel.localFilePath != null && 
-                             localModel.localFilePath!.isNotEmpty;
-
-        if (remoteModel == null) {
-          // Photo belum ada di remote
+        if (remoteEntity == null) {
+          // Not in remote
+          final entity = _photoModelToEntity(localModel);
           
-          if (!hasImageUrl && hasLocalPath) {
-            // ✅ FIX: Upload photo file ke Firebase Storage
+          // Handle photo upload if needed
+          if (!localModel.isDeleted && localModel.imageUrl == null && localModel.localFilePath != null) {
+            // Photo not uploaded yet and not deleted, upload it
             try {
-              debugPrint('📤 Uploading photo to Firebase Storage: ${localModel.id}');
               final file = File(localModel.localFilePath!);
-              
               if (await file.exists()) {
-                // Upload file ke storage
                 final cloudUrl = await photoRemote.uploadPhoto(file, localModel.id);
-                debugPrint('✅ Photo uploaded: $cloudUrl');
-                
-                // Update local model dengan cloudUrl
                 final updatedModel = localModel.copyWith(
                   imageUrl: cloudUrl,
                   uploadStatus: 'completed',
@@ -272,30 +322,31 @@ class SyncRepositoryImpl implements SyncRepository {
                 );
                 await photoLocal.updatePhoto(updatedModel);
                 
-                // Create metadata di Firestore
-                final entity = _photoModelToEntity(updatedModel);
-                await photoRemote.createPhotoMetadata(entity);
-                debugPrint('✅ Photo metadata synced: ${localModel.id}');
-              } else {
-                debugPrint('⚠️ Photo file not found: ${localModel.localFilePath}');
+                // Create metadata in Firestore
+                final updatedEntity = _photoModelToEntity(updatedModel);
+                await photoRemote.createPhotoMetadata(updatedEntity);
+                debugPrint('✅ Photo uploaded and synced: ${localModel.id}');
               }
             } catch (e) {
               debugPrint('⚠️ Failed to upload photo ${localModel.id}: $e');
-              // Continue dengan photo lainnya, jangan stop sync
             }
-          } else if (hasImageUrl) {
-            // Photo sudah punya cloudUrl, langsung sync metadata
-            final entity = _photoModelToEntity(localModel);
-            await photoRemote.createPhotoMetadata(entity);
-            debugPrint('✅ Photo metadata synced: ${localModel.id}');
-          } else {
-            debugPrint('⚠️ Photo has no cloudUrl or localPath: ${localModel.id}');
+          } else if (localModel.imageUrl != null || localModel.isDeleted) {
+            // Photo already has cloudUrl or is deleted, just sync metadata
+            if (localModel.isDeleted) {
+              await photoRemote.updatePhoto(entity);
+            } else {
+              await photoRemote.createPhotoMetadata(entity);
+            }
+            debugPrint('✅ Photo metadata synced: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
           }
-        } else if (localModel.updatedAt.isAfter(remoteModel.updatedAt)) {
-          // Update remote dengan data local yang lebih baru
-          final entity = _photoModelToEntity(localModel);
-          await photoRemote.updatePhoto(entity);
-          debugPrint('✅ Photo updated on remote: ${localModel.id}');
+        } else {
+          // Exists in remote, check timestamps
+          if (localModel.updatedAt.isAfter(remoteEntity.updatedAt)) {
+            // Local is newer, update remote
+            final entity = _photoModelToEntity(localModel);
+            await photoRemote.updatePhoto(entity);
+            debugPrint('✅ Updated photo on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+          }
         }
       }
 
@@ -309,12 +360,12 @@ class SyncRepositoryImpl implements SyncRepository {
   // ==================== SCHEDULE CONVERTERS ====================
 
   /// Convert ScheduleEntity (from remote) to ScheduleModel (for local)
-  ScheduleModel _entityToModel(schedule_entity.ScheduleEntity entity) => ScheduleModel(
+  ScheduleModel _scheduleEntityToModel(schedule_entity.ScheduleEntity entity) => ScheduleModel(
       id: entity.id,
       userId: entity.userId,
       title: entity.title,
       description: entity.notes,
-      category: _mapEntityCategoryToModel(entity.category),
+      category: _mapScheduleEntityCategoryToModel(entity.category),
       scheduledTime: entity.dateTime,
       reminderEnabled: entity.hasReminder,
       reminderMinutesBefore: entity.reminderMinutes,
@@ -322,95 +373,33 @@ class SyncRepositoryImpl implements SyncRepository {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       isSynced: true,
+      isDeleted: entity.isDeleted,      // 🆕 ADDED
+      deletedAt: entity.deletedAt,      // 🆕 ADDED
     );
 
   /// Convert ScheduleModel (from local) to ScheduleEntity (for remote)
-  schedule_entity.ScheduleEntity _modelToEntity(ScheduleModel model) => schedule_entity.ScheduleEntity(
-      id: model.id,
-      userId: model.userId,
-      title: model.title,
-      category: _mapCategoryToEntity(model.category),
-      dateTime: model.scheduledTime,
-      notes: model.description,
-      hasReminder: model.reminderEnabled,
-      reminderMinutes: model.reminderMinutesBefore,
-      isCompleted: model.isCompleted,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    );
+  schedule_entity.ScheduleEntity _scheduleModelToEntity(ScheduleModel model) => 
+      schedule_entity.ScheduleEntity(
+        id: model.id,
+        userId: model.userId,
+        title: model.title,
+        notes: model.description,
+        category: _mapScheduleModelCategoryToEntity(model.category),
+        dateTime: model.scheduledTime,
+        hasReminder: model.reminderEnabled,
+        reminderMinutes: model.reminderMinutesBefore ?? 15,
+        isCompleted: model.isCompleted,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        isSynced: model.isSynced,
+        isDeleted: model.isDeleted,      // 🆕 ADDED
+        deletedAt: model.deletedAt,      // 🆕 ADDED
+      );
 
-  // ==================== JOURNAL CONVERTERS ====================
-
-  JournalModel _journalEntityToModel(JournalEntity entity) => JournalModel(
-      id: entity.id,
-      userId: entity.userId,
-      date: entity.date,
-      mood: _mapMoodToModel(entity.mood),
-      content: entity.content,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      isSynced: true, // From remote = already synced
-    );
-
-  JournalEntity _journalModelToEntity(JournalModel model) => JournalEntity(
-      id: model.id,
-      userId: model.userId,
-      date: model.date,
-      mood: _mapMoodToEntity(model.mood),
-      content: model.content,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-    );
-
-  // ==================== PHOTO CONVERTERS ====================
-
-  PhotoModel _photoEntityToModel(PhotoEntity entity) => PhotoModel(
-      id: entity.id,
-      userId: entity.userId,
-      localFilePath: entity.localPath ?? '',
-      imageUrl: entity.cloudUrl,
-      caption: entity.caption,
-      isMilestone: entity.isMilestone,
-      date: entity.dateTaken,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      isSynced: true, // From remote = already synced
-      uploadStatus: 'completed', // From remote = already uploaded
-    );
-
-  PhotoEntity _photoModelToEntity(PhotoModel model) => PhotoEntity(
-      id: model.id,
-      userId: model.userId,
-      localPath: model.localFilePath,
-      cloudUrl: model.imageUrl,
-      caption: model.caption,
-      isMilestone: model.isMilestone,
-      dateTaken: model.date,
-      createdAt: model.createdAt,
-      updatedAt: model.updatedAt,
-      isUploaded: model.uploadStatus == 'completed',
-      isSynced: model.isSynced,
-    );
-
-  // ==================== ENUM MAPPERS ====================
-
-  schedule_entity.ScheduleCategory _mapCategoryToEntity(ScheduleCategory modelCategory) {
-    switch (modelCategory) {
-      case ScheduleCategory.feeding:
-        return schedule_entity.ScheduleCategory.feeding;
-      case ScheduleCategory.sleeping:
-        return schedule_entity.ScheduleCategory.sleep;
-      case ScheduleCategory.health:
-        return schedule_entity.ScheduleCategory.health;
-      case ScheduleCategory.milestone:
-        return schedule_entity.ScheduleCategory.milestone;
-      case ScheduleCategory.other:
-        return schedule_entity.ScheduleCategory.other;
-    }
-  }
-
-  ScheduleCategory _mapEntityCategoryToModel(schedule_entity.ScheduleCategory entityCategory) {
-    switch (entityCategory) {
+  /// Map entity category to model category
+  ScheduleCategory _mapScheduleEntityCategoryToModel(
+      schedule_entity.ScheduleCategory entityCat,) {
+    switch (entityCat) {
       case schedule_entity.ScheduleCategory.feeding:
         return ScheduleCategory.feeding;
       case schedule_entity.ScheduleCategory.sleep:
@@ -424,33 +413,121 @@ class SyncRepositoryImpl implements SyncRepository {
     }
   }
 
-  MoodType _mapMoodToEntity(Mood modelMood) {
-    switch (modelMood) {
-      case Mood.veryHappy:
-        return MoodType.veryHappy;
-      case Mood.happy:
-        return MoodType.happy;
-      case Mood.neutral:
-        return MoodType.neutral;
-      case Mood.sad:
-        return MoodType.sad;
-      case Mood.verySad:
-        return MoodType.verySad;
+  /// Map model category to entity category
+  schedule_entity.ScheduleCategory _mapScheduleModelCategoryToEntity(
+      ScheduleCategory modelCat,) {
+    switch (modelCat) {
+      case ScheduleCategory.feeding:
+        return schedule_entity.ScheduleCategory.feeding;
+      case ScheduleCategory.sleeping:
+        return schedule_entity.ScheduleCategory.sleep;
+      case ScheduleCategory.health:
+        return schedule_entity.ScheduleCategory.health;
+      case ScheduleCategory.milestone:
+        return schedule_entity.ScheduleCategory.milestone;
+      case ScheduleCategory.other:
+        return schedule_entity.ScheduleCategory.other;
     }
   }
 
-  Mood _mapMoodToModel(MoodType entityMood) {
+  // ==================== JOURNAL CONVERTERS ====================
+
+  /// Convert JournalEntity (from remote) to JournalModel (for local)
+  JournalModel _journalEntityToModel(journal_entity.JournalEntity entity) => 
+      JournalModel(
+        id: entity.id,
+        userId: entity.userId,
+        date: entity.date,
+        mood: _mapJournalEntityMoodToModel(entity.mood),
+        content: entity.content,
+        createdAt: entity.createdAt,
+        updatedAt: entity.updatedAt,
+        isSynced: true,
+        isDeleted: entity.isDeleted,      // 🆕 ADDED
+        deletedAt: entity.deletedAt,      // 🆕 ADDED
+      );
+
+  /// Convert JournalModel (from local) to JournalEntity (for remote)
+  journal_entity.JournalEntity _journalModelToEntity(JournalModel model) => 
+      journal_entity.JournalEntity(
+        id: model.id,
+        userId: model.userId,
+        date: model.date,
+        mood: _mapJournalModelMoodToEntity(model.mood),
+        content: model.content,
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        isSynced: model.isSynced,
+        isDeleted: model.isDeleted,      // 🆕 ADDED
+        deletedAt: model.deletedAt,      // 🆕 ADDED
+      );
+
+  /// Map entity mood to model mood
+  Mood _mapJournalEntityMoodToModel(journal_entity.MoodType entityMood) {
     switch (entityMood) {
-      case MoodType.veryHappy:
+      case journal_entity.MoodType.veryHappy:
         return Mood.veryHappy;
-      case MoodType.happy:
+      case journal_entity.MoodType.happy:
         return Mood.happy;
-      case MoodType.neutral:
+      case journal_entity.MoodType.neutral:
         return Mood.neutral;
-      case MoodType.sad:
+      case journal_entity.MoodType.sad:
         return Mood.sad;
-      case MoodType.verySad:
+      case journal_entity.MoodType.verySad:
         return Mood.verySad;
     }
   }
+
+  /// Map model mood to entity mood
+  journal_entity.MoodType _mapJournalModelMoodToEntity(Mood modelMood) {
+    switch (modelMood) {
+      case Mood.veryHappy:
+        return journal_entity.MoodType.veryHappy;
+      case Mood.happy:
+        return journal_entity.MoodType.happy;
+      case Mood.neutral:
+        return journal_entity.MoodType.neutral;
+      case Mood.sad:
+        return journal_entity.MoodType.sad;
+      case Mood.verySad:
+        return journal_entity.MoodType.verySad;
+    }
+  }
+
+  // ==================== PHOTO CONVERTERS ====================
+
+  /// Convert PhotoEntity (from remote) to PhotoModel (for local)
+  PhotoModel _photoEntityToModel(photo_entity.PhotoEntity entity) => PhotoModel(
+      id: entity.id,
+      userId: entity.userId,
+      caption: entity.caption,
+      date: entity.dateTaken,
+      imageUrl: entity.cloudUrl,
+      localFilePath: entity.localPath,
+      isMilestone: entity.isMilestone,
+      uploadStatus: entity.isUploaded ? 'completed' : 'pending',
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      isSynced: true,
+      isDeleted: entity.isDeleted,      // 🆕 ADDED
+      deletedAt: entity.deletedAt,      // 🆕 ADDED
+    );
+
+  /// Convert PhotoModel (from local) to PhotoEntity (for remote)
+  photo_entity.PhotoEntity _photoModelToEntity(PhotoModel model) => 
+      photo_entity.PhotoEntity(
+        id: model.id,
+        userId: model.userId,
+        caption: model.caption,
+        dateTaken: model.date,
+        localPath: model.localFilePath,
+        cloudUrl: model.imageUrl,
+        isMilestone: model.isMilestone,
+        isUploaded: model.uploadStatus == 'completed',
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        isSynced: model.isSynced,
+        isDeleted: model.isDeleted,      // 🆕 ADDED
+        deletedAt: model.deletedAt,      // 🆕 ADDED
+      );
 }

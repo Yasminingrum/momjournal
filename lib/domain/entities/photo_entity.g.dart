@@ -25,16 +25,20 @@ class PhotoEntityAdapter extends TypeAdapter<PhotoEntity> {
       localPath: fields[2] as String?,
       cloudUrl: fields[3] as String?,
       caption: fields[4] as String?,
+      category: fields[13] as String?,
       isMilestone: fields[5] as bool,
+      isFavorite: fields[14] as bool,
       isSynced: fields[9] as bool,
       isUploaded: fields[10] as bool,
+      isDeleted: fields[11] as bool,
+      deletedAt: fields[12] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, PhotoEntity obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,7 +60,15 @@ class PhotoEntityAdapter extends TypeAdapter<PhotoEntity> {
       ..writeByte(9)
       ..write(obj.isSynced)
       ..writeByte(10)
-      ..write(obj.isUploaded);
+      ..write(obj.isUploaded)
+      ..writeByte(11)
+      ..write(obj.isDeleted)
+      ..writeByte(12)
+      ..write(obj.deletedAt)
+      ..writeByte(13)
+      ..write(obj.category)
+      ..writeByte(14)
+      ..write(obj.isFavorite);
   }
 
   @override

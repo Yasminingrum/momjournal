@@ -889,4 +889,7 @@ class PhotoLocalDataSource {
       );
     }
   }
+
+  /// Get all photos INCLUDING deleted ones (for sync purposes)
+  List<PhotoModel> getAllPhotosIncludingDeleted() => _photoBox.values.toList();
 }

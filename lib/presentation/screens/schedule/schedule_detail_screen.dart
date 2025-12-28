@@ -96,14 +96,14 @@ class ScheduleDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Reminder card
-            if (schedule.hasReminder && schedule.reminderMinutes != null)
+            if (schedule.hasReminder)
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: _buildInfoRow(
                     icon: Icons.notifications_active,
                     label: 'Pengingat',
-                    value: _formatReminderTime(schedule.reminderMinutes!),
+                    value: _formatReminderTime(schedule.reminderMinutes),
                     theme: theme,
                   ),
                 ),

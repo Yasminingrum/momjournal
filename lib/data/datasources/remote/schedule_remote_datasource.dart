@@ -11,8 +11,11 @@ abstract class ScheduleRemoteDatasource {
   /// Create schedule di Firestore
   Future<void> createSchedule(ScheduleEntity schedule);
   
-  /// Get all schedules untuk user
+  /// Get all schedules untuk user (excluding deleted)
   Future<List<ScheduleEntity>> getAllSchedules();
+  
+  /// 🆕 Get all schedules including deleted (for sync)
+  Future<List<ScheduleEntity>> getAllSchedulesIncludingDeleted();
   
   /// Get schedules by date range
   Future<List<ScheduleEntity>> getSchedulesByDateRange(
@@ -23,8 +26,11 @@ abstract class ScheduleRemoteDatasource {
   /// Update schedule
   Future<void> updateSchedule(ScheduleEntity schedule);
   
-  /// Delete schedule
+  /// 🆕 Soft delete schedule
   Future<void> deleteSchedule(String scheduleId);
+  
+  /// 🆕 Hard delete schedule (permanent)
+  Future<void> permanentlyDeleteSchedule(String scheduleId);
   
   /// Stream schedules (real-time updates)
   Stream<List<ScheduleEntity>> watchSchedules();
@@ -75,6 +81,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
+          .where('isDeleted', isEqualTo: false)  // 🆕 Filter deleted
           .orderBy('dateTime', descending: true)
           .get();
 
@@ -98,6 +105,38 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     }
   }
 
+  /// 🆕 Get all schedules including deleted ones (for sync)
+  @override
+  Future<List<ScheduleEntity>> getAllSchedulesIncludingDeleted() async {
+    try {
+      if (_schedulesCollection == null) {
+        throw const AuthorizationException('User tidak login');
+      }
+
+      final QuerySnapshot snapshot = await _schedulesCollection!
+          .orderBy('dateTime', descending: true)
+          .get();
+
+      final schedules = snapshot.docs
+          .map(_scheduleFromFirestore)
+          .where((schedule) => schedule != null)
+          .cast<ScheduleEntity>()
+          .toList();
+
+      debugPrint('✅ Fetched ${schedules.length} schedules (including deleted) from Firestore');
+      return schedules;
+    } on FirebaseException catch (e) {
+      debugPrint('❌ Firebase error getting all schedules: ${e.code}');
+      throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
+    } catch (e) {
+      debugPrint('❌ Error getting all schedules: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
+      throw DatabaseException('Gagal mengambil semua jadwal: $e');
+    }
+  }
+
   @override
   Future<List<ScheduleEntity>> getSchedulesByDateRange(
     DateTime startDate,
@@ -109,6 +148,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       }
 
       final QuerySnapshot snapshot = await _schedulesCollection!
+          .where('isDeleted', isEqualTo: false)  // 🆕 Filter deleted
           .where('dateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
           .where('dateTime', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('dateTime')
@@ -161,6 +201,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     }
   }
 
+  /// 🆕 SOFT DELETE - Mark as deleted instead of removing
   @override
   Future<void> deleteSchedule(String scheduleId) async {
     try {
@@ -168,9 +209,13 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      await _schedulesCollection!.doc(scheduleId).delete();
+      await _schedulesCollection!.doc(scheduleId).update({
+        'isDeleted': true,
+        'deletedAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
 
-      debugPrint('✅ Schedule deleted from Firestore: $scheduleId');
+      debugPrint('✅ Schedule soft deleted from Firestore: $scheduleId');
     } on FirebaseException catch (e) {
       debugPrint('❌ Firebase error deleting schedule: ${e.code}');
       throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
@@ -183,6 +228,29 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     }
   }
 
+  /// 🆕 HARD DELETE - Actually remove from Firestore (for permanent cleanup)
+  @override
+  Future<void> permanentlyDeleteSchedule(String scheduleId) async {
+    try {
+      if (_schedulesCollection == null) {
+        throw const AuthorizationException('User tidak login');
+      }
+
+      await _schedulesCollection!.doc(scheduleId).delete();
+
+      debugPrint('✅ Schedule permanently deleted from Firestore: $scheduleId');
+    } on FirebaseException catch (e) {
+      debugPrint('❌ Firebase error permanently deleting schedule: ${e.code}');
+      throw DatabaseException(FirebaseErrorHandler.getErrorMessage(e));
+    } catch (e) {
+      debugPrint('❌ Error permanently deleting schedule: $e');
+      if (e is AuthorizationException) {
+        rethrow;
+      }
+      throw DatabaseException('Gagal menghapus permanen jadwal: $e');
+    }
+  }
+
   @override
   Stream<List<ScheduleEntity>> watchSchedules() {
     if (_schedulesCollection == null) {
@@ -190,6 +258,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
     }
 
     return _schedulesCollection!
+        .where('isDeleted', isEqualTo: false)  // 🆕 Filter deleted
         .orderBy('dateTime', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -217,6 +286,10 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       'isCompleted': schedule.isCompleted,
       'createdAt': Timestamp.fromDate(schedule.createdAt),
       'updatedAt': Timestamp.fromDate(schedule.updatedAt),
+      'isDeleted': schedule.isDeleted,  // 🆕 ADDED
+      'deletedAt': schedule.deletedAt != null 
+          ? Timestamp.fromDate(schedule.deletedAt!) 
+          : null,  // 🆕 ADDED
     };
 
   /// Convert Firestore document to ScheduleEntity
@@ -281,6 +354,8 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         isCompleted: data['isCompleted'] as bool? ?? false,
         createdAt: parseTimestamp(data['createdAt']) ?? DateTime.now(),
         updatedAt: parseTimestamp(data['updatedAt']) ?? DateTime.now(),
+        isDeleted: data['isDeleted'] as bool? ?? false,  // 🆕 ADDED
+        deletedAt: parseTimestamp(data['deletedAt']),   // 🆕 ADDED
       );
     } catch (e) {
       debugPrint('⚠️ Error parsing document ${doc.id}: $e');

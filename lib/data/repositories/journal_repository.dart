@@ -4,7 +4,7 @@ import '/data/datasources/local/hive_database.dart';
 import '/data/models/journal_model.dart';
 import '/domain/entities/journal_entity.dart';
 
-/// Repository for Journal data management (Fixed Version)
+/// Repository for Journal data management (Complete Version with Soft Delete)
 /// Menggunakan JournalModel (data layer) alih-alih JournalEntity langsung
 /// 
 /// Pattern: Repository mengakses data layer (JournalModel dari Hive)
@@ -23,6 +23,8 @@ class JournalRepository {
       createdAt: model.createdAt,
       updatedAt: model.updatedAt,
       isSynced: model.isSynced,
+      isDeleted: model.isDeleted,      // 🆕 ADDED
+      deletedAt: model.deletedAt,      // 🆕 ADDED
     );
 
   /// Convert JournalEntity to JournalModel
@@ -35,6 +37,8 @@ class JournalRepository {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       isSynced: entity.isSynced,
+      isDeleted: entity.isDeleted,      // 🆕 ADDED
+      deletedAt: entity.deletedAt,      // 🆕 ADDED
     );
 
   /// Convert Mood (model) to MoodType (entity)
@@ -75,16 +79,29 @@ class JournalRepository {
     await _box.put(model.id, model);
   }
 
-  /// Get all journals
+  /// Get all journals (EXCLUDING deleted ones) 🆕 MODIFIED
   Future<List<JournalEntity>> getAllJournals() async {
-    final models = _box.values.toList()
+    final models = _box.values
+        .where((journal) => !journal.isDeleted)  // 🆕 Filter deleted
+        .toList()
       ..sort((a, b) => b.date.compareTo(a.date)); // Most recent first
     return models.map(_modelToEntity).toList();
   }
 
-  /// Get journals for a specific date
+  /// 🆕 Get all journals INCLUDING deleted ones (for sync purposes)
+  Future<List<JournalEntity>> getAllJournalsIncludingDeleted() async {
+    final models = _box.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
+    return models.map(_modelToEntity).toList();
+  }
+
+  /// Get journals for a specific date (EXCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getJournalsByDate(DateTime date) async {
     final models = _box.values.where((journal) {
+      if (journal.isDeleted) {
+        return false;  // 🆕 Filter deleted
+      }
+      
       final journalDate = journal.date;
       return journalDate.year == date.year &&
           journalDate.month == date.month &&
@@ -93,45 +110,58 @@ class JournalRepository {
     return models.map(_modelToEntity).toList();
   }
 
-  /// Get journals for a specific month
+  /// Get journals for a specific month (EXCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getJournalsByMonth(int year, int month) async {
     final models = _box.values
         .where((journal) =>
-            journal.date.year == year && journal.date.month == month,)
+            !journal.isDeleted &&  // 🆕 Filter deleted
+            journal.date.year == year && 
+            journal.date.month == month,)
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
     return models.map(_modelToEntity).toList();
   }
 
-  /// Get journals by date range
+  /// Get journals by date range (EXCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getJournalsByDateRange(
     DateTime startDate,
     DateTime endDate,
   ) async {
     final models = _box.values
         .where((journal) =>
+            !journal.isDeleted &&  // 🆕 Filter deleted
             journal.date.isAfter(startDate.subtract(const Duration(days: 1))) &&
-            journal.date
-                .isBefore(endDate.add(const Duration(days: 1))),)
+            journal.date.isBefore(endDate.add(const Duration(days: 1))),)
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
     return models.map(_modelToEntity).toList();
   }
 
-  /// Get journals by mood
+  /// Get journals by mood (EXCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getJournalsByMood(MoodType mood) async {
     final modelMood = _convertMoodType(mood);
     final models = _box.values
-        .where((journal) => journal.mood == modelMood)
+        .where((journal) => 
+            !journal.isDeleted &&  // 🆕 Filter deleted
+            journal.mood == modelMood,)
         .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
     return models.map(_modelToEntity).toList();
   }
 
-  /// Get a specific journal by ID
-  Future<JournalEntity?> getJournalById(String id) async {
+  /// Get a specific journal by ID 🆕 MODIFIED
+  Future<JournalEntity?> getJournalById(String id, {bool includeDeleted = false}) async {
     final model = _box.get(id);
-    return model != null ? _modelToEntity(model) : null;
+    if (model == null) {
+      return null;
+    }
+    
+    // If not including deleted and item is deleted, return null
+    if (!includeDeleted && model.isDeleted) {
+      return null;
+    }
+    
+    return _modelToEntity(model);
   }
 
   /// Update an existing journal
@@ -144,12 +174,26 @@ class JournalRepository {
     await _box.put(model.id, model);
   }
 
-  /// Delete a journal
+  /// 🆕 SOFT DELETE - Mark journal as deleted instead of removing
   Future<void> deleteJournal(String id) async {
+    final model = _box.get(id);
+    if (model != null) {
+      final deleted = model.copyWith(
+        isDeleted: true,
+        deletedAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isSynced: false,  // Mark as unsynced to sync deletion
+      );
+      await _box.put(id, deleted);
+    }
+  }
+
+  /// 🆕 HARD DELETE - Actually remove from database (for permanent cleanup)
+  Future<void> permanentlyDeleteJournal(String id) async {
     await _box.delete(id);
   }
 
-  /// Get mood statistics
+  /// Get mood statistics (EXCLUDING deleted) 🆕 MODIFIED
   Future<Map<MoodType, int>> getMoodStats() async {
     final stats = <MoodType, int>{
       MoodType.veryHappy: 0,
@@ -160,6 +204,10 @@ class JournalRepository {
     };
 
     for (final model in _box.values) {
+      if (model.isDeleted) {
+        continue;  // 🆕 Skip deleted
+      }
+      
       final moodType = _convertMood(model.mood);
       stats[moodType] = (stats[moodType] ?? 0) + 1;
     }
@@ -167,16 +215,20 @@ class JournalRepository {
     return stats;
   }
 
-  /// Get recent journals (last N entries)
+  /// Get recent journals (last N entries, EXCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getRecentJournals(int count) async {
-    final models = _box.values.toList()
+    final models = _box.values
+        .where((journal) => !journal.isDeleted)  // 🆕 Filter deleted
+        .toList()
       ..sort((a, b) => b.date.compareTo(a.date));
     return models.take(count).map(_modelToEntity).toList();
   }
 
-  /// Get unsynced journals for cloud sync
+  /// Get unsynced journals for cloud sync (INCLUDING deleted) 🆕 MODIFIED
   Future<List<JournalEntity>> getUnsyncedJournals() async {
-    final models = _box.values.where((journal) => !journal.isSynced).toList();
+    final models = _box.values
+        .where((journal) => !journal.isSynced)  // Include deleted for sync
+        .toList();
     return models.map(_modelToEntity).toList();
   }
 

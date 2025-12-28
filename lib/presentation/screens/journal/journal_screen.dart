@@ -249,123 +249,252 @@ class _JournalScreenState extends State<JournalScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
+        initialChildSize: 0.85,
         minChildSize: 0.5,
         maxChildSize: 0.95,
         expand: false,
-        builder: (context, scrollController) => Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        builder: (context, scrollController) => Column(
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 24),
-              
-              // Header with mood and date
-              Row(
-                children: [
-                  Text(
-                    journal.moodEmoji,
-                    style: const TextStyle(fontSize: 48),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+            
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header with mood and date
+                    Row(
                       children: [
-                        Text(
-                          dateFormat.format(journal.date),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        // Mood emoji
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: _getMoodColor(journal.mood).withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _getMoodColor(journal.mood).withValues(alpha: 0.3),
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              journal.moodEmoji,
+                              style: const TextStyle(fontSize: 40),
+                            ),
                           ),
                         ),
-                        Text(
-                          'Created at ${timeFormat.format(journal.createdAt)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Date and time
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                dateFormat.format(journal.date),
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Dibuat ${timeFormat.format(journal.createdAt)}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 24),
-              const Divider(),
-              const SizedBox(height: 16),
-              
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Text(
-                    journal.content,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      height: 1.6,
-                    ),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Action buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                        Navigator.pushNamed(
-                          context,
-                          Routes.addJournal,
-                          arguments: journal,
-                        ).then((result) {
-                          if (result == true) {
-                            provider.loadAllJournals();
-                          }
-                        });
-                      },
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _confirmDelete(context, journal, provider),
-                      icon: const Icon(Icons.delete),
-                      label: const Text('Delete'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
+                    
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const SizedBox(height: 20),
+                    
+                    // Content label
+                    Text(
+                      'Catatan Harian',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey[700],
                       ),
                     ),
+                    
+                    const SizedBox(height: 12),
+                    
+                    // Content
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Text(
+                        journal.content,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          height: 1.7,
+                          color: Color(0xFF424242),
+                        ),
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Mood label
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: _getMoodColor(journal.mood).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _getMoodColor(journal.mood).withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.mood,
+                            color: _getMoodColor(journal.mood),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Mood: ${_getMoodLabel(journal.mood)}',
+                            style: TextStyle(
+                              color: _getMoodColor(journal.mood),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
+            // Action buttons
+            Container(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
                   ),
                 ],
               ),
-            ],
-          ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(
+                            context,
+                            Routes.addJournal,
+                            arguments: journal,
+                          ).then((result) {
+                            if (result == true) {
+                              provider.loadAllJournals();
+                            }
+                          });
+                        },
+                        icon: const Icon(Icons.edit_outlined, size: 20),
+                        label: const Text('Edit'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: Colors.blue[700]!),
+                          foregroundColor: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => _confirmDelete(context, journal, provider),
+                        icon: const Icon(Icons.delete_outline, size: 20),
+                        label: const Text('Delete'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          foregroundColor: Colors.red[700],
+                          side: BorderSide(color: Colors.red[300]!),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+  
+  Color _getMoodColor(MoodType mood) {
+    switch (mood) {
+      case MoodType.veryHappy:
+        return Colors.green;
+      case MoodType.happy:
+        return Colors.lightGreen;
+      case MoodType.neutral:
+        return Colors.amber;
+      case MoodType.sad:
+        return Colors.orange;
+      case MoodType.verySad:
+        return Colors.red;
+    }
+  }
+
+  String _getMoodLabel(MoodType mood) {
+    switch (mood) {
+      case MoodType.veryHappy:
+        return 'Sangat Bahagia';
+      case MoodType.happy:
+        return 'Bahagia';
+      case MoodType.neutral:
+        return 'Biasa Saja';
+      case MoodType.sad:
+        return 'Sedih';
+      case MoodType.verySad:
+        return 'Sangat Sedih';
+    }
   }
 
   void _confirmDelete(

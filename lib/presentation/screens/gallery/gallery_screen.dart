@@ -24,7 +24,9 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   bool _showMilestonesOnly = false;
+  bool _showFavoritesOnly = false;  // 🆕 ADDED
   bool _sortNewestFirst = true;
+  String? _selectedCategory;  // 🆕 ADDED
 
   @override
   void initState() {
@@ -42,6 +44,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
       appBar: AppBar(
         title: const Text(TextConstants.navGallery),
         actions: [
+          // 🆕 Category filter button
+          IconButton(
+            icon: Icon(
+              _selectedCategory != null ? Icons.folder : Icons.folder_outlined,
+              color: _selectedCategory != null ? ColorConstants.primaryColor : null,
+            ),
+            onPressed: _showCategoryFilter,
+          ),
+          // 🆕 Favorite filter button
+          IconButton(
+            icon: Icon(
+              _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              color: _showFavoritesOnly ? Colors.red : null,
+            ),
+            onPressed: _toggleFavoriteFilter,
+          ),
           // Sort button
           PopupMenuButton<bool>(
             icon: Icon(
@@ -111,9 +129,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
       body: Consumer<PhotoProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading && provider.photos.isEmpty) {
-            return const _LoadingGrid();
+        builder: (context, provider, _) {
+          if (provider.isLoading) {
+            return const LoadingIndicator();
           }
 
           if (provider.error != null) {
@@ -123,155 +141,222 @@ class _GalleryScreenState extends State<GalleryScreen> {
             );
           }
 
-          if (provider.photos.isEmpty) {
-            return const EmptyPhotoState();
+          final filteredPhotos = _getFilteredPhotos(provider);
+
+          if (filteredPhotos.isEmpty) {
+            return EmptyState(
+              icon: Icons.photo_library_outlined,
+              title: _getEmptyStateTitle(),
+              message: _getEmptyStateMessage(),
+              actionText: _selectedCategory != null || _showFavoritesOnly || _showMilestonesOnly
+                  ? 'Hapus Filter'
+                  : 'Tambah Foto',
+              onAction: _selectedCategory != null || _showFavoritesOnly || _showMilestonesOnly
+                  ? _clearAllFilters
+                  : () => _showImageSourceDialog(context),
+            );
           }
 
-          return RefreshIndicator(
-            onRefresh: _loadPhotos,
-            child: Column(
-              children: [
-                // Filter chips
-                _buildFilterChips(provider),
-                // Photo grid
-                Expanded(
-                  child: _buildPhotoGrid(provider),
-                ),
-              ],
-            ),
+          // Group photos by month
+          final groupedPhotos = _groupPhotosByMonth(filteredPhotos);
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: groupedPhotos.length,
+            itemBuilder: (context, index) {
+              final monthYear = groupedPhotos.keys.elementAt(index);
+              final photos = groupedPhotos[monthYear]!;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Month header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 12,
+                    ),
+                    child: Text(
+                      monthYear,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // Photo grid
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
+                    ),
+                    itemCount: photos.length,
+                    itemBuilder: (context, photoIndex) {
+                      final photo = photos[photoIndex];
+                      final globalIndex =
+                          filteredPhotos.indexOf(photo);
+                      return _PhotoCard(
+                        photo: photo,
+                        heroTag: 'photo_${photo.id}_$globalIndex',
+                        onTap: () => _navigateToDetail(photo, globalIndex),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showImageSourceDialog(context),
-        tooltip: TextConstants.addPhoto,
         child: const Icon(Icons.add_a_photo),
       ),
     );
 
-  Widget _buildFilterChips(PhotoProvider provider) => Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          // Photo count
-          Expanded(
-            child: Text(
-              '${_getFilteredPhotos(provider).length} Foto',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-          ),
-          // Milestone filter chip
-          FilterChip(
-            label: const Text('Momen Spesial'),
-            selected: _showMilestonesOnly,
-            onSelected: (selected) {
-              setState(() {
-                _showMilestonesOnly = selected;
-              });
-            },
-            avatar: Icon(
-              Icons.stars,
-              size: 18,
-              color: _showMilestonesOnly ? Colors.white : Colors.amber,
-            ),
-            selectedColor: Colors.amber,
-            checkmarkColor: Colors.white,
-            labelStyle: TextStyle(
-              color: _showMilestonesOnly ? Colors.white : Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
+  String _getEmptyStateTitle() {
+    if (_showFavoritesOnly) return 'Belum ada foto favorit';
+    if (_selectedCategory != null) return 'Belum ada foto di kategori ini';
+    if (_showMilestonesOnly) return 'Belum ada milestone';
+    return 'Belum ada foto';
+  }
 
-  Widget _buildPhotoGrid(PhotoProvider provider) {
-    final photos = _getFilteredPhotos(provider);
-    final groupedPhotos = _groupPhotosByMonth(photos);
+  String _getEmptyStateMessage() {
+    if (_showFavoritesOnly) return 'Favoritkan foto untuk melihatnya di sini';
+    if (_selectedCategory != null) return 'Tambahkan foto ke kategori $_selectedCategory';
+    if (_showMilestonesOnly) return 'Tandai foto sebagai milestone';
+    return 'Mulai dokumentasikan momen berharga Anda';
+  }
 
-    if (photos.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.filter_alt_off,
-              size: 64,
-              color: Colors.grey[400],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Tidak ada foto dengan filter ini',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _showMilestonesOnly = false;
-                });
-              },
-              child: const Text('Hapus Filter'),
-            ),
-          ],
+  /// 🆕 Toggle favorite filter
+  Future<void> _toggleFavoriteFilter() async {
+    setState(() {
+      _showFavoritesOnly = !_showFavoritesOnly;
+      if (_showFavoritesOnly) {
+        _showMilestonesOnly = false;
+      }
+    });
+    await _loadPhotos();
+  }
+
+  /// 🆕 Show category filter
+  Future<void> _showCategoryFilter() async {
+    final provider = context.read<PhotoProvider>();
+    final categories = await provider.getCategories();
+    
+    if (!mounted) return;
+    
+    if (categories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Belum ada kategori tersedia'),
+          behavior: SnackBarBehavior.floating,
         ),
       );
+      return;
     }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: groupedPhotos.length,
-      itemBuilder: (context, index) {
-        final entry = groupedPhotos.entries.elementAt(index);
-        final monthYear = entry.key;
-        final monthPhotos = entry.value;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Month header
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12, top: 8),
-              child: Text(
-                monthYear,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
+    
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Filter Kategori',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (_selectedCategory != null)
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, ''),
+                    child: const Text('Hapus Filter'),
+                  ),
+              ],
             ),
-            // Photo grid for this month
-            GridView.builder(
+          ),
+          const Divider(),
+          Flexible(
+            child: ListView.builder(
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1,
-              ),
-              itemCount: monthPhotos.length,
-              itemBuilder: (context, photoIndex) {
-                final photo = monthPhotos[photoIndex];
-                return _PhotoCard(
-                  photo: photo,
-                  heroTag: 'photo_${photo.id}_$index',
-                  onTap: () => _navigateToDetail(photo, index),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories[index];
+                final isSelected = category == _selectedCategory;
+                
+                return ListTile(
+                  leading: Icon(
+                    Icons.folder,
+                    color: isSelected ? ColorConstants.primaryColor : null,
+                  ),
+                  title: Text(
+                    category,
+                    style: TextStyle(
+                      color: isSelected ? ColorConstants.primaryColor : null,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: isSelected 
+                      ? const Icon(Icons.check, color: ColorConstants.primaryColor) 
+                      : null,
+                  onTap: () => Navigator.pop(context, category),
                 );
               },
             ),
-            const SizedBox(height: 16),
-          ],
-        );
-      },
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
     );
+    
+    if (selected != null && mounted) {
+      setState(() {
+        _selectedCategory = selected.isEmpty ? null : selected;
+        if (_selectedCategory != null) {
+          _showMilestonesOnly = false;
+          _showFavoritesOnly = false;
+        }
+      });
+      await _loadPhotos();
+    }
+  }
+
+  /// 🆕 Clear all filters
+  Future<void> _clearAllFilters() async {
+    setState(() {
+      _selectedCategory = null;
+      _showFavoritesOnly = false;
+      _showMilestonesOnly = false;
+    });
+    await _loadPhotos();
   }
 
   List<PhotoEntity> _getFilteredPhotos(PhotoProvider provider) {
     var photos = provider.photos;
+
+    // Filter by category
+    if (_selectedCategory != null) {
+      photos = photos.where((p) => p.category == _selectedCategory).toList();
+    }
+
+    // Filter by favorite
+    if (_showFavoritesOnly) {
+      photos = photos.where((p) => p.isFavorite).toList();
+    }
 
     // Filter by milestone
     if (_showMilestonesOnly) {
@@ -312,7 +397,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         'heroTag': 'photo_${photo.id}_$index',
       },
     ).then((_) {
-      // Reload photos after returning from detail (in case photo was deleted)
+      // Reload photos after returning from detail (in case photo was deleted/updated)
       _loadPhotos();
     });
   }
@@ -351,8 +436,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   /// Pick image and upload
-
-  /// Pick image and upload
   Future<void> _pickAndUploadImage(
     BuildContext context,
     ImageSource source,
@@ -361,9 +444,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        imageQuality: 85,
+        maxWidth: 1024,      // 🔧 Reduce dari 1920 ke 1024
+        maxHeight: 1024,     // 🔧 Reduce dari 1920 ke 1024
+        imageQuality: 70,    // 🔧 Reduce dari 85 ke 70
       );
 
       if (image == null) {
@@ -377,13 +460,31 @@ class _GalleryScreenState extends State<GalleryScreen> {
       // Get provider before async operations
       final photoProvider = context.read<PhotoProvider>();
 
-      // Show loading indicator
+      // Show loading indicator with message
       showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext dialogContext) => const Center(
-            child: CircularProgressIndicator(),
+        builder: (BuildContext dialogContext) => WillPopScope(
+          onWillPop: () async => false,
+          child: const AlertDialog(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Mengunggah foto...',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Mohon tunggu sebentar',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
           ),
+        ),
       );
 
       try {
@@ -469,7 +570,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
-/// Photo Card Widget
+/// Photo Card Widget (UPDATED with favorite indicator)
 class _PhotoCard extends StatelessWidget {
   const _PhotoCard({
     required this.photo,
@@ -486,186 +587,101 @@ class _PhotoCard extends StatelessWidget {
       onTap: onTap,
       child: Hero(
         tag: heroTag,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Photo image
-                _buildImage(),
-                // Gradient overlay
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.7),
-                      ],
-                      stops: const [0.6, 1.0],
-                    ),
-                  ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Photo image
+            _buildPhotoImage(),
+            
+            // 🆕 Favorite indicator
+            if (photo.isFavorite)
+              const Positioned(
+                top: 4,
+                right: 4,
+                child: Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 20,
                 ),
-                // Milestone badge
-                if (photo.isMilestone)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.stars, size: 12, color: Colors.white),
-                          SizedBox(width: 4),
-                          Text(
-                            'Spesial',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+              ),
+            
+            // Milestone badge
+            if (photo.isMilestone)
+              const Positioned(
+                bottom: 4,
+                left: 4,
+                child: Icon(
+                  Icons.stars,
+                  color: Colors.amber,
+                  size: 20,
+                ),
+              ),
+
+            // 🆕 Category badge
+            if (photo.category != null && photo.category!.isNotEmpty)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
                   ),
-                // Date
-                Positioned(
-                  bottom: 8,
-                  left: 8,
-                  right: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   child: Text(
-                    _formatDate(photo.dateTaken),
+                    photo.category!,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+          ],
         ),
       ),
     );
 
-  Widget _buildImage() {
-    // Check if it's a local file or network URL
-    if (photo.localPath != null && photo.localPath!.isNotEmpty) {
-      final file = File(photo.localPath!);
-      if (file.existsSync()) {
-        return Image.file(
-          file,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-        );
-      }
-    }
-
-    // Try network image
-    if (photo.cloudUrl != null && photo.cloudUrl!.isNotEmpty) {
-      return CachedNetworkImage(
-        imageUrl: photo.cloudUrl!,
+  Widget _buildPhotoImage() {
+    // Try local file first
+    if (photo.localPath != null && File(photo.localPath!).existsSync()) {
+      return Image.file(
+        File(photo.localPath!),
         fit: BoxFit.cover,
-        placeholder: (context, url) => _buildPlaceholder(),
-        errorWidget: (context, url, error) => _buildPlaceholder(),
+        errorBuilder: (context, error, stackTrace) => _buildCloudImage(),
       );
     }
 
-    return _buildPlaceholder();
+    return _buildCloudImage();
   }
 
-  Widget _buildPlaceholder() => Container(
-      color: Colors.grey[300],
-      child: const Center(
-        child: Icon(
-          Icons.image,
-          size: 48,
-          color: Colors.grey,
+  Widget _buildCloudImage() {
+    if (photo.cloudUrl == null || photo.cloudUrl!.isEmpty) {
+      return Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: Icon(Icons.broken_image, color: Colors.grey),
+        ),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: photo.cloudUrl!,
+      fit: BoxFit.cover,
+      placeholder: (context, url) => Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
-    );
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final photoDate = DateTime(date.year, date.month, date.day);
-
-    if (photoDate == today) {
-      return 'Hari ini';
-    } else if (photoDate == yesterday) {
-      return 'Kemarin';
-    } else {
-      return DateFormat('d MMM yyyy', 'id_ID').format(date);
-    }
-  }
-}
-
-/// Loading Grid Widget
-class _LoadingGrid extends StatelessWidget {
-  const _LoadingGrid();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Loading header
-          ShimmerLoading(
-            child: Container(
-              width: 120,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Loading grid
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1,
-              ),
-              itemCount: 6,
-              itemBuilder: (context, index) => ShimmerLoading(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+      errorWidget: (context, url, error) => Container(
+        color: Colors.grey[300],
+        child: const Icon(Icons.error_outline, color: Colors.red),
       ),
     );
+  }
 }

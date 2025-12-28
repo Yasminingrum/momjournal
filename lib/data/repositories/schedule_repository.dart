@@ -20,11 +20,13 @@ class ScheduleRepository {
       dateTime: scheduleModel.scheduledTime,
       notes: scheduleModel.description,
       hasReminder: scheduleModel.reminderEnabled,
-      reminderMinutes: scheduleModel.reminderMinutesBefore,
+      reminderMinutes: scheduleModel.reminderMinutesBefore ?? 0,
       isCompleted: scheduleModel.isCompleted,
       createdAt: scheduleModel.createdAt,
       updatedAt: scheduleModel.updatedAt,
       isSynced: scheduleModel.isSynced,
+      isDeleted: scheduleModel.isDeleted,      // 🆕 ADDED
+      deletedAt: scheduleModel.deletedAt,      // 🆕 ADDED
     );
 
   /// Convert ScheduleEntity to ScheduleModel
@@ -41,6 +43,8 @@ class ScheduleRepository {
       createdAt: scheduleEntity.createdAt,
       updatedAt: scheduleEntity.updatedAt,
       isSynced: scheduleEntity.isSynced,
+      isDeleted: scheduleEntity.isDeleted,      // 🆕 ADDED
+      deletedAt: scheduleEntity.deletedAt,      // 🆕 ADDED
     );
 
   /// Convert ScheduleModel.ScheduleCategory to ScheduleEntity.ScheduleCategory
@@ -83,13 +87,17 @@ class ScheduleRepository {
     await _box.put(scheduleModel.id, scheduleModel);
   }
 
-  /// Get all schedules
-  Future<List<entity.ScheduleEntity>> getAllSchedules() async => _box.values.map(_toEntity).toList();
+  /// Get all schedules (EXCLUDING deleted ones) 🆕 MODIFIED
+  Future<List<entity.ScheduleEntity>> getAllSchedules() async => _box.values
+        .where((schedule) => !schedule.isDeleted)  // 🆕 Filter deleted
+        .map(_toEntity)
+        .toList();
 
-  /// Get schedules for a specific date
+  /// Get schedules for a specific date (EXCLUDING deleted ones) 🆕 MODIFIED
   Future<List<entity.ScheduleEntity>> getSchedulesByDate(DateTime date) async {
     final schedules = _box.values
         .where((schedule) =>
+            !schedule.isDeleted &&  // 🆕 Filter deleted
             schedule.scheduledTime.year == date.year &&
             schedule.scheduledTime.month == date.month &&
             schedule.scheduledTime.day == date.day,)
@@ -100,40 +108,54 @@ class ScheduleRepository {
     return schedules;
   }
 
-  /// Get schedules for a specific month
+  /// Get schedules for a specific month (EXCLUDING deleted ones) 🆕 MODIFIED
   Future<List<entity.ScheduleEntity>> getSchedulesByMonth(int year, int month) async => _box.values
         .where((schedule) =>
+            !schedule.isDeleted &&  // 🆕 Filter deleted
             schedule.scheduledTime.year == year &&
             schedule.scheduledTime.month == month,)
         .map(_toEntity)
         .toList();
 
-  /// Get schedules by category
+  /// Get schedules by category (EXCLUDING deleted ones) 🆕 MODIFIED
   Future<List<entity.ScheduleEntity>> getSchedulesByCategory(
       entity.ScheduleCategory category,) async {
     final modelCategory = _convertCategoryToModel(category);
     return _box.values
-        .where((schedule) => schedule.category == modelCategory)
+        .where((schedule) => 
+            !schedule.isDeleted &&  // 🆕 Filter deleted
+            schedule.category == modelCategory,)
         .map(_toEntity)
         .toList();
   }
 
-  /// Get upcoming schedules
+  /// Get upcoming schedules (EXCLUDING deleted ones) 🆕 MODIFIED
   Future<List<entity.ScheduleEntity>> getUpcomingSchedules() async {
     final now = DateTime.now();
     final schedules = _box.values
         .where((schedule) =>
-            schedule.scheduledTime.isAfter(now) && !schedule.isCompleted,)
+            !schedule.isDeleted &&  // 🆕 Filter deleted
+            schedule.scheduledTime.isAfter(now) && 
+            !schedule.isCompleted,)
         .map(_toEntity)
         .toList()
       ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
     return schedules;
   }
 
-  /// Get a specific schedule by ID
-  Future<entity.ScheduleEntity?> getScheduleById(String id) async {
+  /// Get a specific schedule by ID (can get deleted ones for sync) 🆕 MODIFIED
+  Future<entity.ScheduleEntity?> getScheduleById(String id, {bool includeDeleted = false}) async {
     final scheduleModel = _box.get(id);
-    return scheduleModel != null ? _toEntity(scheduleModel) : null;
+    if (scheduleModel == null) {
+      return null;
+    }
+    
+    // If not including deleted and item is deleted, return null
+    if (!includeDeleted && scheduleModel.isDeleted) {
+      return null;
+    }
+    
+    return _toEntity(scheduleModel);
   }
 
   /// Update an existing schedule
@@ -149,7 +171,7 @@ class ScheduleRepository {
   /// Mark schedule as completed
   Future<void> markAsCompleted(String id) async {
     final scheduleModel = _box.get(id);
-    if (scheduleModel != null) {
+    if (scheduleModel != null && !scheduleModel.isDeleted) {  // 🆕 Check not deleted
       final updated = scheduleModel.copyWith(
         isCompleted: true,
         completedAt: DateTime.now(),
@@ -160,14 +182,32 @@ class ScheduleRepository {
     }
   }
 
-  /// Delete a schedule
+  /// 🆕 SOFT DELETE - Mark schedule as deleted instead of removing
   Future<void> deleteSchedule(String id) async {
+    final scheduleModel = _box.get(id);
+    if (scheduleModel != null) {
+      final deleted = scheduleModel.copyWith(
+        isDeleted: true,
+        deletedAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        isSynced: false,  // Mark as unsynced to sync deletion
+      );
+      await _box.put(id, deleted);
+    }
+  }
+
+  /// 🆕 HARD DELETE - Actually remove from database (for permanent cleanup)
+  Future<void> permanentlyDeleteSchedule(String id) async {
     await _box.delete(id);
   }
 
-  /// Get unsynced schedules for cloud sync
+  /// 🆕 Get ALL schedules including deleted ones (for sync purposes)
+  Future<List<entity.ScheduleEntity>> getAllSchedulesIncludingDeleted() async => 
+      _box.values.map(_toEntity).toList();
+
+  /// Get unsynced schedules for cloud sync (INCLUDING deleted ones) 🆕 MODIFIED
   Future<List<entity.ScheduleEntity>> getUnsyncedSchedules() async => _box.values
-        .where((schedule) => !schedule.isSynced)
+        .where((schedule) => !schedule.isSynced)  // Include deleted ones for sync
         .map(_toEntity)
         .toList();
 

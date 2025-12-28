@@ -70,11 +70,11 @@ class SyncService extends ChangeNotifier {
   /// Handle connectivity changes
   void _handleConnectivityChange(ConnectivityResult result) {
     if (result != ConnectivityResult.none) {
-      debugPrint('📡 Connectivity restored: $result');
+      debugPrint('ðŸ“¡ Connectivity restored: $result');
       // Connection available, trigger sync
       syncAll();
     } else {
-      debugPrint('📡 Connection lost');
+      debugPrint('ðŸ“¡ Connection lost');
     }
   }
 
@@ -97,7 +97,7 @@ class SyncService extends ChangeNotifier {
   /// Sync all data (schedules, journals, photos)
   Future<void> syncAll() async {
     if (_isSyncing) {
-      debugPrint('⚠️ Sync already in progress');
+      debugPrint('âš ï¸ Sync already in progress');
       return;
     }
 
@@ -106,7 +106,7 @@ class SyncService extends ChangeNotifier {
       _syncError = null;
       notifyListeners();
 
-      debugPrint('🔄 Starting full sync...');
+      debugPrint('ðŸ”„ Starting full sync...');
 
       // Process sync queue first
       await _processSyncQueue();
@@ -123,10 +123,10 @@ class SyncService extends ChangeNotifier {
       _lastSyncTime = DateTime.now();
       _pendingSyncCount = 0;
 
-      debugPrint('✅ Sync completed successfully');
+      debugPrint('âœ… Sync completed successfully');
     } catch (e) {
       _syncError = e.toString();
-      debugPrint('❌ Sync failed: $e');
+      debugPrint('âŒ Sync failed: $e');
     } finally {
       _isSyncing = false;
       notifyListeners();
@@ -178,9 +178,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('✅ Schedules synced');
+      debugPrint('âœ… Schedules synced');
     } catch (e) {
-      debugPrint('❌ Schedule sync failed: $e');
+      debugPrint('âŒ Schedule sync failed: $e');
       _addToSyncQueue('schedules', null);
       rethrow;
     }
@@ -260,9 +260,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('✅ Journals synced');
+      debugPrint('âœ… Journals synced');
     } catch (e) {
-      debugPrint('❌ Journal sync failed: $e');
+      debugPrint('âŒ Journal sync failed: $e');
       _addToSyncQueue('journals', null);
       rethrow;
     }
@@ -339,9 +339,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('✅ Photos synced');
+      debugPrint('âœ… Photos synced');
     } catch (e) {
-      debugPrint('❌ Photo sync failed: $e');
+      debugPrint('âŒ Photo sync failed: $e');
       _addToSyncQueue('photos', null);
       rethrow;
     }
@@ -390,7 +390,7 @@ class SyncService extends ChangeNotifier {
       return;
     }
 
-    debugPrint('🔄 Processing sync queue: ${_syncQueue.length} items');
+    debugPrint('ðŸ”„ Processing sync queue: ${_syncQueue.length} items');
 
     final itemsToRemove = <Map<String, dynamic>>[];
 
@@ -411,7 +411,7 @@ class SyncService extends ChangeNotifier {
         // Success, mark for removal
         itemsToRemove.add(item);
       } catch (e) {
-        debugPrint('❌ Queue item failed: ${item['collection']}');
+        debugPrint('âŒ Queue item failed: ${item['collection']}');
         // Keep in queue for next retry
       }
     }
@@ -424,7 +424,7 @@ class SyncService extends ChangeNotifier {
 
   /// Force sync now (manual trigger)
   Future<void> forceSyncNow() async {
-    debugPrint('🔄 Force sync triggered');
+    debugPrint('ðŸ”„ Force sync triggered');
     await syncAll();
   }
 
@@ -433,6 +433,52 @@ class SyncService extends ChangeNotifier {
     _syncQueue.clear();
     _pendingSyncCount = 0;
     notifyListeners();
+  }
+
+  /// Delete schedule from remote (Firebase)
+  Future<void> deleteScheduleRemote(String scheduleId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('schedules')
+          .doc(scheduleId)
+          .delete();
+      debugPrint('✅ Schedule deleted from remote: $scheduleId');
+    } catch (e) {
+      debugPrint('❌ Failed to delete schedule from remote: $e');
+      // Don't rethrow - deletion should succeed locally even if remote fails
+    }
+  }
+
+  /// Delete journal from remote (Firebase)
+  Future<void> deleteJournalRemote(String journalId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('journals')
+          .doc(journalId)
+          .delete();
+      debugPrint('✅ Journal deleted from remote: $journalId');
+    } catch (e) {
+      debugPrint('❌ Failed to delete journal from remote: $e');
+    }
+  }
+
+  /// Delete photo metadata from remote (Firebase)
+  Future<void> deletePhotoRemote(String photoId) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('photos')
+          .doc(photoId)
+          .delete();
+      debugPrint('✅ Photo deleted from remote: $photoId');
+    } catch (e) {
+      debugPrint('❌ Failed to delete photo from remote: $e');
+    }
   }
 
   @override

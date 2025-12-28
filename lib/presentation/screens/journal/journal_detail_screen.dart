@@ -21,67 +21,91 @@ class JournalDetailScreen extends StatelessWidget {
         title: const Text('Detail Jurnal'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => _handleEdit(context),
+            tooltip: 'Edit',
+          ),
+          IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () => _handleDelete(context),
+            tooltip: 'Hapus',
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Date
-            Text(
-              _formatDate(journal.date),
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-              ),
+            // Date and mood section
+            Row(
+              children: [
+                // Mood emoji
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: _getMoodColor(journal.mood).withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _getMoodColor(journal.mood).withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _getMoodEmoji(journal.mood),
+                      style: const TextStyle(fontSize: 48),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(width: 16),
+                
+                // Date and mood label
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatDate(journal.date),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Dibuat ${_formatDateTime(journal.createdAt)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 24),
+            
+            const Divider(),
+            
+            const SizedBox(height: 24),
 
-            // Mood display
-            Center(
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: _getMoodColor(journal.mood).withValues (alpha: 0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: _getMoodColor(journal.mood),
-                    width: 4,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    _getMoodEmoji(journal.mood),
-                    style: const TextStyle(fontSize: 64),
-                  ),
-                ),
+            // Content section
+            Text(
+              'Catatan Harian',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
               ),
             ),
-
-            const SizedBox(height: 12),
-
-            // Mood label
-            Center(
-              child: Text(
-                _getMoodLabel(journal.mood),
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: _getMoodColor(journal.mood),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
-            // Content
+            
+            const SizedBox(height: 16),
+            
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.grey[50],
                 borderRadius: BorderRadius.circular(12),
@@ -90,38 +114,58 @@ class JournalDetailScreen extends StatelessWidget {
               child: Text(
                 journal.content,
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  height: 1.6,
+                  height: 1.8,
+                  fontSize: 16,
+                  color: Colors.grey[800],
                 ),
               ),
             ),
 
             const SizedBox(height: 24),
 
-            // Metadata
+            // Mood label section
             Container(
-              padding: const EdgeInsets.all(12),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: _getMoodColor(journal.mood).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: _getMoodColor(journal.mood).withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: Colors.blue[700]),
+                  Icon(
+                    Icons.mood,
+                    color: _getMoodColor(journal.mood),
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Ditulis pada ${_formatDateTime(journal.createdAt)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.blue[700],
-                      ),
+                  Text(
+                    'Mood: ${_getMoodLabel(journal.mood)}',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: _getMoodColor(journal.mood),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
             ),
+
+            const SizedBox(height: 100), // Extra space for safe area
           ],
         ),
       ),
+    );
+  }
+  
+  void _handleEdit(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      '/journal/add',
+      arguments: journal,
     );
   }
 
@@ -225,16 +269,15 @@ class JournalDetailScreen extends StatelessWidget {
       'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
     ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+    
+    final dayNames = [
+      'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu',
+    ];
+    
+    final dayName = dayNames[date.weekday - 1];
+    return '$dayName, ${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-    ];
-    return '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}, '
-        '${dateTime.hour.toString().padLeft(2, '0')}:'
+  String _formatDateTime(DateTime dateTime) => '${dateTime.hour.toString().padLeft(2, '0')}:'
         '${dateTime.minute.toString().padLeft(2, '0')}';
-  }
 }

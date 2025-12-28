@@ -10,11 +10,14 @@ import '../../../core/errors/exceptions.dart';
 import '../../../domain/entities/photo_entity.dart';
 import 'firebase_service.dart';
 
-/// Interface untuk Photo Remote Datasource
+/// Interface untuk Photo Remote Datasource (UPDATED with soft delete, favorite, and category support)
 abstract class PhotoRemoteDatasource {
   Future<String> uploadPhoto(File photoFile, String photoId);
   Future<void> createPhotoMetadata(PhotoEntity photo);
   Future<List<PhotoEntity>> getAllPhotos();
+  Future<List<PhotoEntity>> getAllPhotosIncludingDeleted();
+  Future<List<PhotoEntity>> getFavoritePhotos();  // 🆕 ADDED
+  Future<List<PhotoEntity>> getPhotosByCategory(String category);  // 🆕 ADDED
   Future<void> updatePhoto(PhotoEntity photo);
   Future<void> deletePhoto(String photoId, String downloadUrl);
   Stream<List<PhotoEntity>> watchPhotos();
@@ -74,12 +77,36 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
 
       debugPrint('✅ Photo metadata created: ${photo.id}');
     } catch (e) {
+      debugPrint('❌ Error creating photo metadata: $e');
       throw DatabaseException('Gagal menyimpan metadata foto: $e');
     }
   }
 
   @override
   Future<List<PhotoEntity>> getAllPhotos() async {
+    try {
+      if (_photosCollection == null) {
+        throw const AuthorizationException('User tidak login');
+      }
+
+      final snapshot = await _photosCollection!
+          .where('isDeleted', isEqualTo: false)  // Filter deleted
+          .orderBy('dateTaken', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map(_photoFromFirestore)
+          .where((photo) => photo != null)
+          .cast<PhotoEntity>()
+          .toList();
+    } catch (e) {
+      debugPrint('❌ Error getting all photos: $e');
+      throw DatabaseException('Gagal mengambil foto: $e');
+    }
+  }
+
+  @override
+  Future<List<PhotoEntity>> getAllPhotosIncludingDeleted() async {
     try {
       if (_photosCollection == null) {
         throw const AuthorizationException('User tidak login');
@@ -95,7 +122,58 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
           .cast<PhotoEntity>()
           .toList();
     } catch (e) {
-      throw DatabaseException('Gagal mengambil foto: $e');
+      debugPrint('❌ Error getting all photos including deleted: $e');
+      throw DatabaseException('Gagal mengambil semua foto: $e');
+    }
+  }
+
+  /// 🆕 Get favorite photos only
+  @override
+  Future<List<PhotoEntity>> getFavoritePhotos() async {
+    try {
+      if (_photosCollection == null) {
+        throw const AuthorizationException('User tidak login');
+      }
+
+      final snapshot = await _photosCollection!
+          .where('isDeleted', isEqualTo: false)
+          .where('isFavorite', isEqualTo: true)  // 🆕 Filter favorites
+          .orderBy('dateTaken', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map(_photoFromFirestore)
+          .where((photo) => photo != null)
+          .cast<PhotoEntity>()
+          .toList();
+    } catch (e) {
+      debugPrint('❌ Error getting favorite photos: $e');
+      throw DatabaseException('Gagal mengambil foto favorit: $e');
+    }
+  }
+
+  /// 🆕 Get photos by category
+  @override
+  Future<List<PhotoEntity>> getPhotosByCategory(String category) async {
+    try {
+      if (_photosCollection == null) {
+        throw const AuthorizationException('User tidak login');
+      }
+
+      final snapshot = await _photosCollection!
+          .where('isDeleted', isEqualTo: false)
+          .where('category', isEqualTo: category)  // 🆕 Filter by category
+          .orderBy('dateTaken', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map(_photoFromFirestore)
+          .where((photo) => photo != null)
+          .cast<PhotoEntity>()
+          .toList();
+    } catch (e) {
+      debugPrint('❌ Error getting photos by category: $e');
+      throw DatabaseException('Gagal mengambil foto berdasarkan kategori: $e');
     }
   }
 
@@ -106,16 +184,14 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      final photoData = _photoToFirestore(photo);
-      photoData['updatedAt'] = FieldValue.serverTimestamp();
-
       await _photosCollection!
           .doc(photo.id)
-          .update(photoData);
+          .update(_photoToFirestore(photo));
 
       debugPrint('✅ Photo updated: ${photo.id}');
     } catch (e) {
-      throw DatabaseException('Gagal memperbarui foto: $e');
+      debugPrint('❌ Error updating photo: $e');
+      throw DatabaseException('Gagal mengupdate foto: $e');
     }
   }
 
@@ -126,19 +202,16 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      // Delete from Firestore
-      await _photosCollection!.doc(photoId).delete();
+      // Soft delete: update isDeleted flag instead of actual deletion
+      await _photosCollection!.doc(photoId).update({
+        'isDeleted': true,
+        'deletedAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+      });
 
-      // Delete from Storage
-      try {
-        final ref = FirebaseStorage.instance.refFromURL(downloadUrl);
-        await ref.delete();
-      } catch (e) {
-        debugPrint('⚠️ Failed to delete from storage, but metadata removed: $e');
-      }
-
-      debugPrint('✅ Photo deleted: $photoId');
+      debugPrint('✅ Photo soft deleted: $photoId');
     } catch (e) {
+      debugPrint('❌ Error deleting photo: $e');
       throw DatabaseException('Gagal menghapus foto: $e');
     }
   }
@@ -146,10 +219,11 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
   @override
   Stream<List<PhotoEntity>> watchPhotos() {
     if (_photosCollection == null) {
-      return Stream.error(const AuthorizationException('User tidak login'));
+      throw const AuthorizationException('User tidak login');
     }
 
     return _photosCollection!
+        .where('isDeleted', isEqualTo: false)  // Filter deleted
         .orderBy('dateTaken', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -159,18 +233,25 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
             .toList(),);
   }
 
+  /// Convert PhotoEntity to Firestore Map (UPDATED with category and favorite)
   Map<String, dynamic> _photoToFirestore(PhotoEntity photo) => {
       'id': photo.id,
       'userId': photo.userId,
       'cloudUrl': photo.cloudUrl,
       'caption': photo.caption,
+      'category': photo.category,        // 🆕 ADDED
       'isMilestone': photo.isMilestone,
+      'isFavorite': photo.isFavorite,    // 🆕 ADDED
       'dateTaken': Timestamp.fromDate(photo.dateTaken),
       'createdAt': Timestamp.fromDate(photo.createdAt),
       'updatedAt': Timestamp.fromDate(photo.updatedAt),
+      'isDeleted': photo.isDeleted,
+      'deletedAt': photo.deletedAt != null 
+          ? Timestamp.fromDate(photo.deletedAt!) 
+          : null,
     };
 
-  /// Convert Firestore document to PhotoEntity
+  /// Convert Firestore document to PhotoEntity (UPDATED with category and favorite)
   /// 
   /// Returns null if document is invalid/corrupt to prevent crashes
   PhotoEntity? _photoFromFirestore(DocumentSnapshot doc) {
@@ -228,13 +309,17 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         userId: userId,
         cloudUrl: cloudUrl,
         caption: data['caption'] as String?,
+        category: data['category'] as String?,        // 🆕 ADDED
         isMilestone: data['isMilestone'] as bool? ?? false,
+        isFavorite: data['isFavorite'] as bool? ?? false,  // 🆕 ADDED
         dateTaken: dateTaken,
         createdAt: parseTimestamp(data['createdAt']) ?? DateTime.now(),
         updatedAt: parseTimestamp(data['updatedAt']) ?? DateTime.now(),
         localPath: null,  // Will be populated from local storage if available
         isUploaded: true, // If it's in Firestore, it's uploaded
         isSynced: true,   // If it's in Firestore, it's synced
+        isDeleted: data['isDeleted'] as bool? ?? false,
+        deletedAt: parseTimestamp(data['deletedAt']),
       );
     } catch (e) {
       debugPrint('⚠️ Error parsing photo document ${doc.id}: $e');

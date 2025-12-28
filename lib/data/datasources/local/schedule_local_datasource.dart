@@ -416,4 +416,17 @@ class ScheduleLocalDataSource {
       rethrow;
     }
   }
+
+  /// Get all schedules INCLUDING deleted ones (for sync purposes)
+  List<ScheduleModel> getAllSchedulesIncludingDeleted() => _scheduleBox.values.toList();
+
+  /// Create schedule (if not exists yet, add this)
+  Future<void> createSchedule(ScheduleModel schedule) async {
+    await _scheduleBox.put(schedule.id, schedule);
+  }
+
+  /// Update schedule (if not exists yet, add this)
+  Future<void> updateScheduleIfExists(ScheduleModel schedule) async {
+    await _scheduleBox.put(schedule.id, schedule);
+  }
 }

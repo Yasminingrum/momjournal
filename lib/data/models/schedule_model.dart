@@ -47,7 +47,7 @@ extension ScheduleCategoryExtension on ScheduleCategory {
       case ScheduleCategory.sleeping:
         return '😴';
       case ScheduleCategory.health:
-        return '🏥';
+        return '🥼';
       case ScheduleCategory.milestone:
         return '🎉';
       case ScheduleCategory.other:
@@ -95,6 +95,8 @@ class ScheduleModel extends HiveObject {
     this.completionNotes,
     this.isSynced = false,
     this.notificationId,
+    this.isDeleted = false,  // 🆕 ADDED
+    this.deletedAt,          // 🆕 ADDED
   });
 
   /// Factory constructor dari JSON (Firestore)
@@ -138,6 +140,8 @@ class ScheduleModel extends HiveObject {
       updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       notificationId: json['notificationId'] as int?,
+      isDeleted: json['isDeleted'] as bool? ?? false,  // 🆕 ADDED
+      deletedAt: parseDateTime(json['deletedAt']),    // 🆕 ADDED
     );
   }
   
@@ -202,6 +206,14 @@ class ScheduleModel extends HiveObject {
   @HiveField(14)
   final int? notificationId;
 
+  /// 🆕 Flag soft delete - apakah data sudah dihapus
+  @HiveField(15)
+  final bool isDeleted;
+
+  /// 🆕 Timestamp kapan data dihapus
+  @HiveField(16)
+  final DateTime? deletedAt;
+
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
       'id': id,
@@ -219,6 +231,8 @@ class ScheduleModel extends HiveObject {
       'updatedAt': updatedAt.toIso8601String(),
       'isSynced': isSynced,
       'notificationId': notificationId,
+      'isDeleted': isDeleted,  // 🆕 ADDED
+      'deletedAt': deletedAt?.toIso8601String(),  // 🆕 ADDED
     };
 
   /// Create copy with updated fields
@@ -238,6 +252,8 @@ class ScheduleModel extends HiveObject {
     DateTime? updatedAt,
     bool? isSynced,
     int? notificationId,
+    bool? isDeleted,      // 🆕 ADDED
+    DateTime? deletedAt,  // 🆕 ADDED
   }) => ScheduleModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -255,6 +271,8 @@ class ScheduleModel extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
       notificationId: notificationId ?? this.notificationId,
+      isDeleted: isDeleted ?? this.isDeleted,  // 🆕 ADDED
+      deletedAt: deletedAt ?? this.deletedAt,  // 🆕 ADDED
     );
 
   /// Getter untuk cek apakah schedule sudah lewat
@@ -273,7 +291,7 @@ class ScheduleModel extends HiveObject {
 
   @override
   String toString() => 'ScheduleModel(id: $id, title: $title, category: $category, '
-        'scheduledTime: $scheduledTime, isCompleted: $isCompleted)';
+        'scheduledTime: $scheduledTime, isCompleted: $isCompleted, isDeleted: $isDeleted)';
 
   @override
   bool operator ==(Object other) {
@@ -296,7 +314,9 @@ class ScheduleModel extends HiveObject {
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.isSynced == isSynced &&
-        other.notificationId == notificationId;
+        other.notificationId == notificationId &&
+        other.isDeleted == isDeleted &&        // 🆕 ADDED
+        other.deletedAt == deletedAt;          // 🆕 ADDED
   }
 
   @override
@@ -314,5 +334,7 @@ class ScheduleModel extends HiveObject {
         createdAt.hashCode ^
         updatedAt.hashCode ^
         isSynced.hashCode ^
-        notificationId.hashCode;
+        notificationId.hashCode ^
+        isDeleted.hashCode ^      // 🆕 ADDED
+        deletedAt.hashCode;       // 🆕 ADDED
 }

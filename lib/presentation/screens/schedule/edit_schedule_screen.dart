@@ -43,7 +43,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     _selectedDateTime = widget.schedule.dateTime;
     _selectedCategory = widget.schedule.category;
     _reminderEnabled = widget.schedule.hasReminder;
-    _reminderMinutes = widget.schedule.reminderMinutes ?? 15;
+    _reminderMinutes = widget.schedule.reminderMinutes;
   }
 
   @override

@@ -25,13 +25,15 @@ class JournalEntityAdapter extends TypeAdapter<JournalEntity> {
       createdAt: fields[5] as DateTime,
       updatedAt: fields[6] as DateTime,
       isSynced: fields[7] as bool,
+      isDeleted: fields[8] as bool,
+      deletedAt: fields[9] as DateTime?,
     );
   }
 
   @override
   void write(BinaryWriter writer, JournalEntity obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +49,11 @@ class JournalEntityAdapter extends TypeAdapter<JournalEntity> {
       ..writeByte(6)
       ..write(obj.updatedAt)
       ..writeByte(7)
-      ..write(obj.isSynced);
+      ..write(obj.isSynced)
+      ..writeByte(8)
+      ..write(obj.isDeleted)
+      ..writeByte(9)
+      ..write(obj.deletedAt);
   }
 
   @override

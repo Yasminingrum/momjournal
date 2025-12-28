@@ -13,16 +13,22 @@ class PhotoProvider extends ChangeNotifier {
 
   List<PhotoEntity> _photos = [];
   List<PhotoEntity> _milestonePhotos = [];
+  List<PhotoEntity> _favoritePhotos = [];  // 🆕 ADDED
   DateTime _selectedDate = DateTime.now();
   bool _showMilestonesOnly = false;
+  bool _showFavoritesOnly = false;  // 🆕 ADDED
+  String? _selectedCategory;        // 🆕 ADDED
   bool _isLoading = false;
   String? _error;
 
   // Getters
   List<PhotoEntity> get photos => _photos;
   List<PhotoEntity> get milestonePhotos => _milestonePhotos;
+  List<PhotoEntity> get favoritePhotos => _favoritePhotos;  // 🆕 ADDED
   DateTime get selectedDate => _selectedDate;
   bool get showMilestonesOnly => _showMilestonesOnly;
+  bool get showFavoritesOnly => _showFavoritesOnly;  // 🆕 ADDED
+  String? get selectedCategory => _selectedCategory;  // 🆕 ADDED
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get errorMessage => _error; // Alias untuk compatibility
@@ -38,6 +44,7 @@ class PhotoProvider extends ChangeNotifier {
       _setLoading(true);
       _photos = await _repository.getAllPhotos();
       _milestonePhotos = await _repository.getMilestonePhotos();
+      _favoritePhotos = await _repository.getFavoritePhotos();  // 🆕 ADDED
       _clearError();
     } catch (e) {
       _setError('Failed to load photos: $e');
@@ -89,6 +96,42 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
+  /// 🆕 Load photos by category
+  Future<void> loadPhotosByCategory(String? category) async {
+    try {
+      _setLoading(true);
+      _selectedCategory = category;
+      
+      if (category == null || category.isEmpty) {
+        _photos = await _repository.getAllPhotos();
+      } else {
+        _photos = await _repository.getPhotosByCategory(category);
+      }
+      
+      _clearError();
+    } catch (e) {
+      _setError('Failed to load photos by category: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🆕 Get all unique categories from photos
+  Future<List<String>> getCategories() async {
+    try {
+      final allPhotos = await _repository.getAllPhotos();
+      final categories = allPhotos
+          .where((p) => p.category != null && p.category!.isNotEmpty)
+          .map((p) => p.category!)
+          .toSet()
+          .toList();
+      categories.sort();
+      return categories;
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Toggle milestone filter
   Future<void> toggleMilestoneFilter() async {
     _showMilestonesOnly = !_showMilestonesOnly;
@@ -109,17 +152,41 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
+  /// 🆕 Toggle favorite filter
+  Future<void> toggleFavoriteFilter() async {
+    _showFavoritesOnly = !_showFavoritesOnly;
+    notifyListeners();
+
+    if (_showFavoritesOnly) {
+      try {
+        _setLoading(true);
+        _photos = await _repository.getFavoritePhotos();
+        _clearError();
+      } catch (e) {
+        _setError('Failed to load favorite photos: $e');
+      } finally {
+        _setLoading(false);
+      }
+    } else {
+      await loadPhotos();
+    }
+  }
+
   /// Upload photo - simplified version
   Future<bool> uploadPhoto({
     required String imagePath,
     String? caption,
+    String? category,     // 🆕 ADDED
     bool isMilestone = false,
+    bool isFavorite = false,  // 🆕 ADDED
     String? userId,
   }) async => createPhoto(
       localPath: imagePath,
       dateTaken: DateTime.now(),
       caption: caption,
+      category: category,        // 🆕 ADDED
       isMilestone: isMilestone,
+      isFavorite: isFavorite,    // 🆕 ADDED
       userId: userId,
     );
 
@@ -138,7 +205,9 @@ class PhotoProvider extends ChangeNotifier {
     required String localPath,
     required DateTime dateTaken,
     String? caption,
+    String? category,
     bool isMilestone = false,
+    bool isFavorite = false,
     String? userId,
   }) async {
     try {
@@ -149,21 +218,31 @@ class PhotoProvider extends ChangeNotifier {
         userId: userId ?? 'default_user',
         localPath: localPath,
         caption: caption,
+        category: category,
         dateTaken: dateTaken,
         isMilestone: isMilestone,
+        isFavorite: isFavorite,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
+      // Save to local first (fast)
       await _repository.createPhoto(photo);
-      await loadPhotos();
+      
+      // ⚡ Update UI immediately without waiting for full reload
+      _photos.insert(0, photo);
+      _setLoading(false);
       _clearError();
+      notifyListeners(); // Notify UI immediately
+      
+      // 🔄 Reload in background (async, don't await)
+      loadPhotos(); // This will sync with any changes
+      
       return true;
     } catch (e) {
       _setError('Failed to create photo: $e');
-      return false;
-    } finally {
       _setLoading(false);
+      return false;
     }
   }
 
@@ -177,6 +256,90 @@ class PhotoProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _setError('Failed to update photo: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🆕 Update photo caption
+  Future<bool> updatePhotoCaption(String photoId, String caption) async {
+    try {
+      _setLoading(true);
+      
+      final photo = _photos.firstWhere(
+        (p) => p.id == photoId,
+        orElse: () => throw Exception('Photo not found'),
+      );
+      
+      final updatedPhoto = photo.copyWith(
+        caption: caption,
+        updatedAt: DateTime.now(),
+        isSynced: false,
+      );
+      
+      await _repository.updatePhoto(updatedPhoto);
+      await loadPhotos();
+      _clearError();
+      return true;
+    } catch (e) {
+      _setError('Failed to update caption: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🆕 Update photo category
+  Future<bool> updatePhotoCategory(String photoId, String? category) async {
+    try {
+      _setLoading(true);
+      
+      final photo = _photos.firstWhere(
+        (p) => p.id == photoId,
+        orElse: () => throw Exception('Photo not found'),
+      );
+      
+      final updatedPhoto = photo.copyWith(
+        category: category,
+        updatedAt: DateTime.now(),
+        isSynced: false,
+      );
+      
+      await _repository.updatePhoto(updatedPhoto);
+      await loadPhotos();
+      _clearError();
+      return true;
+    } catch (e) {
+      _setError('Failed to update category: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// 🆕 Toggle photo favorite status
+  Future<bool> togglePhotoFavorite(String photoId) async {
+    try {
+      _setLoading(true);
+      
+      final photo = _photos.firstWhere(
+        (p) => p.id == photoId,
+        orElse: () => throw Exception('Photo not found'),
+      );
+      
+      final updatedPhoto = photo.copyWith(
+        isFavorite: !photo.isFavorite,
+        updatedAt: DateTime.now(),
+        isSynced: false,
+      );
+      
+      await _repository.updatePhoto(updatedPhoto);
+      await loadPhotos();
+      _clearError();
+      return true;
+    } catch (e) {
+      _setError('Failed to toggle favorite: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -213,6 +376,12 @@ class PhotoProvider extends ChangeNotifier {
   void setSelectedDate(DateTime date) {
     _selectedDate = date;
     loadPhotosForDate(date);
+  }
+
+  /// 🆕 Clear category filter
+  void clearCategoryFilter() {
+    _selectedCategory = null;
+    loadPhotos();
   }
 
   // Helper methods

@@ -278,7 +278,7 @@ class _AddJournalScreenState extends State<AddJournalScreen> {
         SnackBar(
           content: Text(_isEditMode 
               ? 'Jurnal berhasil diupdate' 
-              : 'Jurnal berhasil disimpan'),
+              : 'Jurnal berhasil disimpan',),
           backgroundColor: Colors.green,
         ),
       );

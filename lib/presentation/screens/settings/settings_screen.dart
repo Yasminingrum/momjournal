@@ -147,8 +147,7 @@ class SettingsScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
           title: const Text('Pilih Tema'),
           content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
+            builder: (BuildContext context, StateSetter setState) => Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   RadioListTile<AppThemeType>(
@@ -188,8 +187,7 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                 ],
-              );
-            },
+              ),
           ),
           actions: [
             TextButton(
@@ -245,7 +243,7 @@ class SettingsScreen extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // App Name
-                Center(
+                const Center(
                   child: Text(
                     'MomJournal',
                     style: TextStyle(
@@ -254,24 +252,24 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Center(
+                const Center(
                   child: Text(
                     'Versi 1.0.0',
                     style: TextStyle(color: Colors.grey),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 // Description
-                Text(
+                const Text(
                   'Aplikasi pendamping Anda untuk mengelola jadwal, mencatat momen, '
                   'dan menyimpan kenangan berharga perjalanan parenting Anda.',
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
 
                 // Contact
-                Text(
+                const Text(
                   '© 2025 MomJournal. Hak cipta dilindungi.',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                   textAlign: TextAlign.center,

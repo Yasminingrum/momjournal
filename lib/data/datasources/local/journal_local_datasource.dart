@@ -698,4 +698,8 @@ class JournalLocalDataSource {
       );
     }
   }
+
+  /// Get all journals INCLUDING deleted ones (for sync purposes)
+  List<JournalModel> getAllJournalsIncludingDeleted() => _journalBox.values.toList();
+
 }

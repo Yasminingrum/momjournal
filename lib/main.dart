@@ -188,8 +188,7 @@ class MomJournalApp extends StatelessWidget {
         ),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
-          return MaterialApp(
+        builder: (context, themeProvider, child) => MaterialApp(
             key: ValueKey(themeProvider.themeType), // Key untuk proper rebuild
             title: 'MomJournal',
             debugShowCheckedModeBanner: false,
@@ -197,7 +196,7 @@ class MomJournalApp extends StatelessWidget {
             // ==================== LOCALIZATION FIX ====================
             // Add localization delegates to fix MaterialLocalizations error
             // IMPORTANT: Remove 'const' because delegates are not compile-time constants
-            localizationsDelegates: [
+            localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
@@ -228,8 +227,7 @@ class MomJournalApp extends StatelessWidget {
 
               return child ?? const SizedBox.shrink();
             },
-          );
-        },
+          ),
       ),
     );
 }

@@ -66,6 +66,20 @@ class PhotoRepository {
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
 
+  /// 🆕 Get favorite photos only
+  Future<List<PhotoEntity>> getFavoritePhotos() async => _box.values
+        .map((model) => model.toEntity())
+        .where((photo) => photo.isFavorite)
+        .toList()
+      ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
+
+  /// 🆕 Get photos by category
+  Future<List<PhotoEntity>> getPhotosByCategory(String category) async => _box.values
+        .map((model) => model.toEntity())
+        .where((photo) => photo.category == category)
+        .toList()
+      ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
+
   /// Get a specific photo by ID
   Future<PhotoEntity?> getPhotoById(String id) async {
     final model = _box.get(id);

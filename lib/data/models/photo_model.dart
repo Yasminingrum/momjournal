@@ -19,10 +19,12 @@ class PhotoModel extends HiveObject {
     required this.createdAt, 
     required this.updatedAt, 
     this.caption,
+    this.category,           // 🆕 ADDED
     this.imageUrl,
     this.thumbnailUrl,
     this.localFilePath,
     this.isMilestone = false,
+    this.isFavorite = false, // 🆕 ADDED
     this.tags,
     this.fileSizeBytes,
     this.imageWidth,
@@ -31,6 +33,8 @@ class PhotoModel extends HiveObject {
     this.uploadStatus = 'pending',
     this.uploadProgress,
     this.uploadError,
+    this.isDeleted = false,
+    this.deletedAt,
   });
 
   /// Factory constructor dari JSON (Firestore)
@@ -59,11 +63,13 @@ class PhotoModel extends HiveObject {
       id: json['id'] as String? ?? '',
       userId: json['userId'] as String? ?? '',
       caption: json['caption'] as String?,
+      category: json['category'] as String?,            // 🆕 ADDED
       date: parseDateTime(json['date']) ?? DateTime.now(),
       imageUrl: json['imageUrl'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String?,
       localFilePath: json['localFilePath'] as String?,
       isMilestone: json['isMilestone'] as bool? ?? false,
+      isFavorite: json['isFavorite'] as bool? ?? false, // 🆕 ADDED
       tags: json['tags'] != null
           ? List<String>.from(json['tags'] as List)
           : null,
@@ -76,6 +82,8 @@ class PhotoModel extends HiveObject {
       uploadStatus: json['uploadStatus'] as String? ?? 'completed',
       uploadProgress: json['uploadProgress'] as int?,
       uploadError: json['uploadError'] as String?,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      deletedAt: parseDateTime(json['deletedAt']),
     );
   }
 
@@ -84,11 +92,13 @@ class PhotoModel extends HiveObject {
       id: entity.id,
       userId: entity.userId,
       caption: entity.caption,
+      category: entity.category,            // 🆕 ADDED
       date: entity.dateTaken,
       imageUrl: entity.cloudUrl,
       thumbnailUrl: null,
       localFilePath: entity.localPath,
       isMilestone: entity.isMilestone,
+      isFavorite: entity.isFavorite,        // 🆕 ADDED
       tags: null,
       fileSizeBytes: null,
       imageWidth: null,
@@ -99,6 +109,8 @@ class PhotoModel extends HiveObject {
       uploadStatus: entity.isUploaded ? 'completed' : 'pending',
       uploadProgress: null,
       uploadError: null,
+      isDeleted: entity.isDeleted,
+      deletedAt: entity.deletedAt,
     );
 
   /// ID unik untuk photo
@@ -173,16 +185,34 @@ class PhotoModel extends HiveObject {
   @HiveField(17)
   final String? uploadError;
 
+  /// Flag soft delete - apakah data sudah dihapus
+  @HiveField(18)
+  final bool isDeleted;
+
+  /// Timestamp kapan data dihapus
+  @HiveField(19)
+  final DateTime? deletedAt;
+
+  /// 🆕 Kategori/Album foto (contoh: "Ulang Tahun Pertama", "Liburan", "Milestone")
+  @HiveField(20)
+  final String? category;
+
+  /// 🆕 Status favorite - apakah foto ini difavoritkan
+  @HiveField(21)
+  final bool isFavorite;
+
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
       'id': id,
       'userId': userId,
       'caption': caption,
+      'category': category,              // 🆕 ADDED
       'date': date.toIso8601String(),
       'imageUrl': imageUrl,
       'thumbnailUrl': thumbnailUrl,
       'localFilePath': localFilePath,
       'isMilestone': isMilestone,
+      'isFavorite': isFavorite,          // 🆕 ADDED
       'tags': tags,
       'fileSizeBytes': fileSizeBytes,
       'imageWidth': imageWidth,
@@ -193,6 +223,8 @@ class PhotoModel extends HiveObject {
       'uploadStatus': uploadStatus,
       'uploadProgress': uploadProgress,
       'uploadError': uploadError,
+      'isDeleted': isDeleted,
+      'deletedAt': deletedAt?.toIso8601String(),
     };
 
   /// Convert ke PhotoEntity untuk domain layer
@@ -200,14 +232,18 @@ class PhotoModel extends HiveObject {
       id: id,
       userId: userId,
       caption: caption,
+      category: category,            // 🆕 ADDED
       dateTaken: date,
       localPath: localFilePath,
       cloudUrl: imageUrl,
       isMilestone: isMilestone,
+      isFavorite: isFavorite,        // 🆕 ADDED
       isUploaded: uploadStatus == 'completed',
       createdAt: createdAt,
       updatedAt: updatedAt,
       isSynced: isSynced,
+      isDeleted: isDeleted,
+      deletedAt: deletedAt,
     );
 
   /// Create copy with updated fields
@@ -215,11 +251,13 @@ class PhotoModel extends HiveObject {
     String? id,
     String? userId,
     String? caption,
+    String? category,        // 🆕 ADDED
     DateTime? date,
     String? imageUrl,
     String? thumbnailUrl,
     String? localFilePath,
     bool? isMilestone,
+    bool? isFavorite,        // 🆕 ADDED
     List<String>? tags,
     int? fileSizeBytes,
     int? imageWidth,
@@ -230,15 +268,19 @@ class PhotoModel extends HiveObject {
     String? uploadStatus,
     int? uploadProgress,
     String? uploadError,
+    bool? isDeleted,
+    DateTime? deletedAt,
   }) => PhotoModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       caption: caption ?? this.caption,
+      category: category ?? this.category,              // 🆕 ADDED
       date: date ?? this.date,
       imageUrl: imageUrl ?? this.imageUrl,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       localFilePath: localFilePath ?? this.localFilePath,
       isMilestone: isMilestone ?? this.isMilestone,
+      isFavorite: isFavorite ?? this.isFavorite,        // 🆕 ADDED
       tags: tags ?? this.tags,
       fileSizeBytes: fileSizeBytes ?? this.fileSizeBytes,
       imageWidth: imageWidth ?? this.imageWidth,
@@ -249,6 +291,8 @@ class PhotoModel extends HiveObject {
       uploadStatus: uploadStatus ?? this.uploadStatus,
       uploadProgress: uploadProgress ?? this.uploadProgress,
       uploadError: uploadError ?? this.uploadError,
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
 
   /// Getter untuk mengecek apakah foto sudah diupload ke cloud
@@ -278,7 +322,7 @@ class PhotoModel extends HiveObject {
 
   @override
   String toString() =>
-      'PhotoModel(id: $id, caption: $caption, date: $date, uploadStatus: $uploadStatus)';
+      'PhotoModel(id: $id, caption: $caption, category: $category, isFavorite: $isFavorite, date: $date, uploadStatus: $uploadStatus, isDeleted: $isDeleted)';
 
   @override
   bool operator ==(Object other) {
@@ -290,11 +334,13 @@ class PhotoModel extends HiveObject {
         other.id == id &&
         other.userId == userId &&
         other.caption == caption &&
+        other.category == category &&            // 🆕 ADDED
         other.date == date &&
         other.imageUrl == imageUrl &&
         other.thumbnailUrl == thumbnailUrl &&
         other.localFilePath == localFilePath &&
         other.isMilestone == isMilestone &&
+        other.isFavorite == isFavorite &&        // 🆕 ADDED
         other.fileSizeBytes == fileSizeBytes &&
         other.imageWidth == imageWidth &&
         other.imageHeight == imageHeight &&
@@ -303,7 +349,9 @@ class PhotoModel extends HiveObject {
         other.isSynced == isSynced &&
         other.uploadStatus == uploadStatus &&
         other.uploadProgress == uploadProgress &&
-        other.uploadError == uploadError;
+        other.uploadError == uploadError &&
+        other.isDeleted == isDeleted &&
+        other.deletedAt == deletedAt;
   }
 
   @override
@@ -311,11 +359,13 @@ class PhotoModel extends HiveObject {
       id.hashCode ^
       userId.hashCode ^
       caption.hashCode ^
+      category.hashCode ^          // 🆕 ADDED
       date.hashCode ^
       imageUrl.hashCode ^
       thumbnailUrl.hashCode ^
       localFilePath.hashCode ^
       isMilestone.hashCode ^
+      isFavorite.hashCode ^        // 🆕 ADDED
       fileSizeBytes.hashCode ^
       imageWidth.hashCode ^
       imageHeight.hashCode ^
@@ -324,5 +374,7 @@ class PhotoModel extends HiveObject {
       isSynced.hashCode ^
       uploadStatus.hashCode ^
       uploadProgress.hashCode ^
-      uploadError.hashCode;
+      uploadError.hashCode ^
+      isDeleted.hashCode ^
+      deletedAt.hashCode;
 }

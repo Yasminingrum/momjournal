@@ -116,7 +116,7 @@ class ScheduleProvider extends ChangeNotifier {
         dateTime: dateTime,
         notes: notes,
         hasReminder: hasReminder,
-        reminderMinutes: reminderMinutes,
+        reminderMinutes: reminderMinutes ?? 0,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );

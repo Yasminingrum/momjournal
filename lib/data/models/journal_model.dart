@@ -104,10 +104,31 @@ class JournalModel extends HiveObject {
     this.isSynced = false,
     this.tags,
     this.isFavorite = false,
+    this.isDeleted = false,  // 🆕 ADDED
+    this.deletedAt,          // 🆕 ADDED
   });
 
   /// Factory constructor dari JSON (Firestore)
-  factory JournalModel.fromJson(Map<String, dynamic> json) => JournalModel(
+  factory JournalModel.fromJson(Map<String, dynamic> json) {
+    // Helper function untuk safely parse DateTime
+    DateTime? parseDateTime(dynamic value) {
+      if (value == null) {
+        return null;
+      }
+      if (value is DateTime) {
+        return value;
+      }
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    return JournalModel(
       id: json['id'] as String,
       userId: json['userId'] as String,
       date: json['date'] is DateTime
@@ -118,18 +139,18 @@ class JournalModel extends HiveObject {
         orElse: () => Mood.neutral,
       ),
       content: json['content'] as String,
-      createdAt: json['createdAt'] is DateTime
-          ? json['createdAt'] as DateTime
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] is DateTime
-          ? json['updatedAt'] as DateTime
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: parseDateTime(json['createdAt']) ?? DateTime.now(),
+      updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       tags: json['tags'] != null
           ? List<String>.from(json['tags'] as List)
           : null,
       isFavorite: json['isFavorite'] as bool? ?? false,
+      isDeleted: json['isDeleted'] as bool? ?? false,  // 🆕 ADDED
+      deletedAt: parseDateTime(json['deletedAt']),    // 🆕 ADDED
     );
+  }
+
   /// ID unik untuk journal entry
   @HiveField(0)
   final String id;
@@ -170,6 +191,14 @@ class JournalModel extends HiveObject {
   @HiveField(9)
   final bool isFavorite;
 
+  /// 🆕 Flag soft delete - apakah data sudah dihapus
+  @HiveField(10)
+  final bool isDeleted;
+
+  /// 🆕 Timestamp kapan data dihapus
+  @HiveField(11)
+  final DateTime? deletedAt;
+
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
       'id': id,
@@ -182,6 +211,8 @@ class JournalModel extends HiveObject {
       'isSynced': isSynced,
       'tags': tags,
       'isFavorite': isFavorite,
+      'isDeleted': isDeleted,  // 🆕 ADDED
+      'deletedAt': deletedAt?.toIso8601String(),  // 🆕 ADDED
     };
 
   /// Create copy with updated fields
@@ -196,6 +227,8 @@ class JournalModel extends HiveObject {
     bool? isSynced,
     List<String>? tags,
     bool? isFavorite,
+    bool? isDeleted,      // 🆕 ADDED
+    DateTime? deletedAt,  // 🆕 ADDED
   }) => JournalModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -207,6 +240,8 @@ class JournalModel extends HiveObject {
       isSynced: isSynced ?? this.isSynced,
       tags: tags ?? this.tags,
       isFavorite: isFavorite ?? this.isFavorite,
+      isDeleted: isDeleted ?? this.isDeleted,  // 🆕 ADDED
+      deletedAt: deletedAt ?? this.deletedAt,  // 🆕 ADDED
     );
 
   /// Getter untuk preview content (first 100 chars)
@@ -280,7 +315,7 @@ class JournalModel extends HiveObject {
 
   @override
   String toString() => 'JournalModel(id: $id, date: $date, mood: $mood, '
-        'contentLength: ${content.length}, isSynced: $isSynced)';
+        'contentLength: ${content.length}, isSynced: $isSynced, isDeleted: $isDeleted)';
 
   @override
   bool operator ==(Object other) {
@@ -297,7 +332,9 @@ class JournalModel extends HiveObject {
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.isSynced == isSynced &&
-        other.isFavorite == isFavorite;
+        other.isFavorite == isFavorite &&
+        other.isDeleted == isDeleted &&        // 🆕 ADDED
+        other.deletedAt == deletedAt;          // 🆕 ADDED
   }
 
   @override
@@ -309,5 +346,7 @@ class JournalModel extends HiveObject {
         createdAt.hashCode ^
         updatedAt.hashCode ^
         isSynced.hashCode ^
-        isFavorite.hashCode;
+        isFavorite.hashCode ^
+        isDeleted.hashCode ^      // 🆕 ADDED
+        deletedAt.hashCode;       // 🆕 ADDED
 }
