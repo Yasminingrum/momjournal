@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 // Core
 import 'core/themes/app_theme.dart';
 import 'core/themes/lazydays_theme.dart';
+import 'data/datasources/local/category_local_datasource.dart';
 // Data Layer - Local Datasources
 import 'data/datasources/local/hive_database.dart';
 import 'data/datasources/local/journal_local_datasource.dart';
@@ -14,15 +16,18 @@ import 'data/datasources/local/photo_local_datasource.dart';
 import 'data/datasources/local/schedule_local_datasource.dart';
 // Data Layer - Remote Datasources
 import 'data/datasources/remote/auth_remote_datasource.dart';
+import 'data/datasources/remote/category_remote_datasource.dart';
 import 'data/datasources/remote/firebase_service.dart';
 import 'data/datasources/remote/journal_remote_datasource.dart';
 import 'data/datasources/remote/photo_remote_datasource.dart';
 import 'data/datasources/remote/schedule_remote_datasource.dart';
 // Data Layer - Repositories
 import 'data/repositories/auth_repository.dart';
+import 'data/repositories/category_repository.dart';
 import 'data/repositories/sync_repository.dart';
 // Presentation Layer - Providers
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/category_provider.dart';
 import 'presentation/providers/journal_provider.dart';
 import 'presentation/providers/notification_provider.dart';
 import 'presentation/providers/photo_provider.dart';
@@ -186,12 +191,35 @@ class MomJournalApp extends StatelessWidget {
         ChangeNotifierProvider<PhotoProvider>(
           create: (_) => PhotoProvider()..loadPhotos(),
         ),
+
+        // Category Provider
+        ChangeNotifierProvider<CategoryProvider>(
+          create: (context) {
+            final categoryLocalDataSource = CategoryLocalDataSource(
+              hiveDatabase.categoryBox,
+            );
+            
+            final categoryRemoteDataSource = CategoryRemoteDataSource(
+              FirebaseFirestore.instance,
+            );
+            
+            final categoryRepository = CategoryRepository(
+              localDataSource: categoryLocalDataSource,
+              remoteDataSource: categoryRemoteDataSource,
+            );
+            
+            return CategoryProvider(
+              repository: categoryRepository,
+            );
+          },
+        ),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) => MaterialApp(
-            key: ValueKey(themeProvider.themeType), // Key untuk proper rebuild
-            title: 'MomJournal',
-            debugShowCheckedModeBanner: false,
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) => MaterialApp(
+              key: ValueKey(themeProvider.themeType), // Key untuk proper rebuild
+              title: 'MomJournal',
+              debugShowCheckedModeBanner: false,
+
 
             // ==================== LOCALIZATION FIX ====================
             // Add localization delegates to fix MaterialLocalizations error

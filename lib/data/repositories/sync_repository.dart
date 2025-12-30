@@ -365,7 +365,7 @@ class SyncRepositoryImpl implements SyncRepository {
       userId: entity.userId,
       title: entity.title,
       description: entity.notes,
-      category: _mapScheduleEntityCategoryToModel(entity.category),
+      category: entity.category,  // ✅ Direct String assignment (no mapping)
       scheduledTime: entity.dateTime,
       reminderEnabled: entity.hasReminder,
       reminderMinutesBefore: entity.reminderMinutes,
@@ -373,8 +373,8 @@ class SyncRepositoryImpl implements SyncRepository {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       isSynced: true,
-      isDeleted: entity.isDeleted,      // 🆕 ADDED
-      deletedAt: entity.deletedAt,      // 🆕 ADDED
+      isDeleted: entity.isDeleted,
+      deletedAt: entity.deletedAt,
     );
 
   /// Convert ScheduleModel (from local) to ScheduleEntity (for remote)
@@ -384,7 +384,7 @@ class SyncRepositoryImpl implements SyncRepository {
         userId: model.userId,
         title: model.title,
         notes: model.description,
-        category: _mapScheduleModelCategoryToEntity(model.category),
+        category: model.category,  // ✅ Direct String assignment (no mapping)
         dateTime: model.scheduledTime,
         hasReminder: model.reminderEnabled,
         reminderMinutes: model.reminderMinutesBefore ?? 15,
@@ -392,43 +392,9 @@ class SyncRepositoryImpl implements SyncRepository {
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
         isSynced: model.isSynced,
-        isDeleted: model.isDeleted,      // 🆕 ADDED
-        deletedAt: model.deletedAt,      // 🆕 ADDED
+        isDeleted: model.isDeleted,
+        deletedAt: model.deletedAt,
       );
-
-  /// Map entity category to model category
-  ScheduleCategory _mapScheduleEntityCategoryToModel(
-      schedule_entity.ScheduleCategory entityCat,) {
-    switch (entityCat) {
-      case schedule_entity.ScheduleCategory.feeding:
-        return ScheduleCategory.feeding;
-      case schedule_entity.ScheduleCategory.sleep:
-        return ScheduleCategory.sleeping;
-      case schedule_entity.ScheduleCategory.health:
-        return ScheduleCategory.health;
-      case schedule_entity.ScheduleCategory.milestone:
-        return ScheduleCategory.milestone;
-      case schedule_entity.ScheduleCategory.other:
-        return ScheduleCategory.other;
-    }
-  }
-
-  /// Map model category to entity category
-  schedule_entity.ScheduleCategory _mapScheduleModelCategoryToEntity(
-      ScheduleCategory modelCat,) {
-    switch (modelCat) {
-      case ScheduleCategory.feeding:
-        return schedule_entity.ScheduleCategory.feeding;
-      case ScheduleCategory.sleeping:
-        return schedule_entity.ScheduleCategory.sleep;
-      case ScheduleCategory.health:
-        return schedule_entity.ScheduleCategory.health;
-      case ScheduleCategory.milestone:
-        return schedule_entity.ScheduleCategory.milestone;
-      case ScheduleCategory.other:
-        return schedule_entity.ScheduleCategory.other;
-    }
-  }
 
   // ==================== JOURNAL CONVERTERS ====================
 

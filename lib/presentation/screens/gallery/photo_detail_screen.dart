@@ -323,7 +323,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     // Combine default with existing
     final allCategories = {...defaultCategories, ...categories}.toList()..sort();
     
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     
     final selected = await showModalBottomSheet<String>(
       context: context,

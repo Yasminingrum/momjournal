@@ -325,7 +325,7 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _performSignOut(BuildContext context, AuthProvider authProvider) async {
     // Show loading indicator with sync message
     if (context.mounted) {
-      showDialog<void>(
+      await showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) => const AlertDialog(
@@ -379,7 +379,7 @@ class SettingsScreen extends StatelessWidget {
       
       // Show loading again
       if (context.mounted) {
-        showDialog<void>(
+        await showDialog<void>(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) => const Center(

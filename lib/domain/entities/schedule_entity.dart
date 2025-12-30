@@ -1,31 +1,4 @@
-/// Schedule Entity
-/// Pure business logic object
-/// 
-/// Location: lib/domain/entities/schedule_entity.dart
 library;
-
-import 'package:hive/hive.dart';
-
-part 'schedule_entity.g.dart';
-
-/// Enum untuk kategori schedule
-@HiveType(typeId: 11)
-enum ScheduleCategory {
-  @HiveField(0)
-  feeding,
-  
-  @HiveField(1)
-  sleep,
-  
-  @HiveField(2)
-  health,
-  
-  @HiveField(3)
-  milestone,
-  
-  @HiveField(4)
-  other,
-}
 
 /// Domain entity untuk Schedule
 /// Represents the business logic for a schedule/agenda
@@ -39,20 +12,22 @@ class ScheduleEntity {
     required this.createdAt,
     required this.updatedAt,
     this.notes,
+    this.endDateTime,
     this.hasReminder = true,
     this.reminderMinutes = 15,
     this.isCompleted = false,
     this.isSynced = false,
-    this.isDeleted = false,  // 🆕 ADDED
-    this.deletedAt,          // 🆕 ADDED
+    this.isDeleted = false,
+    this.deletedAt,
   });
 
   final String id;
   final String userId;
   final String title;
   final String? notes;
-  final ScheduleCategory category;
+  final String category;
   final DateTime dateTime;
+  final DateTime? endDateTime;
   final bool hasReminder;
   final int reminderMinutes;
   final bool isCompleted;
@@ -60,16 +35,39 @@ class ScheduleEntity {
   final DateTime updatedAt;
   final bool isSynced;
   
-  /// 🆕 Soft delete fields
+  /// Soft delete fields
   final bool isDeleted;
   final DateTime? deletedAt;
 
+  /// Check if schedule is multi-day event
+  bool get isMultiDay => endDateTime != null && 
+      !_isSameDay(dateTime, endDateTime!);
+
+  /// Get duration in days (for multi-day events)
+  int get durationInDays {
+    if (endDateTime == null) {
+      return 1;
+    }
+    return endDateTime!.difference(dateTime).inDays + 1;
+  }
+
   /// Check if schedule is in the past
-  bool get isPast => dateTime.isBefore(DateTime.now());
+  bool get isPast {
+    final compareDate = endDateTime ?? dateTime;
+    return compareDate.isBefore(DateTime.now());
+  }
 
   /// Check if schedule is today
   bool get isToday {
     final now = DateTime.now();
+    // For multi-day: check if today is within range
+    if (isMultiDay) {
+      final today = DateTime(now.year, now.month, now.day);
+      final start = DateTime(dateTime.year, dateTime.month, dateTime.day);
+      final end = DateTime(endDateTime!.year, endDateTime!.month, endDateTime!.day);
+      return !today.isBefore(start) && !today.isAfter(end);
+    }
+    // For single day: check exact date
     return dateTime.year == now.year &&
         dateTime.month == now.month &&
         dateTime.day == now.day;
@@ -83,22 +81,26 @@ class ScheduleEntity {
     Duration(minutes: reminderMinutes),
   );
 
+  /// Helper to check if two dates are same day
+  bool _isSameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
+
   /// Copy with method
   ScheduleEntity copyWith({
     String? id,
     String? userId,
     String? title,
     String? notes,
-    ScheduleCategory? category,
+    String? category,
     DateTime? dateTime,
+    DateTime? endDateTime,
     bool? hasReminder,
     int? reminderMinutes,
     bool? isCompleted,
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isSynced,
-    bool? isDeleted,      // 🆕 ADDED
-    DateTime? deletedAt,  // 🆕 ADDED
+    bool? isDeleted,
+    DateTime? deletedAt,
   }) => ScheduleEntity(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -106,14 +108,15 @@ class ScheduleEntity {
       notes: notes ?? this.notes,
       category: category ?? this.category,
       dateTime: dateTime ?? this.dateTime,
+      endDateTime: endDateTime ?? this.endDateTime,
       hasReminder: hasReminder ?? this.hasReminder,
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
-      isDeleted: isDeleted ?? this.isDeleted,  // 🆕 ADDED
-      deletedAt: deletedAt ?? this.deletedAt,  // 🆕 ADDED
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
 
   @override
@@ -129,14 +132,15 @@ class ScheduleEntity {
         other.notes == notes &&
         other.category == category &&
         other.dateTime == dateTime &&
+        other.endDateTime == endDateTime &&
         other.hasReminder == hasReminder &&
         other.reminderMinutes == reminderMinutes &&
         other.isCompleted == isCompleted &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
         other.isSynced == isSynced &&
-        other.isDeleted == isDeleted &&        // 🆕 ADDED
-        other.deletedAt == deletedAt;          // 🆕 ADDED
+        other.isDeleted == isDeleted &&
+        other.deletedAt == deletedAt;
   }
 
   @override
@@ -146,16 +150,17 @@ class ScheduleEntity {
         notes.hashCode ^
         category.hashCode ^
         dateTime.hashCode ^
+        endDateTime.hashCode ^
         hasReminder.hashCode ^
         reminderMinutes.hashCode ^
         isCompleted.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode ^
         isSynced.hashCode ^
-        isDeleted.hashCode ^      // 🆕 ADDED
-        deletedAt.hashCode;       // 🆕 ADDED
+        isDeleted.hashCode ^
+        deletedAt.hashCode;
 
   @override
   String toString() => 'ScheduleEntity(id: $id, title: $title, '
-        'category: $category, dateTime: $dateTime, isDeleted: $isDeleted)';
+        'category: $category, dateTime: $dateTime, endDateTime: $endDateTime, isDeleted: $isDeleted)';
 }

@@ -1,76 +1,9 @@
 // ignore_for_file: lines_longer_than_80_chars
 
 import 'package:hive/hive.dart';
+import '../../domain/entities/schedule_entity.dart';
 
 part 'schedule_model.g.dart';
-
-/// Enum untuk kategori jadwal
-@HiveType(typeId: 10)
-enum ScheduleCategory {
-  @HiveField(0)
-  feeding, // Pemberian Makan/Menyusui
-
-  @HiveField(1)
-  sleeping, // Tidur
-
-  @HiveField(2)
-  health, // Kesehatan (vaksinasi, dokter)
-
-  @HiveField(3)
-  milestone, // Pencapaian perkembangan
-
-  @HiveField(4)
-  other, // Lainnya
-}
-
-/// Extension untuk mendapatkan display name dan emoji dari category
-extension ScheduleCategoryExtension on ScheduleCategory {
-  String get displayName {
-    switch (this) {
-      case ScheduleCategory.feeding:
-        return 'Pemberian Makan';
-      case ScheduleCategory.sleeping:
-        return 'Tidur';
-      case ScheduleCategory.health:
-        return 'Kesehatan';
-      case ScheduleCategory.milestone:
-        return 'Pencapaian';
-      case ScheduleCategory.other:
-        return 'Lainnya';
-    }
-  }
-
-  String get emoji {
-    switch (this) {
-      case ScheduleCategory.feeding:
-        return '🍼';
-      case ScheduleCategory.sleeping:
-        return '😴';
-      case ScheduleCategory.health:
-        return '🥼';
-      case ScheduleCategory.milestone:
-        return '🎉';
-      case ScheduleCategory.other:
-        return '📌';
-    }
-  }
-
-  /// Color code untuk UI (hex string)
-  String get colorHex {
-    switch (this) {
-      case ScheduleCategory.feeding:
-        return '#4A90E2'; // Blue
-      case ScheduleCategory.sleeping:
-        return '#9B59B6'; // Purple
-      case ScheduleCategory.health:
-        return '#E74C3C'; // Red
-      case ScheduleCategory.milestone:
-        return '#2ECC71'; // Green
-      case ScheduleCategory.other:
-        return '#95A5A6'; // Gray
-    }
-  }
-}
 
 /// Data model untuk Schedule/Agenda
 /// 
@@ -88,6 +21,7 @@ class ScheduleModel extends HiveObject {
     required this.createdAt, 
     required this.updatedAt, 
     this.description,
+    this.endTime,  // 🆕 For multi-day events
     this.reminderEnabled = true,
     this.reminderMinutesBefore = 15,
     this.isCompleted = false,
@@ -95,8 +29,8 @@ class ScheduleModel extends HiveObject {
     this.completionNotes,
     this.isSynced = false,
     this.notificationId,
-    this.isDeleted = false,  // 🆕 ADDED
-    this.deletedAt,          // 🆕 ADDED
+    this.isDeleted = false,
+    this.deletedAt,
   });
 
   /// Factory constructor dari JSON (Firestore)
@@ -126,11 +60,9 @@ class ScheduleModel extends HiveObject {
       userId: json['userId'] as String? ?? '',
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
-      category: ScheduleCategory.values.firstWhere(
-        (e) => e.toString() == 'ScheduleCategory.${json['category']}',
-        orElse: () => ScheduleCategory.other,
-      ),
+      category: json['category'] as String? ?? 'Lainnya',  // 🔄 Changed to String
       scheduledTime: parseDateTime(json['scheduledTime']) ?? DateTime.now(),
+      endTime: parseDateTime(json['endTime']),  // 🆕 Added
       reminderEnabled: json['reminderEnabled'] as bool? ?? true,
       reminderMinutesBefore: json['reminderMinutesBefore'] as int?,
       isCompleted: json['isCompleted'] as bool? ?? false,
@@ -140,10 +72,29 @@ class ScheduleModel extends HiveObject {
       updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
       isSynced: json['isSynced'] as bool? ?? false,
       notificationId: json['notificationId'] as int?,
-      isDeleted: json['isDeleted'] as bool? ?? false,  // 🆕 ADDED
-      deletedAt: parseDateTime(json['deletedAt']),    // 🆕 ADDED
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      deletedAt: parseDateTime(json['deletedAt']),
     );
   }
+
+  /// Factory constructor dari Entity
+  factory ScheduleModel.fromEntity(ScheduleEntity entity) => ScheduleModel(
+    id: entity.id,
+    userId: entity.userId,
+    title: entity.title,
+    description: entity.notes,
+    category: entity.category,
+    scheduledTime: entity.dateTime,
+    endTime: entity.endDateTime,  // 🆕 Added
+    reminderEnabled: entity.hasReminder,
+    reminderMinutesBefore: entity.reminderMinutes,
+    isCompleted: entity.isCompleted,
+    createdAt: entity.createdAt,
+    updatedAt: entity.updatedAt,
+    isSynced: entity.isSynced,
+    isDeleted: entity.isDeleted,
+    deletedAt: entity.deletedAt,
+  );
   
   /// ID unik untuk schedule
   @HiveField(0)
@@ -161,11 +112,11 @@ class ScheduleModel extends HiveObject {
   @HiveField(3)
   final String? description;
 
-  /// Kategori schedule
+  /// Kategori schedule (custom string)
   @HiveField(4)
-  final ScheduleCategory category;
+  final String category;  // 🔄 Changed from enum to String
 
-  /// Waktu schedule
+  /// Waktu mulai schedule
   @HiveField(5)
   final DateTime scheduledTime;
 
@@ -206,13 +157,36 @@ class ScheduleModel extends HiveObject {
   @HiveField(14)
   final int? notificationId;
 
-  /// 🆕 Flag soft delete - apakah data sudah dihapus
+  /// Flag soft delete - apakah data sudah dihapus
   @HiveField(15)
   final bool isDeleted;
 
-  /// 🆕 Timestamp kapan data dihapus
+  /// Timestamp kapan data dihapus
   @HiveField(16)
   final DateTime? deletedAt;
+
+  /// 🆕 Waktu akhir schedule (untuk multi-day events)
+  @HiveField(17, defaultValue: null)
+  final DateTime? endTime;
+
+  /// Convert ke Entity
+  ScheduleEntity toEntity() => ScheduleEntity(
+    id: id,
+    userId: userId,
+    title: title,
+    notes: description,
+    category: category,
+    dateTime: scheduledTime,
+    endDateTime: endTime,  // 🆕 Added
+    hasReminder: reminderEnabled,
+    reminderMinutes: reminderMinutesBefore ?? 15,
+    isCompleted: isCompleted,
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    isSynced: isSynced,
+    isDeleted: isDeleted,
+    deletedAt: deletedAt,
+  );
 
   /// Convert ke JSON untuk Firestore
   Map<String, dynamic> toJson() => {
@@ -220,8 +194,9 @@ class ScheduleModel extends HiveObject {
       'userId': userId,
       'title': title,
       'description': description,
-      'category': category.toString().split('.').last,
+      'category': category,
       'scheduledTime': scheduledTime.toIso8601String(),
+      'endTime': endTime?.toIso8601String(),  // 🆕 Added
       'reminderEnabled': reminderEnabled,
       'reminderMinutesBefore': reminderMinutesBefore,
       'isCompleted': isCompleted,
@@ -231,8 +206,8 @@ class ScheduleModel extends HiveObject {
       'updatedAt': updatedAt.toIso8601String(),
       'isSynced': isSynced,
       'notificationId': notificationId,
-      'isDeleted': isDeleted,  // 🆕 ADDED
-      'deletedAt': deletedAt?.toIso8601String(),  // 🆕 ADDED
+      'isDeleted': isDeleted,
+      'deletedAt': deletedAt?.toIso8601String(),
     };
 
   /// Create copy with updated fields
@@ -241,8 +216,9 @@ class ScheduleModel extends HiveObject {
     String? userId,
     String? title,
     String? description,
-    ScheduleCategory? category,
+    String? category,
     DateTime? scheduledTime,
+    DateTime? endTime,
     bool? reminderEnabled,
     int? reminderMinutesBefore,
     bool? isCompleted,
@@ -252,8 +228,8 @@ class ScheduleModel extends HiveObject {
     DateTime? updatedAt,
     bool? isSynced,
     int? notificationId,
-    bool? isDeleted,      // 🆕 ADDED
-    DateTime? deletedAt,  // 🆕 ADDED
+    bool? isDeleted,
+    DateTime? deletedAt,
   }) => ScheduleModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
@@ -261,6 +237,7 @@ class ScheduleModel extends HiveObject {
       description: description ?? this.description,
       category: category ?? this.category,
       scheduledTime: scheduledTime ?? this.scheduledTime,
+      endTime: endTime ?? this.endTime,  // 🆕 Added
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderMinutesBefore:
           reminderMinutesBefore ?? this.reminderMinutesBefore,
@@ -271,12 +248,15 @@ class ScheduleModel extends HiveObject {
       updatedAt: updatedAt ?? this.updatedAt,
       isSynced: isSynced ?? this.isSynced,
       notificationId: notificationId ?? this.notificationId,
-      isDeleted: isDeleted ?? this.isDeleted,  // 🆕 ADDED
-      deletedAt: deletedAt ?? this.deletedAt,  // 🆕 ADDED
+      isDeleted: isDeleted ?? this.isDeleted,
+      deletedAt: deletedAt ?? this.deletedAt,
     );
 
   /// Getter untuk cek apakah schedule sudah lewat
-  bool get isPast => scheduledTime.isBefore(DateTime.now());
+  bool get isPast {
+    final compareDate = endTime ?? scheduledTime;
+    return compareDate.isBefore(DateTime.now());
+  }
 
   /// Getter untuk cek apakah schedule hari ini
   bool get isToday {
@@ -289,9 +269,19 @@ class ScheduleModel extends HiveObject {
   /// Getter untuk cek apakah schedule upcoming (belum lewat & belum complete)
   bool get isUpcoming => !isPast && !isCompleted;
 
+  /// 🆕 Check if this is multi-day event
+  bool get isMultiDay {
+    if (endTime == null) {
+      return false;
+    }
+    return !(scheduledTime.year == endTime!.year &&
+        scheduledTime.month == endTime!.month &&
+        scheduledTime.day == endTime!.day);
+  }
+
   @override
   String toString() => 'ScheduleModel(id: $id, title: $title, category: $category, '
-        'scheduledTime: $scheduledTime, isCompleted: $isCompleted, isDeleted: $isDeleted)';
+        'scheduledTime: $scheduledTime, endTime: $endTime, isCompleted: $isCompleted, isDeleted: $isDeleted)';
 
   @override
   bool operator ==(Object other) {
@@ -306,6 +296,7 @@ class ScheduleModel extends HiveObject {
         other.description == description &&
         other.category == category &&
         other.scheduledTime == scheduledTime &&
+        other.endTime == endTime &&
         other.reminderEnabled == reminderEnabled &&
         other.reminderMinutesBefore == reminderMinutesBefore &&
         other.isCompleted == isCompleted &&
@@ -315,8 +306,8 @@ class ScheduleModel extends HiveObject {
         other.updatedAt == updatedAt &&
         other.isSynced == isSynced &&
         other.notificationId == notificationId &&
-        other.isDeleted == isDeleted &&        // 🆕 ADDED
-        other.deletedAt == deletedAt;          // 🆕 ADDED
+        other.isDeleted == isDeleted &&
+        other.deletedAt == deletedAt;
   }
 
   @override
@@ -326,6 +317,7 @@ class ScheduleModel extends HiveObject {
         description.hashCode ^
         category.hashCode ^
         scheduledTime.hashCode ^
+        endTime.hashCode ^
         reminderEnabled.hashCode ^
         reminderMinutesBefore.hashCode ^
         isCompleted.hashCode ^
@@ -335,6 +327,6 @@ class ScheduleModel extends HiveObject {
         updatedAt.hashCode ^
         isSynced.hashCode ^
         notificationId.hashCode ^
-        isDeleted.hashCode ^      // 🆕 ADDED
-        deletedAt.hashCode;       // 🆕 ADDED
+        isDeleted.hashCode ^
+        deletedAt.hashCode;
 }

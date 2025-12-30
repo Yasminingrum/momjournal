@@ -275,22 +275,36 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
   }
 
   /// Convert ScheduleEntity to Firestore map
-  Map<String, dynamic> _scheduleToFirestore(ScheduleEntity schedule) => {
+  Map<String, dynamic> _scheduleToFirestore(ScheduleEntity schedule) {
+    final data = {
       'id': schedule.id,
+      'userId': schedule.userId,
       'title': schedule.title,
       'notes': schedule.notes,
+      'category': schedule.category,
       'dateTime': Timestamp.fromDate(schedule.dateTime),
-      'category': schedule.category.name,
+      'endDateTime': schedule.endDateTime != null
+          ? Timestamp.fromDate(schedule.endDateTime!)
+          : null,  // ✅ Make sure this is saved!
       'hasReminder': schedule.hasReminder,
       'reminderMinutes': schedule.reminderMinutes,
       'isCompleted': schedule.isCompleted,
-      'createdAt': Timestamp.fromDate(schedule.createdAt),
-      'updatedAt': Timestamp.fromDate(schedule.updatedAt),
-      'isDeleted': schedule.isDeleted,  // 🆕 ADDED
-      'deletedAt': schedule.deletedAt != null 
-          ? Timestamp.fromDate(schedule.deletedAt!) 
-          : null,  // 🆕 ADDED
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'isDeleted': schedule.isDeleted,
+      'deletedAt': schedule.deletedAt != null
+          ? Timestamp.fromDate(schedule.deletedAt!)
+          : null,
     };
+    
+    // ✅ ADD: Debug log
+    debugPrint('📤 Firestore data: ${data.toString()}');
+    if (schedule.endDateTime != null) {
+      debugPrint('   ✅ Multi-day schedule detected');
+    }
+    
+    return data;
+  }
 
   /// Convert Firestore document to ScheduleEntity
   /// 
@@ -345,10 +359,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
         title: title,
         notes: data['notes'] as String?,
         dateTime: dateTime,
-        category: ScheduleCategory.values.firstWhere(
-          (e) => e.name == data['category'],
-          orElse: () => ScheduleCategory.other,
-        ),
+        category: data['category'] as String? ?? 'Lainnya',
         hasReminder: data['hasReminder'] as bool? ?? false,
         reminderMinutes: data['reminderMinutes'] as int? ?? 15,
         isCompleted: data['isCompleted'] as bool? ?? false,

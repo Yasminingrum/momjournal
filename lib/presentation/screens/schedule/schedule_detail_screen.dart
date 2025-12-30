@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/color_constants.dart';
 import '../../../domain/entities/schedule_entity.dart';
 import '../../providers/schedule_provider.dart';
-import '../../widgets/common/custom_button.dart';
-import '../../widgets/dialogs/confirmation_dialog.dart';
 import 'edit_schedule_screen.dart';
 
+/// Schedule Detail Screen
+/// COMPLETE CLEAN VERSION - No ScheduleCategory enum
+/// Location: lib/presentation/screens/schedule/schedule_detail_screen.dart
 class ScheduleDetailScreen extends StatelessWidget {
   const ScheduleDetailScreen({
     required this.schedule,
@@ -26,136 +26,143 @@ class ScheduleDetailScreen extends StatelessWidget {
         actions: [
           // Edit button
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => _handleEdit(context),
-            tooltip: 'Edit Jadwal',
+            icon: const Icon(Icons.edit),
+            onPressed: () => _navigateToEdit(context),
           ),
           // Delete button
           IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: const Icon(Icons.delete),
             onPressed: () => _handleDelete(context),
-            tooltip: 'Hapus Jadwal',
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Category badge
-            _buildCategoryBadge(theme),
+            // Header with category color
+            _buildHeader(theme),
 
             const SizedBox(height: 24),
 
-            // Title
-            Text(
-              schedule.title,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            if (schedule.notes != null && schedule.notes!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                schedule.notes!,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-
-            const SizedBox(height: 32),
-
-            // Date & Time card
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildInfoRow(
-                      icon: Icons.calendar_today,
-                      label: 'Tanggal',
-                      value: _formatDate(schedule.dateTime),
-                      theme: theme,
+            // Details section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    schedule.title,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Category
+                  _buildInfoRow(
+                    icon: _getCategoryIcon(schedule.category),
+                    iconColor: _getCategoryColor(schedule.category),
+                    label: 'Kategori',
+                    value: schedule.category,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Date & Time
+                  _buildDateTimeInfo(theme),
+
+                  const SizedBox(height: 16),
+
+                  // Reminder
+                  _buildInfoRow(
+                    icon: Icons.notifications,
+                    iconColor: schedule.hasReminder ? Colors.orange : Colors.grey,
+                    label: 'Pengingat',
+                    value: schedule.hasReminder
+                        ? '${schedule.reminderMinutes} menit sebelumnya'
+                        : 'Tidak aktif',
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Status
+                  _buildInfoRow(
+                    icon: schedule.isCompleted
+                        ? Icons.check_circle
+                        : _isOverdue(schedule)
+                            ? Icons.warning
+                            : Icons.schedule,
+                    iconColor: schedule.isCompleted
+                        ? Colors.green
+                        : _isOverdue(schedule)
+                            ? Colors.red
+                            : Colors.blue,
+                    label: 'Status',
+                    value: schedule.isCompleted
+                        ? 'Selesai'
+                        : _isOverdue(schedule)
+                            ? 'Terlewat'
+                            : 'Belum selesai',
+                  ),
+
+                  if (schedule.notes != null && schedule.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Divider(),
                     const SizedBox(height: 16),
-                    _buildInfoRow(
-                      icon: Icons.access_time,
-                      label: 'Waktu',
-                      value: _formatTime(schedule.dateTime),
-                      theme: theme,
+                    
+                    // Notes
+                    Text(
+                      'Catatan',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        schedule.notes!,
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
                   ],
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
 
-            // Reminder card
-            if (schedule.hasReminder)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: _buildInfoRow(
-                    icon: Icons.notifications_active,
-                    label: 'Pengingat',
-                    value: _formatReminderTime(schedule.reminderMinutes),
-                    theme: theme,
-                  ),
-                ),
-              ),
+                  // Timestamps
+                  _buildTimestamps(theme),
 
-            const SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
-            // Status card
-            Card(
-              color: schedule.isCompleted ? Colors.green[50] : Colors.orange[50],
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(
-                      schedule.isCompleted ? Icons.check_circle : Icons.pending,
-                      color: schedule.isCompleted ? Colors.green : Colors.orange,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        schedule.isCompleted ? 'Selesai' : 'Belum Selesai',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: schedule.isCompleted
-                              ? Colors.green[700]
-                              : Colors.orange[700],
+                  // Action buttons
+                  if (!schedule.isCompleted) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _handleMarkComplete(context),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Tandai Selesai'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
                         ),
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
 
-            const SizedBox(height: 32),
-
-            // Toggle completion button
-            Consumer<ScheduleProvider>(
-              builder: (context, provider, child) => CustomButton(
-                onPressed: provider.isLoading
-                    ? null
-                    : () => _handleToggleCompletion(context),
-                text: schedule.isCompleted
-                    ? 'Tandai Belum Selesai'
-                    : 'Tandai Selesai',
-                icon:
-                    schedule.isCompleted ? Icons.remove_done : Icons.check,
-                type: schedule.isCompleted
-                    ? ButtonType.outlined
-                    : ButtonType.elevated,
-                isFullWidth: true,
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
           ],
@@ -164,226 +171,267 @@ class ScheduleDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryBadge(ThemeData theme) {
-    final categoryColor = _getCategoryColor();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  Widget _buildHeader(ThemeData theme) => Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: categoryColor.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
+        color: _getCategoryColor(schedule.category).withValues (alpha: 0.1),
+        borderRadius: const BorderRadius.vertical(
+          bottom: Radius.circular(24),
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
         children: [
-          Icon(
-            _getCategoryIcon(),
-            size: 18,
-            color: categoryColor,
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _getCategoryColor(schedule.category),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _getCategoryIcon(schedule.category),
+              size: 40,
+              color: Colors.white,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 12),
           Text(
-            _getCategoryName(),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: categoryColor,
+            schedule.category,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: _getCategoryColor(schedule.category),
               fontWeight: FontWeight.bold,
             ),
           ),
         ],
       ),
     );
-  }
+
+  Widget _buildDateTimeInfo(ThemeData theme) => _buildInfoRow(
+      icon: Icons.access_time,
+      iconColor: Colors.blue,
+      label: 'Waktu',
+      value: _formatDateTime(schedule.dateTime),
+    );
 
   Widget _buildInfoRow({
     required IconData icon,
+    required Color iconColor,
     required String label,
     required String value,
-    required ThemeData theme,
-  }) =>
-      Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Column(
+  }) => Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: TextStyle(
+                  fontSize: 12,
                   color: Colors.grey[600],
                 ),
               ),
+              const SizedBox(height: 2),
               Text(
                 value,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-        ],
-      );
+        ),
+      ],
+    );
 
-  Future<void> _handleEdit(BuildContext context) async {
-    final result = await Navigator.push<bool>(
+  Widget _buildTimestamps(ThemeData theme) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Informasi',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: Colors.grey[600],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Dibuat',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                  Text(
+                    _formatDate(schedule.createdAt),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Diperbarui',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                  Text(
+                    _formatDate(schedule.updatedAt),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
+  void _navigateToEdit(BuildContext context) {
+    Navigator.push<bool?>(
       context,
-      MaterialPageRoute(
+      MaterialPageRoute<bool?>(
         builder: (context) => EditScheduleScreen(schedule: schedule),
       ),
-    );
-
-    // Jika edit berhasil, pop screen ini juga untuk kembali ke list
-    if ((result ?? false) && context.mounted) {
-      Navigator.pop(context);
-    }
+    ).then((updated) {
+      if (updated ?? false) {
+        Navigator.pop(context, true);
+      }
+    });
   }
 
-  Future<void> _handleToggleCompletion(BuildContext context) async {
-    final provider = context.read<ScheduleProvider>();
-    final updated = schedule.copyWith(
-      isCompleted: !schedule.isCompleted,
-      updatedAt: DateTime.now(),
-    );
+  Future<void> _handleMarkComplete(BuildContext context) async {
+    try {
+      final scheduleProvider = context.read<ScheduleProvider>();
+      final success = await scheduleProvider.markAsCompleted(schedule.id);
 
-    final success = await provider.updateSchedule(updated);
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            updated.isCompleted
-                ? 'Jadwal ditandai selesai'
-                : 'Jadwal ditandai belum selesai',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.error ?? 'Terjadi kesalahan'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Jadwal ditandai selesai')),
+        );
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menandai selesai: $e')),
+        );
+      }
     }
   }
 
   Future<void> _handleDelete(BuildContext context) async {
-    final confirmed = await showDeleteConfirmation(
-      context,
-      itemName: 'jadwal ini',
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Jadwal'),
+        content: const Text('Apakah Anda yakin ingin menghapus jadwal ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
     );
 
-    if (confirmed != true || !context.mounted) {
-      return;
-    }
+    if ((confirmed ?? false) && context.mounted) {
+      try {
+        final scheduleProvider = context.read<ScheduleProvider>();
+        final success = await scheduleProvider.deleteSchedule(schedule.id);
 
-    final provider = context.read<ScheduleProvider>();
-    final success = await provider.deleteSchedule(schedule.id);
-
-    if (!context.mounted) {
-      return;
-    }
-
-    if (success) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Jadwal berhasil dihapus'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.error ?? 'Terjadi kesalahan'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+        if (success && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Jadwal berhasil dihapus')),
+          );
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal menghapus jadwal: $e')),
+          );
+        }
+      }
     }
   }
 
-  Color _getCategoryColor() {
-    switch (schedule.category) {
-      case ScheduleCategory.feeding:
-        return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleep:
-        return ColorConstants.categorySleep;
-      case ScheduleCategory.health:
-        return ColorConstants.categoryHealth;
-      case ScheduleCategory.milestone:
-        return ColorConstants.categoryMilestone;
-      case ScheduleCategory.other:
-        return ColorConstants.categoryOther;
+  // Helper methods
+  Color _getCategoryColor(String category) {
+    switch (category) {
+      case 'Pemberian Makan/Menyusui':
+        return Colors.orange;
+      case 'Tidur':
+        return Colors.blue;
+      case 'Kesehatan':
+        return Colors.red;
+      case 'Pencapaian':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
-  IconData _getCategoryIcon() {
-    switch (schedule.category) {
-      case ScheduleCategory.feeding:
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Pemberian Makan/Menyusui':
         return Icons.restaurant;
-      case ScheduleCategory.sleep:
+      case 'Tidur':
         return Icons.bedtime;
-      case ScheduleCategory.health:
+      case 'Kesehatan':
         return Icons.medical_services;
-      case ScheduleCategory.milestone:
+      case 'Pencapaian':
         return Icons.stars;
-      case ScheduleCategory.other:
+      default:
         return Icons.more_horiz;
     }
   }
 
-  String _getCategoryName() {
-    switch (schedule.category) {
-      case ScheduleCategory.feeding:
-        return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleep:
-        return 'Tidur';
-      case ScheduleCategory.health:
-        return 'Kesehatan';
-      case ScheduleCategory.milestone:
-        return 'Pencapaian';
-      case ScheduleCategory.other:
-        return 'Lainnya';
-    }
-  }
-
   String _formatDate(DateTime date) {
-    final months = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime time) =>
-      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  String _formatTime(DateTime time) {
+    final hour = time.hour == 0 ? 12 : time.hour > 12 ? time.hour - 12 : time.hour;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
+  }
 
-  String _formatReminderTime(int minutes) {
-    if (minutes < 60) {
-      return '$minutes menit sebelumnya';
-    } else if (minutes == 60) {
-      return '1 jam sebelumnya';
-    } else {
-      final hours = minutes ~/ 60;
-      return '$hours jam sebelumnya';
+  String _formatDateTime(DateTime dateTime) => '${_formatDate(dateTime)}, ${_formatTime(dateTime)}';
+
+  // Helper to check if schedule is overdue
+  bool _isOverdue(ScheduleEntity schedule) {
+    if (schedule.isCompleted) {
+      return false;
     }
+    return schedule.dateTime.isBefore(DateTime.now());
   }
 }

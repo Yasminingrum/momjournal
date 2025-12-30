@@ -5,6 +5,9 @@ import '/domain/entities/schedule_entity.dart';
 
 /// ViewModel for Schedule management
 /// Manages schedule state and business logic using Provider pattern
+/// 
+/// UPDATED: Uses String for category instead of enum
+/// Location: lib/presentation/providers/schedule_provider.dart
 class ScheduleProvider extends ChangeNotifier {
 
   ScheduleProvider();
@@ -14,7 +17,7 @@ class ScheduleProvider extends ChangeNotifier {
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];
   DateTime _selectedDate = DateTime.now();
-  ScheduleCategory? _selectedCategory;
+  String? _selectedCategory;  // ✅ Changed from ScheduleCategory? to String?
   bool _isLoading = false;
   String? _error;
 
@@ -22,7 +25,7 @@ class ScheduleProvider extends ChangeNotifier {
   List<ScheduleEntity> get schedules => _schedules;
   List<ScheduleEntity> get todaySchedules => _todaySchedules;
   DateTime get selectedDate => _selectedDate;
-  ScheduleCategory? get selectedCategory => _selectedCategory;
+  String? get selectedCategory => _selectedCategory;  // ✅ Returns String? now
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -77,7 +80,8 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Filter by category
-  Future<void> filterByCategory(ScheduleCategory? category) async {
+  /// ✅ NOW ACCEPTS String? instead of ScheduleCategory?
+  Future<void> filterByCategory(String? category) async {
     try {
       _setLoading(true);
       _selectedCategory = category;
@@ -96,10 +100,12 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Create a new schedule
+  /// ✅ PARAMETER CHANGED: category is now String
   Future<bool> createSchedule({
     required String title,
-    required ScheduleCategory category,
+    required String category,  // ✅ Changed from ScheduleCategory to String
     required DateTime dateTime,
+    DateTime? endDateTime,  // 🆕 Multi-day support
     String? notes,
     bool hasReminder = false,
     int? reminderMinutes,
@@ -112,8 +118,9 @@ class ScheduleProvider extends ChangeNotifier {
         id: _uuid.v4(),
         userId: userId ?? 'default_user',
         title: title,
-        category: category,
+        category: category,  // ✅ Direct String usage
         dateTime: dateTime,
+        endDateTime: endDateTime,  // 🆕 Multi-day support
         notes: notes,
         hasReminder: hasReminder,
         reminderMinutes: reminderMinutes ?? 0,
@@ -123,7 +130,7 @@ class ScheduleProvider extends ChangeNotifier {
 
       await _repository.createSchedule(schedule);
       
-      // ✅ FIX: Reload data yang sesuai dengan context
+      // Reload data yang sesuai dengan context
       await _reloadCurrentView();
       
       _clearError();
@@ -142,7 +149,7 @@ class ScheduleProvider extends ChangeNotifier {
       _setLoading(true);
       await _repository.updateSchedule(schedule);
       
-      // ✅ FIX: Reload data yang sesuai dengan context
+      // Reload data yang sesuai dengan context
       await _reloadCurrentView();
       
       _clearError();
@@ -160,7 +167,7 @@ class ScheduleProvider extends ChangeNotifier {
     try {
       await _repository.markAsCompleted(id);
       
-      // ✅ FIX: Reload data yang sesuai dengan context
+      // Reload data yang sesuai dengan context
       await _reloadCurrentView();
       
       _clearError();
@@ -177,7 +184,7 @@ class ScheduleProvider extends ChangeNotifier {
       _setLoading(true);
       await _repository.deleteSchedule(id);
       
-      // ✅ FIX: Reload data yang sesuai dengan context
+      // Reload data yang sesuai dengan context
       await _reloadCurrentView();
       
       _clearError();
@@ -187,6 +194,107 @@ class ScheduleProvider extends ChangeNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// Toggle schedule completion status
+  Future<bool> toggleScheduleCompletion(String scheduleId) async {
+    try {
+      _setLoading(true);
+      
+      // Find schedule in list
+      final index = _schedules.indexWhere((s) => s.id == scheduleId);
+      if (index == -1) {
+        _setError('Schedule not found');
+        return false;
+      }
+
+      final schedule = _schedules[index];
+      
+      // Toggle completion
+      final updatedSchedule = schedule.copyWith(
+        isCompleted: !schedule.isCompleted,
+        updatedAt: DateTime.now(),
+      );
+
+      // Update in repository
+      await _repository.updateSchedule(updatedSchedule);
+      
+      // Update in local list
+      _schedules[index] = updatedSchedule;
+      
+      _setLoading(false);
+      notifyListeners();
+      
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Mark schedule as complete
+  Future<bool> markScheduleComplete(String scheduleId, {String? notes}) async {
+    try {
+      _setLoading(true);
+      
+      final index = _schedules.indexWhere((s) => s.id == scheduleId);
+      if (index == -1) {
+        _setError('Schedule not found');
+        return false;
+      }
+
+      final schedule = _schedules[index];
+      
+      final updatedSchedule = schedule.copyWith(
+        isCompleted: true,
+        updatedAt: DateTime.now(),
+      );
+
+      await _repository.updateSchedule(updatedSchedule);
+      _schedules[index] = updatedSchedule;
+      
+      _setLoading(false);
+      notifyListeners();
+      
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
+    }
+  }
+
+  /// Mark schedule as incomplete
+  Future<bool> markScheduleIncomplete(String scheduleId) async {
+    try {
+      _setLoading(true);
+      
+      final index = _schedules.indexWhere((s) => s.id == scheduleId);
+      if (index == -1) {
+        _setError('Schedule not found');
+        return false;
+      }
+
+      final schedule = _schedules[index];
+      
+      final updatedSchedule = schedule.copyWith(
+        isCompleted: false,
+        updatedAt: DateTime.now(),
+      );
+
+      await _repository.updateSchedule(updatedSchedule);
+      _schedules[index] = updatedSchedule;
+      
+      _setLoading(false);
+      notifyListeners();
+      
+      return true;
+    } catch (e) {
+      _setError(e.toString());
+      _setLoading(false);
+      return false;
     }
   }
 
@@ -206,7 +314,6 @@ class ScheduleProvider extends ChangeNotifier {
     loadSchedulesForDate(date);
   }
 
-  // ✅ NEW: Helper method to reload current view properly
   /// Reload schedules for current view context
   /// This ensures we only reload the data that's currently being displayed
   Future<void> _reloadCurrentView() async {

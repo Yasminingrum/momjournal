@@ -236,7 +236,7 @@ class PhotoProvider extends ChangeNotifier {
       notifyListeners(); // Notify UI immediately
       
       // 🔄 Reload in background (async, don't await)
-      loadPhotos(); // This will sync with any changes
+      await loadPhotos(); // This will sync with any changes
       
       return true;
     } catch (e) {

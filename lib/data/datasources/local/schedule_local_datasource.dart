@@ -125,7 +125,7 @@ class ScheduleLocalDataSource {
 
   /// Get schedules by category
   List<ScheduleModel> getSchedulesByCategory(
-    ScheduleCategory category,
+    String category,
     String userId,
   ) {
     try {
@@ -389,7 +389,7 @@ class ScheduleLocalDataSource {
   int getScheduleCount(String userId) => getSchedulesByUserId(userId).length;
 
   /// Get count by category
-  int getCountByCategory(ScheduleCategory category, String userId) => getSchedulesByCategory(category, userId).length;
+  int getCountByCategory(String category, String userId) => getSchedulesByCategory(category, userId).length;
 
   /// Check if schedule exists
   bool scheduleExists(String id) => _scheduleBox.containsKey(id);

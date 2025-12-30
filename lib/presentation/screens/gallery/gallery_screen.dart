@@ -220,16 +220,28 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
 
   String _getEmptyStateTitle() {
-    if (_showFavoritesOnly) return 'Belum ada foto favorit';
-    if (_selectedCategory != null) return 'Belum ada foto di kategori ini';
-    if (_showMilestonesOnly) return 'Belum ada milestone';
+    if (_showFavoritesOnly) {
+      return 'Belum ada foto favorit';
+    }
+    if (_selectedCategory != null) {
+      return 'Belum ada foto di kategori ini';
+    }
+    if (_showMilestonesOnly) {
+      return 'Belum ada milestone';
+    }
     return 'Belum ada foto';
   }
 
   String _getEmptyStateMessage() {
-    if (_showFavoritesOnly) return 'Favoritkan foto untuk melihatnya di sini';
-    if (_selectedCategory != null) return 'Tambahkan foto ke kategori $_selectedCategory';
-    if (_showMilestonesOnly) return 'Tandai foto sebagai milestone';
+    if (_showFavoritesOnly) {
+      return 'Favoritkan foto untuk melihatnya di sini';
+    }
+    if (_selectedCategory != null) {
+      return 'Tambahkan foto ke kategori $_selectedCategory';
+    }
+    if (_showMilestonesOnly) {
+      return 'Tandai foto sebagai milestone';
+    }
     return 'Mulai dokumentasikan momen berharga Anda';
   }
 
@@ -249,7 +261,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
     final provider = context.read<PhotoProvider>();
     final categories = await provider.getCategories();
     
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     
     if (categories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -461,7 +475,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       final photoProvider = context.read<PhotoProvider>();
 
       // Show loading indicator with message
-      showDialog<void>(
+      await showDialog<void>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext dialogContext) => WillPopScope(

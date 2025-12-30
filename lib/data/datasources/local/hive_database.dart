@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../models/category_model.dart';
 import '../../models/child_profile_model.dart';
 import '../../models/journal_model.dart';
 import '../../models/photo_model.dart';
@@ -16,12 +17,14 @@ import '../../models/user_model.dart';
 class HiveDatabase {
   factory HiveDatabase() => _instance;
   HiveDatabase._internal();
+  
   // Box names
   static const String userBoxName = 'users';
   static const String scheduleBoxName = 'schedules';
   static const String journalBoxName = 'journals';
   static const String photoBoxName = 'photos';
   static const String childProfileBoxName = 'child_profiles';
+  static const String categoryBoxName = 'categories';
   static const String settingsBoxName = 'settings';
 
   // Singleton pattern
@@ -77,11 +80,11 @@ class HiveDatabase {
     if (!Hive.isAdapterRegistered(4)) {
       Hive.registerAdapter(ChildProfileModelAdapter());
     }
+    if (!Hive.isAdapterRegistered(5)) {
+      Hive.registerAdapter(CategoryModelAdapter());
+    }
 
     // Register enum adapters
-    if (!Hive.isAdapterRegistered(10)) {
-      Hive.registerAdapter(ScheduleCategoryAdapter());
-    }
     if (!Hive.isAdapterRegistered(11)) {
       Hive.registerAdapter(MoodAdapter());
     }
@@ -106,6 +109,7 @@ class HiveDatabase {
         _openBox<JournalModel>(journalBoxName),
         _openBox<PhotoModel>(photoBoxName),
         _openBox<ChildProfileModel>(childProfileBoxName),
+        _openBox<CategoryModel>(categoryBoxName),
         _openBox<dynamic>(settingsBoxName), // Settings bisa mixed types
       ]);
 
@@ -155,6 +159,9 @@ class HiveDatabase {
   Box<ChildProfileModel> get childProfileBox =>
       getBox<ChildProfileModel>(childProfileBoxName);
 
+  /// Get category box
+  Box<CategoryModel> get categoryBox => getBox<CategoryModel>(categoryBoxName);
+
   /// Get settings box
   Box<dynamic> get settingsBox => getBox<dynamic>(settingsBoxName);
 
@@ -202,6 +209,7 @@ class HiveDatabase {
         journalBox.clear(),
         photoBox.clear(),
         childProfileBox.clear(),
+        categoryBox.clear(),
         settingsBox.clear(),
       ]);
       debugPrint('✓ All data cleared from Hive');
@@ -260,6 +268,7 @@ class HiveDatabase {
         journalBox.compact(),
         photoBox.compact(),
         childProfileBox.compact(),
+        categoryBox.compact(),
         settingsBox.compact(),
       ]);
       debugPrint('✓ All boxes compacted');
@@ -280,6 +289,7 @@ class HiveDatabase {
     debugPrint('Journal box: ${journalBox.length} entries');
     debugPrint('Photo box: ${photoBox.length} entries');
     debugPrint('Child Profile box: ${childProfileBox.length} entries');
+    debugPrint('Category box: ${categoryBox.length} entries');
     debugPrint('Settings box: ${settingsBox.length} entries');
     debugPrint('Total size: ${await getReadableTotalSize()}');
     debugPrint('==========================\n');

@@ -1,23 +1,24 @@
 library;
 
 import 'package:flutter/material.dart';
-
 import '/core/constants/color_constants.dart';
-import '../../../domain/entities/schedule_entity.dart';
 
 /// Show category bottom sheet
 /// 
-/// Returns selected category atau null jika dibatalkan
-Future<ScheduleCategory?> showCategoryBottomSheet(
+/// Returns selected category name atau null jika dibatalkan
+Future<String?> showCategoryBottomSheet(
   BuildContext context, {
-  ScheduleCategory? selectedCategory,
-}) => showModalBottomSheet<ScheduleCategory>(
+  required List<Map<String, String>> categories, String? selectedCategory,
+  VoidCallback? onManageCategories,
+}) => showModalBottomSheet<String>(
     context: context,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (context) => CategoryBottomSheet(
       selectedCategory: selectedCategory,
+      categories: categories,
+      onManageCategories: onManageCategories,
     ),
   );
 
@@ -25,10 +26,14 @@ Future<ScheduleCategory?> showCategoryBottomSheet(
 class CategoryBottomSheet extends StatelessWidget {
 
   const CategoryBottomSheet({
-    super.key,
+    required this.categories, super.key,
     this.selectedCategory,
+    this.onManageCategories,
   });
-  final ScheduleCategory? selectedCategory;
+  
+  final String? selectedCategory;
+  final List<Map<String, String>> categories;
+  final VoidCallback? onManageCategories;
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +67,20 @@ class CategoryBottomSheet extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                ),
+                if (onManageCategories != null)
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      onManageCategories!();
+                    },
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Kelola Kategori',
+                  )
+                else
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
               ],
             ),
           ),
@@ -76,15 +91,17 @@ class CategoryBottomSheet extends StatelessWidget {
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: ScheduleCategory.values.length,
+              itemCount: categories.length,
               itemBuilder: (context, index) {
-                final category = ScheduleCategory.values[index];
-                final isSelected = category == selectedCategory;
+                final category = categories[index];
+                final isSelected = category['name'] == selectedCategory;
                 
                 return CategoryTile(
-                  category: category,
+                  categoryName: category['name']!,
+                  categoryIcon: category['icon']!,
+                  categoryColor: category['colorHex']!,
                   isSelected: isSelected,
-                  onTap: () => Navigator.pop(context, category),
+                  onTap: () => Navigator.pop(context, category['name']),
                 );
               },
             ),
@@ -99,28 +116,35 @@ class CategoryBottomSheet extends StatelessWidget {
 class CategoryTile extends StatelessWidget {
 
   const CategoryTile({
-    required this.category, required this.isSelected, required this.onTap, super.key,
+    required this.categoryName,
+    required this.categoryIcon,
+    required this.categoryColor,
+    required this.isSelected,
+    required this.onTap,
+    super.key,
   });
-  final ScheduleCategory category;
+  
+  final String categoryName;
+  final String categoryIcon;
+  final String categoryColor;
   final bool isSelected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final categoryColor = _getCategoryColor(category);
-    final categoryIcon = _getCategoryIcon(category);
-    final categoryName = _getCategoryName(category);
+    final color = _parseColor(categoryColor);
+    final icon = _getIconData(categoryIcon);
 
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? categoryColor.withValues(alpha: 0.1) : null,
+          color: isSelected ? color.withValues(alpha: 0.1) : null,
           border: Border(
             left: BorderSide(
-              color: isSelected ? categoryColor : Colors.transparent,
+              color: isSelected ? color : Colors.transparent,
               width: 4,
             ),
           ),
@@ -132,12 +156,12 @@ class CategoryTile extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                categoryIcon,
-                color: categoryColor,
+                icon,
+                color: color,
                 size: 24,
               ),
             ),
@@ -158,7 +182,7 @@ class CategoryTile extends StatelessWidget {
             if (isSelected)
               Icon(
                 Icons.check_circle,
-                color: categoryColor,
+                color: color,
                 size: 24,
               ),
           ],
@@ -167,48 +191,43 @@ class CategoryTile extends StatelessWidget {
     );
   }
 
-  Color _getCategoryColor(ScheduleCategory category) {
-    switch (category) {
-      case ScheduleCategory.feeding:
-        return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleep:
-        return ColorConstants.categorySleep;
-      case ScheduleCategory.health:
-        return ColorConstants.categoryHealth;
-      case ScheduleCategory.milestone:
-        return ColorConstants.categoryMilestone;
-      case ScheduleCategory.other:
-        return ColorConstants.categoryOther;
+  Color _parseColor(String colorHex) {
+    try {
+      return Color(int.parse(colorHex.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return ColorConstants.categoryOther;
     }
   }
 
-  IconData _getCategoryIcon(ScheduleCategory category) {
-    switch (category) {
-      case ScheduleCategory.feeding:
+  IconData _getIconData(String iconName) {
+    // Map icon names to IconData
+    switch (iconName) {
+      case 'restaurant':
         return Icons.restaurant;
-      case ScheduleCategory.sleep:
+      case 'bedtime':
         return Icons.bedtime;
-      case ScheduleCategory.health:
+      case 'medical_services':
         return Icons.medical_services;
-      case ScheduleCategory.milestone:
+      case 'stars':
         return Icons.stars;
-      case ScheduleCategory.other:
+      case 'celebration':
+        return Icons.celebration;
+      case 'school':
+        return Icons.school;
+      case 'sports_soccer':
+        return Icons.sports_soccer;
+      case 'music_note':
+        return Icons.music_note;
+      case 'brush':
+        return Icons.brush;
+      case 'favorite':
+        return Icons.favorite;
+      case 'pets':
+        return Icons.pets;
+      case 'cake':
+        return Icons.cake;
+      default:
         return Icons.more_horiz;
-    }
-  }
-
-  String _getCategoryName(ScheduleCategory category) {
-    switch (category) {
-      case ScheduleCategory.feeding:
-        return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleep:
-        return 'Tidur';
-      case ScheduleCategory.health:
-        return 'Kesehatan';
-      case ScheduleCategory.milestone:
-        return 'Pencapaian';
-      case ScheduleCategory.other:
-        return 'Lainnya';
     }
   }
 }

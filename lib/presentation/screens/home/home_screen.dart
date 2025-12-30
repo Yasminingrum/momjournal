@@ -14,7 +14,6 @@ import '/presentation/screens/journal/journal_screen.dart';
 import '/presentation/screens/schedule/schedule_screen.dart';
 import '/presentation/screens/settings/settings_screen.dart';
 import '../../../domain/entities/journal_entity.dart';
-import '../../../domain/entities/schedule_entity.dart';
 
 /// Home Screen with bottom navigation and dashboard
 class HomeScreen extends StatefulWidget {
@@ -403,18 +402,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
     );
 
-  Color _getCategoryColor(ScheduleCategory category) {
+    Color _getCategoryColor(String category) {
     switch (category) {
-      case ScheduleCategory.feeding:
-        return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleep:
-        return ColorConstants.categorySleep;
-      case ScheduleCategory.health:
-        return ColorConstants.categoryHealth;
-      case ScheduleCategory.milestone:
-        return ColorConstants.categoryMilestone;
-      case ScheduleCategory.other:
-        return ColorConstants.categoryOther;
+      case 'Pemberian Makan/Menyusui':
+        return Colors.orange;
+      case 'Tidur':
+        return Colors.blue;
+      case 'Kesehatan':
+        return Colors.red;
+      case 'Pencapaian':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 }

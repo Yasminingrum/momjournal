@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/color_constants.dart';
-import '../../../domain/entities/schedule_entity.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/category_provider.dart';
 import '../../providers/schedule_provider.dart';
-import '../../widgets/bottom_sheets/category_bottom_sheet.dart';
-import '../../widgets/bottom_sheets/time_picker_bottom_sheet.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/custom_text_field.dart';
+import 'manage_categories_screen.dart'; 
 
+/// Add Schedule Screen with Multi-day Support
+/// COMPLETE CLEAN VERSION - No ScheduleCategory enum
+/// Location: lib/presentation/screens/schedule/add_schedule_screen.dart
 class AddScheduleScreen extends StatefulWidget {
   const AddScheduleScreen({
     super.key,
@@ -27,15 +29,37 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final _descriptionController = TextEditingController();
 
   late DateTime _selectedDateTime;
-  ScheduleCategory _selectedCategory = ScheduleCategory.other;
+  String _selectedCategory = 'Lainnya';  // âœ… String instead of enum
   bool _reminderEnabled = false;
   int _reminderMinutes = 15;
   bool _isLoading = false;
+  
+  // ðŸ†• Multi-day support
+  bool _isMultiDay = false;
+  DateTime? _endDateTime;
+
+  bool _isRecurring = false;
+  String _recurrencePattern = 'daily';  // daily, weekly
+  int _recurrenceCount = 7;
 
   @override
   void initState() {
     super.initState();
     _selectedDateTime = widget.selectedDate ?? DateTime.now();
+    _initializeCategories();
+  }
+
+  Future<void> _initializeCategories() async {
+    final categoryProvider = context.read<CategoryProvider>();
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.user?.uid;
+    
+    if (userId != null) {
+      // Initialize defaults if DB is empty
+      await categoryProvider.initializeDefaultCategories(userId);
+      // Then load all categories
+      await categoryProvider.loadCategories(userId);
+    }
   }
 
   @override
@@ -55,8 +79,13 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
+          child: ListView(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 16,
+              bottom: 48,  // âœ… Extra bottom padding
+            ),
           children: [
             // Title field
             CustomTextField(
@@ -96,6 +125,20 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
             // Date time selector
             _buildDateTimeSelector(theme),
 
+            const SizedBox(height: 16),
+
+            // ðŸ†• Multi-day checkbox
+            _buildMultiDayCheckbox(),
+            const SizedBox(height: 16),
+
+            _buildRecurringSchedule(theme),
+
+            // ðŸ†• Conditional end date picker
+            if (_isMultiDay) ...[
+              const SizedBox(height: 16),
+              _buildEndDatePicker(theme),
+            ],
+
             const SizedBox(height: 24),
 
             // Reminder section
@@ -105,10 +148,9 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
             // Save button
             CustomButton(
+              text: 'Simpan Jadwal',
               onPressed: _isLoading ? null : _handleSave,
-              text: _isLoading ? 'Menyimpan...' : 'Simpan Jadwal',
-              type: ButtonType.elevated,
-              isFullWidth: true,
+              isLoading: _isLoading,
             ),
           ],
         ),
@@ -116,243 +158,457 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
   }
 
-  Widget _buildCategorySelector(ThemeData theme) => Card(
-      child: InkWell(
-        onTap: _selectCategory,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: _getCategoryColor().withValues (alpha:0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _getCategoryIcon(),
-                  color: _getCategoryColor(),
-                ),
+  Widget _buildCategorySelector(ThemeData theme) => InkWell(
+      onTap: _showCategoryPicker,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: _getCategoryColor(_selectedCategory).withValues (alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Kategori',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[600],
-                      ),
+              child: Icon(
+                _getCategoryIcon(_selectedCategory),
+                color: _getCategoryColor(_selectedCategory),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Kategori',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _selectedCategory,  // âœ… Direct String usage
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+
+  Widget _buildDateTimeSelector(ThemeData theme) => InkWell(
+      onTap: _showDateTimePicker,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.calendar_today, color: Colors.blue),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tanggal & Waktu',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDateTime(_selectedDateTime),
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+
+  // ðŸ†• Multi-day checkbox
+  Widget _buildMultiDayCheckbox() => CheckboxListTile(
+      value: _isMultiDay,
+      onChanged: (value) {
+        setState(() {
+          _isMultiDay = value ?? false;
+          if (!_isMultiDay) {
+            _endDateTime = null;
+          } else {
+            // Set default end date to next day
+            _endDateTime = _selectedDateTime.add(const Duration(days: 1));
+          }
+        });
+      },
+      title: const Text('Kegiatan Multi-Hari'),
+      subtitle: _isMultiDay
+          ? Text(
+              'Jadwal akan berlangsung beberapa hari',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            )
+          : null,
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
+    );
+
+  // ðŸ†• End date picker
+  Widget _buildEndDatePicker(ThemeData theme) => InkWell(
+      onTap: _showEndDatePicker,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.blue.shade50,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.event, color: Colors.blue),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tanggal Selesai',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.blue.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _endDateTime != null
+                        ? _formatDate(_endDateTime!)
+                        : 'Pilih tanggal selesai',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: _endDateTime != null ? Colors.black : Colors.grey,
+                    ),
+                  ),
+                  if (_endDateTime != null) ...[
                     const SizedBox(height: 4),
                     Text(
-                      _getCategoryName(),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      'Durasi: ${_calculateDuration()} hari',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
-                ),
+                ],
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16),
-            ],
-          ),
+            ),
+            const Icon(Icons.chevron_right, color: Colors.blue),
+          ],
         ),
       ),
     );
 
-  Widget _buildDateTimeSelector(ThemeData theme) => Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+  Widget _buildReminderSection(ThemeData theme) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SwitchListTile(
+          value: _reminderEnabled,
+          onChanged: (value) => setState(() => _reminderEnabled = value),
+          title: const Text('Aktifkan Pengingat'),
+          subtitle: _reminderEnabled
+              ? Text('$_reminderMinutes menit sebelumnya')
+              : const Text('Tidak ada pengingat'),
+          contentPadding: EdgeInsets.zero,
+        ),
+        if (_reminderEnabled) ...[
+          const SizedBox(height: 16),
+          Text(
+            'Waktu Pengingat',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: [5, 15, 30, 60].map((minutes) {
+              final isSelected = _reminderMinutes == minutes;
+              return ChoiceChip(
+                label: Text('$minutes menit'),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    setState(() => _reminderMinutes = minutes);
+                  }
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+
+  Future<void> _showCategoryPicker() async {
+    // âœ… Load categories dari CategoryProvider
+    final categoryProvider = context.read<CategoryProvider>();
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.user?.uid;
+    
+    List<String> categories = [];
+    
+    if (userId != null) {
+      // Load categories from provider
+      await categoryProvider.loadCategories(userId);
+      categories = categoryProvider.categories
+          .map((cat) => cat.name)
+          .toList();
+    }
+    
+    // Fallback to default categories if empty
+    if (categories.isEmpty && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memuat kategori. Silakan coba lagi.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      Navigator.pop(context);
+      return;
+    }
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Tanggal & Waktu',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Title
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Pilih Kategori',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  TextButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(context);
+                      
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute<bool>(
+                          builder: (context) => const ManageCategoriesScreen(),
+                        ),
+                      );
+                      
+                      if (mounted && userId != null) {
+                        await categoryProvider.loadCategories(userId);
+                      }
+                    },
+                    icon: const Icon(Icons.settings, size: 16),
+                    label: const Text('Kelola'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Category list
+            Expanded(
+              child: ListView(
+                controller: scrollController,
+                children: categories.map((category) {
+              final isSelected = category == _selectedCategory;
+              return ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: _getCategoryColor(category).withValues (alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _getCategoryIcon(category),
+                    color: _getCategoryColor(category),
+                  ),
+                ),
+                title: Text(category),
+                trailing: isSelected
+                    ? const Icon(Icons.check, color: Colors.blue)
+                    : null,
+                selected: isSelected,
+                onTap: () {
+                  setState(() => _selectedCategory = category);
+                  Navigator.pop(context);
+                },
+              );
+                }).toList(),
               ),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: _selectDate,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today, size: 20),
-                          const SizedBox(width: 8),
-                          Text(_formatDate(_selectedDateTime)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: InkWell(
-                    onTap: _selectTime,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.access_time, size: 20),
-                          const SizedBox(width: 8),
-                          Text(_formatTime(_selectedDateTime)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
-    );
-
-  Widget _buildReminderSection(ThemeData theme) => Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.notifications_active),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pengingat',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (_reminderEnabled)
-                        Text(
-                          _formatReminderTime(),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: _reminderEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _reminderEnabled = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            if (_reminderEnabled) ...[
-              const SizedBox(height: 12),
-              InkWell(
-                onTap: _selectReminderTime,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[300]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_formatReminderTime()),
-                      const Icon(Icons.arrow_forward_ios, size: 16),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
-
-  Future<void> _selectCategory() async {
-    final category = await showCategoryBottomSheet(
-      context,
-      selectedCategory: _selectedCategory,
-    );
-
-    if (category != null) {
-      setState(() {
-        _selectedCategory = category;
-      });
-    }
   }
 
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
+  Future<void> _showDateTimePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDateTime,
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
     );
 
-    if (picked != null) {
-      setState(() {
-        _selectedDateTime = DateTime(
-          picked.year,
-          picked.month,
-          picked.day,
-          _selectedDateTime.hour,
-          _selectedDateTime.minute,
-        );
-      });
+    if (pickedDate != null && mounted) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+      );
+
+      if (pickedTime != null && mounted) {
+        setState(() {
+          _selectedDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          
+          // Update end date if multi-day and end date is before new start date
+          if (_isMultiDay && _endDateTime != null) {
+            if (_endDateTime!.isBefore(_selectedDateTime)) {
+              _endDateTime = _selectedDateTime.add(const Duration(days: 1));
+            }
+          }
+        });
+      }
     }
   }
 
-  Future<void> _selectTime() async {
-    final picked = await showTimePicker(
+  // ðŸ†• End date picker
+  // 🆕 End date picker with time support
+  Future<void> _showEndDatePicker() async {
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
+      initialDate: _endDateTime ?? _selectedDateTime.add(const Duration(days: 1)),
+      firstDate: _selectedDateTime,
+      lastDate: DateTime(2030),
+      helpText: 'Pilih Tanggal Selesai',
     );
 
-    if (picked != null) {
-      setState(() {
-        _selectedDateTime = DateTime(
-          _selectedDateTime.year,
-          _selectedDateTime.month,
-          _selectedDateTime.day,
-          picked.hour,
-          picked.minute,
+    if (pickedDate != null && mounted) {
+      // Ask if user wants to set specific time
+      final bool? setTime = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Atur Waktu Selesai'),
+          content: const Text('Apakah ingin mengatur waktu selesai tertentu?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Akhir Hari (23:59)'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Pilih Waktu'),
+            ),
+          ],
+        ),
+      );
+
+      if ((setTime ?? false) && mounted) {
+        final TimeOfDay? pickedTime = await showTimePicker(
+          context: context,
+          initialTime: const TimeOfDay(hour: 23, minute: 59),
         );
-      });
+
+        if (pickedTime != null && mounted) {
+          setState(() {
+            _endDateTime = DateTime(
+              pickedDate.year,
+              pickedDate.month,
+              pickedDate.day,
+              pickedTime.hour,
+              pickedTime.minute,
+            );
+          });
+        }
+      } else if (setTime == false && mounted) {
+        setState(() {
+          _endDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            23,
+            59,
+          );
+        });
+      }
     }
   }
 
-  Future<void> _selectReminderTime() async {
-    final minutes = await showTimePickerBottomSheet(
-      context,
-      selectedMinutes: _reminderMinutes,
-    );
-
-    if (minutes != null) {
-      setState(() {
-        _reminderMinutes = minutes;
-      });
+  // ðŸ†• Calculate duration
+  int _calculateDuration() {
+    if (_endDateTime == null) {
+      return 0;
     }
+    return _endDateTime!.difference(_selectedDateTime).inDays + 1;
   }
 
   Future<void> _handleSave() async {
@@ -360,105 +616,364 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    //Auto-calculate endDateTime untuk recurring
+    if (_isRecurring) {
+      // Recurring schedule, auto-calculate end date
+      if (_recurrencePattern == 'daily') {
+        _endDateTime = _selectedDateTime.add(
+          Duration(days: _recurrenceCount - 1),
+        );
+      } else {  // weekly
+        _endDateTime = _selectedDateTime.add(
+          Duration(days: (_recurrenceCount - 1) * 7),
+        );
+      }
+      
+      // Set time to end of day
+      _endDateTime = DateTime(
+        _endDateTime!.year,
+        _endDateTime!.month,
+        _endDateTime!.day,
+        23,
+        59,
+        59,
+      );
+      
+      debugPrint('✅ Auto-calculated end date for recurring: $_endDateTime');
+    }
 
-    final scheduleProvider = context.read<ScheduleProvider>();
-    final success = await scheduleProvider.createSchedule(
-      title: _titleController.text.trim(),
-      category: _selectedCategory,
-      dateTime: _selectedDateTime,
-      notes: _descriptionController.text.trim().isEmpty 
-          ? null 
-          : _descriptionController.text.trim(),
-      hasReminder: _reminderEnabled,
-      reminderMinutes: _reminderEnabled ? _reminderMinutes : null,
-    );
-
-    if (!mounted) {
+    // Validate end date for multi-day (but not for recurring, already auto-calculated)
+    if (_isMultiDay && _endDateTime == null && !_isRecurring) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih tanggal selesai untuk kegiatan multi-hari')),
+      );
       return;
     }
 
-    if (success) {
-      Navigator.pop(context);
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
+    setState(() => _isLoading = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(scheduleProvider.error ?? 'Terjadi kesalahan'),
-          backgroundColor: Colors.red,
+    try {
+      final scheduleProvider = context.read<ScheduleProvider>();
+      final authProvider = context.read<AuthProvider>();
+      final userId = authProvider.user?.uid;
+
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      // âœ… RECURRING SCHEDULE LOGIC
+      if (_isRecurring) {
+        // Create multiple schedules
+        int successCount = 0;
+        
+        for (int i = 0; i < _recurrenceCount; i++) {
+          DateTime scheduleDate;
+          
+          if (_recurrencePattern == 'daily') {
+            // Add i days
+            scheduleDate = _selectedDateTime.add(Duration(days: i));
+          } else {
+            // Add i weeks
+            scheduleDate = _selectedDateTime.add(Duration(days: i * 7));
+          }
+
+          final success = await scheduleProvider.createSchedule(
+            title: _titleController.text.trim(),
+            category: _selectedCategory,
+            dateTime: scheduleDate,
+            endDateTime: _isMultiDay 
+                ? _endDateTime?.add(Duration(
+                    days: _recurrencePattern == 'daily' ? i : i * 7,
+                  ),)
+                : null,
+            notes: _descriptionController.text.trim().isEmpty
+                ? null
+                : _descriptionController.text.trim(),
+            hasReminder: _reminderEnabled,
+            reminderMinutes: _reminderEnabled ? _reminderMinutes : null,
+            userId: userId,
+          );
+
+          if (success) {
+            successCount++;
+          }
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '$successCount jadwal berulang berhasil ditambahkan',
+              ),
+            ),
+          );
+          Navigator.of(context).pop(true);
+        }
+      } else {
+        // Single schedule (existing logic)
+        final success = await scheduleProvider.createSchedule(
+          title: _titleController.text.trim(),
+          category: _selectedCategory,
+          dateTime: _selectedDateTime,
+          endDateTime: _isMultiDay ? _endDateTime : null,
+          notes: _descriptionController.text.trim().isEmpty
+              ? null
+              : _descriptionController.text.trim(),
+          hasReminder: _reminderEnabled,
+          reminderMinutes: _reminderEnabled ? _reminderMinutes : null,
+          userId: userId,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Jadwal berhasil ditambahkan')),
+          );
+          Navigator.of(context).pop(true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menambahkan jadwal: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+
+  Widget _buildRecurringSchedule(ThemeData theme) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Recurring checkbox
+        CheckboxListTile(
+          value: _isRecurring,
+          onChanged: (value) {
+            setState(() => _isRecurring = value ?? false);
+          },
+          title: const Text('Jadwal Berulang'),
+          subtitle: _isRecurring
+              ? Text(
+                  _recurrencePattern == 'daily'
+                      ? 'Setiap hari, $_recurrenceCount kali'
+                      : 'Setiap minggu, $_recurrenceCount kali',
+                  style: theme.textTheme.bodySmall,
+                )
+              : const Text('Buat jadwal berulang otomatis'),
         ),
-      );
+
+        // Recurring options
+        if (_isRecurring) ...[
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Pattern selector
+                Text(
+                  'Pola Pengulangan',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Harian'),
+                        selected: _recurrencePattern == 'daily',
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _recurrencePattern = 'daily');
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Mingguan'),
+                        selected: _recurrencePattern == 'weekly',
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _recurrencePattern = 'weekly');
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Count selector
+                Text(
+                  'Jumlah Pengulangan',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: _recurrenceCount > 1
+                          ? () => setState(() => _recurrenceCount--)
+                          : null,
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '$_recurrenceCount kali',
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.titleMedium,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      onPressed: _recurrenceCount < 30
+                          ? () => setState(() => _recurrenceCount++)
+                          : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _recurrencePattern == 'daily'
+                      ? 'Jadwal akan dibuat untuk $_recurrenceCount hari berturut-turut'
+                      : 'Jadwal akan dibuat untuk $_recurrenceCount minggu berturut-turut',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+
+  // Helper methods
+  Color _getCategoryColor(String category) {
+    // âœ… Try to get from CategoryProvider first
+    try {
+      final categoryProvider = context.read<CategoryProvider>();
+      final categoryEntity = categoryProvider.getCategoryByName(category);
+      
+      if (categoryEntity != null) {
+        return _parseColor(categoryEntity.colorHex);
+      }
+    } catch (e) {
+      // Provider not available, use fallback
+    }
+    
+    // Fallback untuk backward compatibility
+    switch (category) {
+      case 'Pemberian Makan/Menyusui':
+        return Colors.orange;
+      case 'Tidur':
+        return Colors.blue;
+      case 'Kesehatan':
+        return Colors.red;
+      case 'Pencapaian':
+        return Colors.purple;
+      default:
+        return Colors.grey;
     }
   }
 
-  Color _getCategoryColor() {
-    switch (_selectedCategory) {
-      case ScheduleCategory.feeding:
-        return ColorConstants.categoryFeeding;
-      case ScheduleCategory.sleep:
-        return ColorConstants.categorySleep;
-      case ScheduleCategory.health:
-        return ColorConstants.categoryHealth;
-      case ScheduleCategory.milestone:
-        return ColorConstants.categoryMilestone;
-      case ScheduleCategory.other:
-        return ColorConstants.categoryOther;
+  // âœ… TAMBAHKAN helper method
+  Color _parseColor(String hexColor) {
+    try {
+      // Remove # if present
+      final hex = hexColor.replaceAll('#', '');
+      // Add FF for alpha if not present
+      final colorHex = hex.length == 6 ? 'FF$hex' : hex;
+      return Color(int.parse('0x$colorHex'));
+    } catch (e) {
+      return Colors.grey;
     }
   }
 
-  IconData _getCategoryIcon() {
-    switch (_selectedCategory) {
-      case ScheduleCategory.feeding:
+  IconData _getCategoryIcon(String category) {
+  // âœ… Try to get from CategoryProvider first
+  try {
+    final categoryProvider = context.read<CategoryProvider>();
+    final categoryEntity = categoryProvider.getCategoryByName(category);
+    
+    if (categoryEntity != null) {
+      return _parseIconData(categoryEntity.icon);
+    }
+  } catch (e) {
+    // Provider not available, use fallback
+  }
+  
+    // Fallback untuk backward compatibility
+    switch (category) {
+      case 'Pemberian Makan/Menyusui':
         return Icons.restaurant;
-      case ScheduleCategory.sleep:
+      case 'Tidur':
         return Icons.bedtime;
-      case ScheduleCategory.health:
+      case 'Kesehatan':
         return Icons.medical_services;
-      case ScheduleCategory.milestone:
+      case 'Pencapaian':
         return Icons.stars;
-      case ScheduleCategory.other:
+      default:
         return Icons.more_horiz;
     }
   }
 
-  String _getCategoryName() {
-    switch (_selectedCategory) {
-      case ScheduleCategory.feeding:
-        return 'Pemberian Makan/Menyusui';
-      case ScheduleCategory.sleep:
-        return 'Tidur';
-      case ScheduleCategory.health:
-        return 'Kesehatan';
-      case ScheduleCategory.milestone:
-        return 'Pencapaian';
-      case ScheduleCategory.other:
-        return 'Lainnya';
-    }
+  // âœ… TAMBAHKAN helper method
+  IconData _parseIconData(String iconName) {
+    // Map icon names to IconData
+    const iconMap = {
+      'restaurant': Icons.restaurant,
+      'bedtime': Icons.bedtime,
+      'medical_services': Icons.medical_services,
+      'stars': Icons.stars,
+      'favorite': Icons.favorite,
+      'sports_soccer': Icons.sports_soccer,
+      'school': Icons.school,
+      'work': Icons.work,
+      'home': Icons.home,
+      'shopping_cart': Icons.shopping_cart,
+      'fitness_center': Icons.fitness_center,
+      'local_hospital': Icons.local_hospital,
+      'child_care': Icons.child_care,
+      'toys': Icons.toys,
+      'cake': Icons.cake,
+      'celebration': Icons.celebration,
+      'more_horiz': Icons.more_horiz,
+    };
+    
+    return iconMap[iconName] ?? Icons.more_horiz;
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-    ];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 
+                    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
-  String _formatTime(DateTime time) => '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-
-  String _formatReminderTime() {
-    if (_reminderMinutes < 60) {
-      return '$_reminderMinutes menit sebelumnya';
-    } else if (_reminderMinutes == 60) {
-      return '1 jam sebelumnya';
-    } else {
-      final hours = _reminderMinutes ~/ 60;
-      return '$hours jam sebelumnya';
-    }
+  String _formatTime(DateTime time) {
+    final hour = time.hour == 0 ? 12 : time.hour > 12 ? time.hour - 12 : time.hour;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
+
+  String _formatDateTime(DateTime dateTime) => '${_formatDate(dateTime)}, ${_formatTime(dateTime)}';
 }
