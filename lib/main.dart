@@ -163,36 +163,14 @@ class MomJournalApp extends StatelessWidget {
           ),
         ),
 
-        // Sync Provider
+        // ✅ Sync Provider - HARUS DIBUAT SEBELUM AuthProvider
         ChangeNotifierProvider<SyncProvider>(
           create: (context) => SyncProvider(
             repository: context.read<SyncRepository>(),
           ),
         ),
 
-        // Auth Provider
-        ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(
-            authRepository: context.read<AuthRepository>(),
-          ),
-        ),
-
-        // Schedule Provider - creates its own repository instance
-        ChangeNotifierProvider<ScheduleProvider>(
-          create: (_) => ScheduleProvider()..loadAllSchedules(),
-        ),
-
-        // Journal Provider - creates its own repository instance
-        ChangeNotifierProvider<JournalProvider>(
-          create: (_) => JournalProvider()..loadAllJournals(),
-        ),
-
-        // Photo Provider - creates its own repository instance
-        ChangeNotifierProvider<PhotoProvider>(
-          create: (_) => PhotoProvider()..loadPhotos(),
-        ),
-
-        // Category Provider
+        // ✅ Category Provider - HARUS DIBUAT SEBELUM AuthProvider
         ChangeNotifierProvider<CategoryProvider>(
           create: (context) {
             final categoryLocalDataSource = CategoryLocalDataSource(
@@ -212,6 +190,30 @@ class MomJournalApp extends StatelessWidget {
               repository: categoryRepository,
             );
           },
+        ),
+
+        // ✅ Auth Provider - UPDATED dengan SyncProvider + CategoryProvider dependency
+        ChangeNotifierProvider<AuthProvider>(
+          create: (context) => AuthProvider(
+            authRepository: context.read<AuthRepository>(),
+            syncProvider: context.read<SyncProvider>(),
+            categoryProvider: context.read<CategoryProvider>(),
+          ),
+        ),
+
+        // Schedule Provider - creates its own repository instance
+        ChangeNotifierProvider<ScheduleProvider>(
+          create: (_) => ScheduleProvider()..loadAllSchedules(),
+        ),
+
+        // Journal Provider - creates its own repository instance
+        ChangeNotifierProvider<JournalProvider>(
+          create: (_) => JournalProvider()..loadAllJournals(),
+        ),
+
+        // Photo Provider - creates its own repository instance
+        ChangeNotifierProvider<PhotoProvider>(
+          create: (_) => PhotoProvider()..loadPhotos(),
         ),
       ],
         child: Consumer<ThemeProvider>(
@@ -249,101 +251,41 @@ class MomJournalApp extends StatelessWidget {
 
             // Error handling
             builder: (context, child) {
-              // Global error boundary
-              ErrorWidget.builder = (FlutterErrorDetails errorDetails) =>
-                  _ErrorScreen(errorDetails: errorDetails);
-
-              return child ?? const SizedBox.shrink();
-            },
-          ),
-      ),
-    );
-}
-
-/// Error screen yang ditampilkan saat terjadi error
-class _ErrorScreen extends StatelessWidget {
-  const _ErrorScreen({required this.errorDetails});
-
-  final FlutterErrorDetails errorDetails;
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Error icon
-              Icon(
-                Icons.error_outline,
-                size: 80,
-                color: Colors.red[400],
-              ),
-              const SizedBox(height: 24),
-
-              // Error title
-              const Text(
-                'Oops! Terjadi Kesalahan',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-
-              // Error message
-              const Text(
-                'Aplikasi mengalami kesalahan. Silakan restart aplikasi.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-
-              // Error details (hanya di debug mode)
-              if (!const bool.fromEnvironment('dart.vm.product')) ...[
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red[200]!),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      errorDetails.exceptionAsString(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'monospace',
-                        color: Colors.red,
+              // Error widget untuk menangkap error yang tidak tertangani
+              ErrorWidget.builder = (FlutterErrorDetails errorDetails) => Scaffold(
+                  body: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Oops! Something went wrong',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            errorDetails.exception.toString(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Restart button
-              ElevatedButton.icon(
-                onPressed: SystemNavigator.pop,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Restart Aplikasi'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
+                );
+              return child ?? const SizedBox();
+            },
           ),
         ),
-      ),
     );
 }

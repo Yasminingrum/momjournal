@@ -1,5 +1,39 @@
 library;
 
+/// Category type untuk membedakan kategori schedule, photo, atau keduanya
+enum CategoryType {
+  schedule,  // Hanya untuk jadwal
+  photo,     // Hanya untuk foto
+  both,      // Bisa digunakan untuk jadwal DAN foto
+}
+
+/// Extension untuk CategoryType
+extension CategoryTypeExtension on CategoryType {
+  String get value {
+    switch (this) {
+      case CategoryType.schedule:
+        return 'schedule';
+      case CategoryType.photo:
+        return 'photo';
+      case CategoryType.both:
+        return 'both';
+    }
+  }
+  
+  static CategoryType fromString(String value) {
+    switch (value.toLowerCase()) {
+      case 'schedule':
+        return CategoryType.schedule;
+      case 'photo':
+        return CategoryType.photo;
+      case 'both':
+        return CategoryType.both;
+      default:
+        return CategoryType.both; // Default to both for backward compatibility
+    }
+  }
+}
+
 /// Domain entity untuk Category
 /// Represents the business logic for a schedule category
 class CategoryEntity {
@@ -11,6 +45,7 @@ class CategoryEntity {
     required this.colorHex,
     required this.createdAt,
     required this.updatedAt,
+    this.type = CategoryType.both,  // ✅ NEW: Default to 'both' for backward compatibility
     this.isDefault = false,
     this.isSynced = false,
     this.isDeleted = false,
@@ -22,6 +57,7 @@ class CategoryEntity {
   final String name;
   final String icon;  // Icon name from Material Icons
   final String colorHex;  // Color in hex format (e.g., "#FF5733")
+  final CategoryType type;  // ✅ NEW: Type of category
   final bool isDefault;  // True for default categories
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -36,6 +72,7 @@ class CategoryEntity {
     String? name,
     String? icon,
     String? colorHex,
+    CategoryType? type,  // ✅ NEW
     bool? isDefault,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -48,6 +85,7 @@ class CategoryEntity {
       name: name ?? this.name,
       icon: icon ?? this.icon,
       colorHex: colorHex ?? this.colorHex,
+      type: type ?? this.type,  // ✅ NEW
       isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -68,6 +106,7 @@ class CategoryEntity {
         other.name == name &&
         other.icon == icon &&
         other.colorHex == colorHex &&
+        other.type == type &&  // ✅ NEW
         other.isDefault == isDefault &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
@@ -82,6 +121,7 @@ class CategoryEntity {
         name.hashCode ^
         icon.hashCode ^
         colorHex.hashCode ^
+        type.hashCode ^  // ✅ NEW
         isDefault.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode ^
@@ -91,11 +131,95 @@ class CategoryEntity {
 
   @override
   String toString() => 'CategoryEntity(id: $id, name: $name, '
-        'icon: $icon, colorHex: $colorHex, isDefault: $isDefault, isDeleted: $isDeleted)';
+        'icon: $icon, colorHex: $colorHex, type: $type, isDefault: $isDefault, isDeleted: $isDeleted)';  // ✅ UPDATED
 }
 
 /// Default categories untuk pertama kali
 class DefaultCategories {
+  // ✅ UPDATED: Kategorikan berdasarkan type
+  
+  /// Kategori untuk Schedule & Photo (shared)
+  static const List<Map<String, dynamic>> both = [
+    {
+      'name': 'Pemberian Makan/Menyusui',
+      'icon': 'restaurant',
+      'colorHex': '#4A90E2',
+      'type': 'both',
+    },
+    {
+      'name': 'Tidur',
+      'icon': 'bedtime',
+      'colorHex': '#9B59B6',
+      'type': 'both',
+    },
+    {
+      'name': 'Kesehatan',
+      'icon': 'medical_services',
+      'colorHex': '#E74C3C',
+      'type': 'both',
+    },
+    {
+      'name': 'Bermain',
+      'icon': 'toys',
+      'colorHex': '#FFA726',
+      'type': 'both',
+    },
+  ];
+  
+  /// Kategori khusus untuk Schedule
+  static const List<Map<String, dynamic>> schedule = [
+    {
+      'name': 'Olahraga',
+      'icon': 'sports',
+      'colorHex': '#66BB6A',
+      'type': 'schedule',
+    },
+    {
+      'name': 'Lainnya',
+      'icon': 'more_horiz',
+      'colorHex': '#95A5A6',
+      'type': 'schedule',
+    },
+  ];
+  
+  /// Kategori khusus untuk Photo
+  static const List<Map<String, dynamic>> photo = [
+    {
+      'name': 'Ulang Tahun',
+      'icon': 'cake',
+      'colorHex': '#FF6B9D',
+      'type': 'photo',
+    },
+    {
+      'name': 'Liburan',
+      'icon': 'beach_access',
+      'colorHex': '#4FC3F7',
+      'type': 'photo',
+    },
+    {
+      'name': 'Keluarga',
+      'icon': 'family_restroom',
+      'colorHex': '#8D6E63',
+      'type': 'photo',
+    },
+    {
+      'name': 'Pencapaian',
+      'icon': 'stars',
+      'colorHex': '#FFD54F',
+      'type': 'photo',
+    },
+    {
+      'name': 'Keseharian',
+      'icon': 'wb_sunny',
+      'colorHex': '#FFCA28',
+      'type': 'photo',
+    },
+  ];
+  
+  /// Semua default categories (backward compatibility)
+  static List<Map<String, dynamic>> get all => [...both, ...schedule, ...photo];
+  
+  /// Legacy defaults (untuk backward compatibility dengan kode lama)
   static const List<Map<String, String>> defaults = [
     {
       'name': 'Pemberian Makan/Menyusui',

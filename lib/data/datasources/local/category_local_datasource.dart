@@ -132,8 +132,8 @@ class CategoryLocalDataSource {
         return; // Already initialized
       }
 
-      // Create default categories
-      const defaults = DefaultCategories.defaults;
+      // ✅ UPDATED: Use new DefaultCategories.all instead of defaults
+      final defaults = DefaultCategories.all;
       final now = DateTime.now();
 
       for (var i = 0; i < defaults.length; i++) {
@@ -143,9 +143,10 @@ class CategoryLocalDataSource {
         final category = CategoryModel(
           id: id,
           userId: userId,
-          name: defaultCat['name']!,
-          icon: defaultCat['icon']!,
-          colorHex: defaultCat['colorHex']!,
+          name: defaultCat['name'] as String,
+          icon: defaultCat['icon'] as String,
+          colorHex: defaultCat['colorHex'] as String,
+          type: defaultCat['type'] as String? ?? 'both',  // ✅ NEW FIELD
           isDefault: true,
           createdAt: now,
           updatedAt: now,

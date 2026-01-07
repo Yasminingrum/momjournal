@@ -4,7 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../domain/entities/category_entity.dart';
 import '../../../domain/entities/photo_entity.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/category_provider.dart';
 import '../../providers/photo_provider.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
 import '../../widgets/dialogs/info_dialog.dart';
@@ -306,28 +309,35 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
   }
 
   /// 🆕 Show category picker
+  /// ✅ UPDATED: Show category picker using CategoryProvider
   Future<void> _showCategoryPicker(BuildContext context, PhotoEntity photo) async {
-    final provider = context.read<PhotoProvider>();
-    final categories = await provider.getCategories();
+    final categoryProvider = context.read<CategoryProvider>();
+    final authProvider = context.read<AuthProvider>();
+    final photoProvider = context.read<PhotoProvider>();
+    final userId = authProvider.user?.uid;
     
-    // Predefined categories
-    final defaultCategories = [
-      'Ulang Tahun',
-      'Liburan',
-      'Milestone',
-      'Keluarga',
-      'Teman',
-      'Acara Khusus',
-    ];
+    if (userId == null) return;
     
-    // Combine default with existing
-    final allCategories = {...defaultCategories, ...categories}.toList()..sort();
+    // Load categories if not loaded yet
+    if (categoryProvider.categories.isEmpty) {
+      await categoryProvider.loadCategories(userId);
+    }
     
-    if (!mounted) {
+    final photoCategories = categoryProvider.photoCategories;
+    
+    if (!mounted) return;
+    
+    if (photoCategories.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Belum ada kategori tersedia'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
     
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showModalBottomSheet<CategoryEntity?>(
       context: context,
       backgroundColor: Colors.grey.shade900,
       shape: const RoundedRectangleBorder(
@@ -351,7 +361,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 ),
                 if (photo.category != null)
                   TextButton(
-                    onPressed: () => Navigator.pop(context, ''),
+                    onPressed: () => Navigator.pop(context),
                     child: const Text('Hapus'),
                   ),
               ],
@@ -361,18 +371,26 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: allCategories.length,
+              itemCount: photoCategories.length,
               itemBuilder: (context, index) {
-                final category = allCategories[index];
-                final isSelected = category == photo.category;
+                final category = photoCategories[index];
+                final isSelected = photo.category == category.name;
                 
                 return ListTile(
-                  leading: Icon(
-                    Icons.folder,
-                    color: isSelected ? Colors.blue : Colors.grey,
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _parseColor(category.colorHex).withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getIconData(category.icon),
+                      color: _parseColor(category.colorHex),
+                      size: 20,
+                    ),
                   ),
                   title: Text(
-                    category,
+                    category.name,
                     style: TextStyle(
                       color: isSelected ? Colors.blue : Colors.white,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -391,24 +409,63 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       ),
     );
     
-    if (selected != null && mounted) {
-      final newCategory = selected.isEmpty ? null : selected;
-      final success = await provider.updatePhotoCategory(photo.id, newCategory);
+    if (!mounted) return;
+    
+    if (selected != null) {
+      // User selected a category
+      final success = await photoProvider.updatePhotoCategory(photo.id, selected.name);
       
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              newCategory == null 
-                  ? 'Kategori dihapus' 
-                  : 'Kategori diubah menjadi: $newCategory',
-            ),
+            content: Text('Kategori diubah menjadi: ${selected.name}'),
             duration: const Duration(seconds: 1),
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    } else if (photo.category != null) {
+      // User clicked "Hapus" - remove category
+      final success = await photoProvider.updatePhotoCategory(photo.id, null);
+      
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Kategori dihapus'),
+            duration: Duration(seconds: 1),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
+  }
+
+  /// ✅ Helper: Parse color hex string to Color
+  Color _parseColor(String hexColor) {
+    try {
+      return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return Colors.grey;
+    }
+  }
+
+  /// ✅ Helper: Convert icon name string to IconData
+  IconData _getIconData(String iconName) {
+    const iconMap = {
+      'restaurant': Icons.restaurant,
+      'bedtime': Icons.bedtime,
+      'medical_services': Icons.medical_services,
+      'toys': Icons.toys,
+      'sports': Icons.sports,
+      'cake': Icons.cake,
+      'beach_access': Icons.beach_access,
+      'family_restroom': Icons.family_restroom,
+      'stars': Icons.stars,
+      'wb_sunny': Icons.wb_sunny,
+      'more_horiz': Icons.more_horiz,
+      'photo_library': Icons.photo_library,
+    };
+    return iconMap[iconName] ?? Icons.folder;
   }
 
   Widget _buildPhotoImage(PhotoEntity photo) {

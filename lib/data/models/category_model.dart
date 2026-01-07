@@ -14,6 +14,7 @@ class CategoryModel extends HiveObject {
     required this.colorHex,
     required this.createdAt,
     required this.updatedAt,
+    this.type = 'both',  // ✅ NEW: Default to 'both' for backward compatibility
     this.isDefault = false,
     this.isSynced = false,
     this.isDeleted = false,
@@ -45,6 +46,7 @@ class CategoryModel extends HiveObject {
       name: json['name'] as String? ?? '',
       icon: json['icon'] as String? ?? 'more_horiz',
       colorHex: json['colorHex'] as String? ?? '#95A5A6',
+      type: json['type'] as String? ?? 'both',  // ✅ NEW
       isDefault: json['isDefault'] as bool? ?? false,
       createdAt: parseDateTime(json['createdAt']) ?? DateTime.now(),
       updatedAt: parseDateTime(json['updatedAt']) ?? DateTime.now(),
@@ -61,6 +63,7 @@ class CategoryModel extends HiveObject {
         name: entity.name,
         icon: entity.icon,
         colorHex: entity.colorHex,
+        type: entity.type.value,  // ✅ NEW: Convert enum to string
         isDefault: entity.isDefault,
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
@@ -102,6 +105,9 @@ class CategoryModel extends HiveObject {
   @HiveField(10)
   final DateTime? deletedAt;
 
+  @HiveField(11)  // ✅ NEW: Using next available index
+  final String type;
+
   /// Convert ke Entity
   CategoryEntity toEntity() => CategoryEntity(
         id: id,
@@ -109,6 +115,7 @@ class CategoryModel extends HiveObject {
         name: name,
         icon: icon,
         colorHex: colorHex,
+        type: CategoryTypeExtension.fromString(type),  // ✅ NEW: Convert string to enum
         isDefault: isDefault,
         createdAt: createdAt,
         updatedAt: updatedAt,
@@ -124,6 +131,7 @@ class CategoryModel extends HiveObject {
         'name': name,
         'icon': icon,
         'colorHex': colorHex,
+        'type': type,  // ✅ NEW
         'isDefault': isDefault,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
@@ -138,6 +146,7 @@ class CategoryModel extends HiveObject {
     String? name,
     String? icon,
     String? colorHex,
+    String? type,  // ✅ NEW
     bool? isDefault,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -151,6 +160,7 @@ class CategoryModel extends HiveObject {
         name: name ?? this.name,
         icon: icon ?? this.icon,
         colorHex: colorHex ?? this.colorHex,
+        type: type ?? this.type,  // ✅ NEW
         isDefault: isDefault ?? this.isDefault,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -161,7 +171,7 @@ class CategoryModel extends HiveObject {
 
   @override
   String toString() => 'CategoryModel(id: $id, name: $name, '
-      'icon: $icon, colorHex: $colorHex, isDefault: $isDefault, isDeleted: $isDeleted)';
+      'icon: $icon, colorHex: $colorHex, type: $type, isDefault: $isDefault, isDeleted: $isDeleted)';  // ✅ UPDATED
 
   @override
   bool operator ==(Object other) {
@@ -175,6 +185,7 @@ class CategoryModel extends HiveObject {
         other.name == name &&
         other.icon == icon &&
         other.colorHex == colorHex &&
+        other.type == type &&  // ✅ NEW
         other.isDefault == isDefault &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
@@ -190,6 +201,7 @@ class CategoryModel extends HiveObject {
       name.hashCode ^
       icon.hashCode ^
       colorHex.hashCode ^
+      type.hashCode ^  // ✅ NEW
       isDefault.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^

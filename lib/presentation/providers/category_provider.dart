@@ -21,6 +21,16 @@ class CategoryProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
+  /// ✅ NEW: Get categories untuk Schedule (schedule + both)
+  List<CategoryEntity> get scheduleCategories => _categories
+      .where((c) => c.type == CategoryType.schedule || c.type == CategoryType.both)
+      .toList();
+
+  /// ✅ NEW: Get categories untuk Photo (photo + both)
+  List<CategoryEntity> get photoCategories => _categories
+      .where((c) => c.type == CategoryType.photo || c.type == CategoryType.both)
+      .toList();
+
   /// Get categories as list of maps for UI
   List<Map<String, String>> get categoriesAsMaps => _categories.map((cat) => {
       'name': cat.name,

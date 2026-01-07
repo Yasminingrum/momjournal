@@ -8,8 +8,12 @@ import 'package:provider/provider.dart';
 
 import '/core/constants/color_constants.dart';
 import '/core/constants/text_constants.dart';
+import '/domain/entities/category_entity.dart';
 import '/domain/entities/photo_entity.dart';
+import '/presentation/providers/auth_provider.dart';
+import '/presentation/providers/category_provider.dart';
 import '/presentation/providers/photo_provider.dart';
+import '/presentation/providers/sync_provider.dart';
 import '/presentation/routes/app_router.dart';
 import '/presentation/widgets/common/empty_state.dart';
 import '/presentation/widgets/common/error_widget.dart';
@@ -24,9 +28,9 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   bool _showMilestonesOnly = false;
-  bool _showFavoritesOnly = false;  // 🆕 ADDED
+  bool _showFavoritesOnly = false;  // ðŸ†• ADDED
   bool _sortNewestFirst = true;
-  String? _selectedCategory;  // 🆕 ADDED
+  String? _selectedCategory;  // ðŸ†• ADDED
 
   @override
   void initState() {
@@ -44,7 +48,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       appBar: AppBar(
         title: const Text(TextConstants.navGallery),
         actions: [
-          // 🆕 Category filter button
+          // ðŸ†• Category filter button
           IconButton(
             icon: Icon(
               _selectedCategory != null ? Icons.folder : Icons.folder_outlined,
@@ -52,7 +56,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             ),
             onPressed: _showCategoryFilter,
           ),
-          // 🆕 Favorite filter button
+          // ðŸ†• Favorite filter button
           IconButton(
             icon: Icon(
               _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
@@ -245,7 +249,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return 'Mulai dokumentasikan momen berharga Anda';
   }
 
-  /// 🆕 Toggle favorite filter
+  /// ðŸ†• Toggle favorite filter
   Future<void> _toggleFavoriteFilter() async {
     setState(() {
       _showFavoritesOnly = !_showFavoritesOnly;
@@ -256,16 +260,28 @@ class _GalleryScreenState extends State<GalleryScreen> {
     await _loadPhotos();
   }
 
-  /// 🆕 Show category filter
+  /// ✅ UPDATED: Show category filter with CategoryProvider
   Future<void> _showCategoryFilter() async {
-    final provider = context.read<PhotoProvider>();
-    final categories = await provider.getCategories();
+    final categoryProvider = context.read<CategoryProvider>();
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.user?.uid;
+    
+    if (userId == null) {
+      return;
+    }
+    
+    // Load categories if not loaded
+    if (categoryProvider.categories.isEmpty) {
+      await categoryProvider.loadCategories(userId);
+    }
+    
+    final photoCategories = categoryProvider.photoCategories;
     
     if (!mounted) {
       return;
     }
     
-    if (categories.isEmpty) {
+    if (photoCategories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Belum ada kategori tersedia'),
@@ -275,7 +291,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       return;
     }
     
-    final selected = await showModalBottomSheet<String>(
+    final selected = await showModalBottomSheet<CategoryEntity>(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -297,7 +313,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 ),
                 if (_selectedCategory != null)
                   TextButton(
-                    onPressed: () => Navigator.pop(context, ''),
+                    onPressed: () => Navigator.pop(context, null),
                     child: const Text('Hapus Filter'),
                   ),
               ],
@@ -307,18 +323,25 @@ class _GalleryScreenState extends State<GalleryScreen> {
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
-              itemCount: categories.length,
+              itemCount: photoCategories.length,
               itemBuilder: (context, index) {
-                final category = categories[index];
-                final isSelected = category == _selectedCategory;
+                final category = photoCategories[index];
+                final isSelected = _selectedCategory == category.name;
                 
                 return ListTile(
-                  leading: Icon(
-                    Icons.folder,
-                    color: isSelected ? ColorConstants.primaryColor : null,
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Color(int.parse(category.colorHex.replaceFirst('#', '0xFF'))).withValues (alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      _getIconData(category.icon),
+                      color: Color(int.parse(category.colorHex.replaceFirst('#', '0xFF'))),
+                    ),
                   ),
                   title: Text(
-                    category,
+                    category.name,
                     style: TextStyle(
                       color: isSelected ? ColorConstants.primaryColor : null,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -339,17 +362,41 @@ class _GalleryScreenState extends State<GalleryScreen> {
     
     if (selected != null && mounted) {
       setState(() {
-        _selectedCategory = selected.isEmpty ? null : selected;
+        _selectedCategory = selected.name;
         if (_selectedCategory != null) {
           _showMilestonesOnly = false;
           _showFavoritesOnly = false;
         }
       });
       await _loadPhotos();
+    } else if (selected == null && _selectedCategory != null && mounted) {
+      // User cleared filter
+      setState(() {
+        _selectedCategory = null;
+      });
+      await _loadPhotos();
     }
   }
 
-  /// 🆕 Clear all filters
+  // ✅ Helper method untuk convert icon string ke IconData
+  IconData _getIconData(String iconName) {
+    const iconMap = {
+      'restaurant': Icons.restaurant,
+      'bedtime': Icons.bedtime,
+      'medical_services': Icons.medical_services,
+      'toys': Icons.toys,
+      'cake': Icons.cake,
+      'beach_access': Icons.beach_access,
+      'family_restroom': Icons.family_restroom,
+      'stars': Icons.stars,
+      'wb_sunny': Icons.wb_sunny,
+      'more_horiz': Icons.more_horiz,
+      'sports': Icons.sports,
+    };
+    return iconMap[iconName] ?? Icons.folder;
+}
+
+  /// ðŸ†• Clear all filters
   Future<void> _clearAllFilters() async {
     setState(() {
       _selectedCategory = null;
@@ -458,9 +505,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        maxWidth: 1024,      // 🔧 Reduce dari 1920 ke 1024
-        maxHeight: 1024,     // 🔧 Reduce dari 1920 ke 1024
-        imageQuality: 70,    // 🔧 Reduce dari 85 ke 70
+        maxWidth: 1024,      // ðŸ”§ Reduce dari 1920 ke 1024
+        maxHeight: 1024,     // ðŸ”§ Reduce dari 1920 ke 1024
+        imageQuality: 70,    // ðŸ”§ Reduce dari 85 ke 70
       );
 
       if (image == null) {
@@ -521,6 +568,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
         }
 
         if (success) {
+          // ✅ AUTO SYNC after successful photo upload
+          final syncProvider = context.read<SyncProvider>();
+          debugPrint('🔄 Gallery: Auto sync after photo upload...');
+          await syncProvider.syncAll();
+          
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -607,7 +659,7 @@ class _PhotoCard extends StatelessWidget {
             // Photo image
             _buildPhotoImage(),
             
-            // 🆕 Favorite indicator
+            // ðŸ†• Favorite indicator
             if (photo.isFavorite)
               const Positioned(
                 top: 4,
@@ -631,7 +683,7 @@ class _PhotoCard extends StatelessWidget {
                 ),
               ),
 
-            // 🆕 Category badge
+            // ðŸ†• Category badge
             if (photo.category != null && photo.category!.isNotEmpty)
               Positioned(
                 bottom: 4,

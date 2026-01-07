@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../data/repositories/auth_repository.dart';
+import 'category_provider.dart';
+import 'sync_provider.dart';
 
 /// Enum untuk auth state
 enum AuthState {
@@ -17,10 +19,16 @@ class AuthProvider with ChangeNotifier {
 
   AuthProvider({
     required AuthRepository authRepository,
-  }) : _authRepository = authRepository {
+    SyncProvider? syncProvider,
+    CategoryProvider? categoryProvider,
+  }) : _authRepository = authRepository,
+       _syncProvider = syncProvider,
+       _categoryProvider = categoryProvider {
     _initialize();
   }
   final AuthRepository _authRepository;
+  final SyncProvider? _syncProvider;
+  final CategoryProvider? _categoryProvider;
 
   // State
   AuthState _state = AuthState.initial;
@@ -78,13 +86,37 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Sign out
+  /// Sign out with auto sync
   Future<bool> signOut() async {
     try {
       _setState(AuthState.loading);
       _errorMessage = null;
 
       debugPrint('🚪 Provider: Signing out...');
+      
+      // ✅ AUTO SYNC CATEGORIES before logout
+      if (_categoryProvider != null && _user != null) {
+        debugPrint('🔄 Provider: Syncing categories before logout...');
+        try {
+          await _categoryProvider.syncToRemote(_user!.uid);
+          debugPrint('✅ Provider: Categories synced');
+        } catch (categoryError) {
+          debugPrint('⚠️ Provider: Category sync failed but continuing: $categoryError');
+        }
+      }
+      
+      // ✅ AUTO SYNC DATA before logout
+      if (_syncProvider != null) {
+        debugPrint('🔄 Provider: Auto sync data before logout...');
+        try {
+          await _syncProvider.syncAll();
+          debugPrint('✅ Provider: Data sync completed');
+        } catch (syncError) {
+          debugPrint('⚠️ Provider: Data sync failed but continuing logout: $syncError');
+          // Continue with logout even if sync fails
+        }
+      }
+      
       await _authRepository.signOut();
       
       _user = null;

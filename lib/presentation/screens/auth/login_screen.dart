@@ -3,6 +3,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/sync_provider.dart';
 import '../../routes/app_router.dart';
 import '../../widgets/common/custom_button.dart';
 import '../../widgets/common/loading_indicator.dart';
@@ -161,6 +162,7 @@ class LoginScreen extends StatelessWidget {
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
+    final syncProvider = context.read<SyncProvider>();
     
     final success = await authProvider.signInWithGoogle();
     
@@ -169,6 +171,14 @@ class LoginScreen extends StatelessWidget {
     }
     
     if (success) {
+      // Auto sync after successful login
+      debugPrint('Auto sync after login...');
+      await syncProvider.syncAll();
+      
+      if (!context.mounted) {
+        return;
+      }
+      
       // Navigate to home
       await Navigator.pushReplacementNamed(context, Routes.home);
     } else {

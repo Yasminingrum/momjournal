@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '/presentation/providers/auth_provider.dart';
-import '/presentation/providers/sync_provider.dart';
 import '/presentation/providers/theme_provider.dart';
 import '/presentation/routes/app_router.dart';
 
@@ -27,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
             subtitle: Text(authProvider.userEmail ?? 'Atur informasi profil Anda'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 Profile tapped');
+              debugPrint('ðŸ”¥ Profile tapped');
               Navigator.pushNamed(context, Routes.account);
             },
           ),
@@ -39,7 +38,7 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('Atur preferensi notifikasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 Notifications tapped');
+              debugPrint('ðŸ”¥ Notifications tapped');
               Navigator.pushNamed(context, Routes.notificationSettings);
             },
           ),
@@ -51,7 +50,7 @@ class SettingsScreen extends StatelessWidget {
             subtitle: Text(themeProvider.currentThemeTypeName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 Theme tapped');
+              debugPrint('ðŸ”¥ Theme tapped');
               _showThemeDialog(context);
             },
           ),
@@ -65,7 +64,7 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('Versi aplikasi dan informasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 About tapped');
+              debugPrint('ðŸ”¥ About tapped');
               _showAboutDialog(context);
             },
           ),
@@ -76,7 +75,7 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Kebijakan Privasi'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 Privacy Policy tapped');
+              debugPrint('ðŸ”¥ Privacy Policy tapped');
               Navigator.pushNamed(context, Routes.privacyPolicy);
             },
           ),
@@ -87,25 +86,11 @@ class SettingsScreen extends StatelessWidget {
             title: const Text('Bantuan & Dukungan'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              debugPrint('🔥 Help & Support tapped');
+              debugPrint('ðŸ”¥ Help & Support tapped');
               Navigator.pushNamed(context, Routes.helpSupport);
             },
           ),
 
-          const Divider(height: 32),
-
-          // Sign Out
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Keluar',
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: () {
-              debugPrint('🔥 Sign Out tapped');
-              _showSignOutDialog(context);
-            },
-          ),
 
           const SizedBox(height: 16),
 
@@ -270,7 +255,7 @@ class SettingsScreen extends StatelessWidget {
 
                 // Contact
                 const Text(
-                  '© 2025 MomJournal. Hak cipta dilindungi.',
+                  'Â© 2025 MomJournal. Hak cipta dilindungi.',
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                   textAlign: TextAlign.center,
                 ),
@@ -289,130 +274,4 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Show sign out confirmation dialog
-  void _showSignOutDialog(BuildContext context) {
-    final authProvider = context.read<AuthProvider>();
-    
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Keluar'),
-          content: const Text(
-            'Apakah Anda yakin ingin keluar? '
-            'Semua data akan disinkronkan sebelum keluar.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('BATAL'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                _performSignOut(context, authProvider);
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('KELUAR'),
-            ),
-          ],
-        ),
-    );
-  }
-
-  // Perform sign out with data synchronization
-  Future<void> _performSignOut(BuildContext context, AuthProvider authProvider) async {
-    // Show loading indicator with sync message
-    if (context.mounted) {
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) => const AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Menyinkronkan data...'),
-              ],
-            ),
-          ),
-      );
-    }
-    
-    // Step 1: Sync all data to Firebase before logout
-    final syncProvider = context.read<SyncProvider>();
-    final syncSuccess = await syncProvider.syncAll();
-    
-    if (!syncSuccess && context.mounted) {
-      // Close loading
-      Navigator.pop(context);
-      
-      // Show warning but allow user to proceed
-      final shouldProceed = await showDialog<bool>(
-        context: context,
-        builder: (BuildContext dialogContext) => AlertDialog(
-            title: const Text('Peringatan'),
-            content: const Text(
-              'Gagal menyinkronkan beberapa data. '
-              'Data yang belum tersinkronisasi akan hilang jika Anda keluar sekarang. '
-              'Apakah Anda tetap ingin keluar?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text('BATAL'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext, true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('TETAP KELUAR'),
-              ),
-            ],
-          ),
-      );
-      
-      if (shouldProceed != true) {
-        return; // User cancelled
-      }
-      
-      // Show loading again
-      if (context.mounted) {
-        await showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => const Center(
-              child: CircularProgressIndicator(),
-            ),
-        );
-      }
-    }
-    
-    // Step 2: Sign out
-    final success = await authProvider.signOut();
-    
-    if (context.mounted) {
-      // Close loading
-      Navigator.pop(context);
-      
-      if (success) {
-        // Navigate to login
-        await Navigator.pushNamedAndRemoveUntil(
-          context,
-          Routes.login,
-          (route) => false,
-        );
-      } else {
-        // Show error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.errorMessage ?? 'Gagal keluar'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
 }
