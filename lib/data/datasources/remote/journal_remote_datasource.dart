@@ -118,7 +118,7 @@ class JournalRemoteDatasourceImpl implements JournalRemoteDatasource {
       final data = _journalToFirestore(journal);
       data['updatedAt'] = FieldValue.serverTimestamp();
 
-      await _journalsCollection!.doc(journal.id).update(data);
+      await _journalsCollection!.doc(journal.id).set(data, SetOptions(merge: true));
       
       debugPrint('✅ Journal updated in Firestore: ${journal.id}');
     } catch (e) {

@@ -28,9 +28,9 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   bool _showMilestonesOnly = false;
-  bool _showFavoritesOnly = false;  // ðŸ†• ADDED
+  bool _showFavoritesOnly = false;  // Ã°Å¸â€ â€¢ ADDED
   bool _sortNewestFirst = true;
-  String? _selectedCategory;  // ðŸ†• ADDED
+  String? _selectedCategory;  // Ã°Å¸â€ â€¢ ADDED
 
   @override
   void initState() {
@@ -48,7 +48,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       appBar: AppBar(
         title: const Text(TextConstants.navGallery),
         actions: [
-          // ðŸ†• Category filter button
+          // Ã°Å¸â€ â€¢ Category filter button
           IconButton(
             icon: Icon(
               _selectedCategory != null ? Icons.folder : Icons.folder_outlined,
@@ -56,7 +56,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             ),
             onPressed: _showCategoryFilter,
           ),
-          // ðŸ†• Favorite filter button
+          // Ã°Å¸â€ â€¢ Favorite filter button
           IconButton(
             icon: Icon(
               _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
@@ -249,7 +249,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return 'Mulai dokumentasikan momen berharga Anda';
   }
 
-  /// ðŸ†• Toggle favorite filter
+  /// Ã°Å¸â€ â€¢ Toggle favorite filter
   Future<void> _toggleFavoriteFilter() async {
     setState(() {
       _showFavoritesOnly = !_showFavoritesOnly;
@@ -260,7 +260,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     await _loadPhotos();
   }
 
-  /// ✅ UPDATED: Show category filter with CategoryProvider
+  /// âœ… UPDATED: Show category filter with CategoryProvider
   Future<void> _showCategoryFilter() async {
     final categoryProvider = context.read<CategoryProvider>();
     final authProvider = context.read<AuthProvider>();
@@ -378,7 +378,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }
 
-  // ✅ Helper method untuk convert icon string ke IconData
+  // âœ… Helper method untuk convert icon string ke IconData
   IconData _getIconData(String iconName) {
     const iconMap = {
       'restaurant': Icons.restaurant,
@@ -396,7 +396,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return iconMap[iconName] ?? Icons.folder;
 }
 
-  /// ðŸ†• Clear all filters
+  /// Ã°Å¸â€ â€¢ Clear all filters
   Future<void> _clearAllFilters() async {
     setState(() {
       _selectedCategory = null;
@@ -450,12 +450,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   void _navigateToDetail(PhotoEntity photo, int index) {
+    // Get all filtered photos untuk swipe support
+    final provider = context.read<PhotoProvider>();
+    final filteredPhotos = _getFilteredPhotos(provider);
+    
     Navigator.pushNamed(
       context,
       Routes.photoDetail,
       arguments: {
         'photo': photo,
         'heroTag': 'photo_${photo.id}_$index',
+        'allPhotos': filteredPhotos, // NEW: pass all photos untuk swipe
       },
     ).then((_) {
       // Reload photos after returning from detail (in case photo was deleted/updated)
@@ -505,9 +510,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
       final ImagePicker picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
-        maxWidth: 1024,      // ðŸ”§ Reduce dari 1920 ke 1024
-        maxHeight: 1024,     // ðŸ”§ Reduce dari 1920 ke 1024
-        imageQuality: 70,    // ðŸ”§ Reduce dari 85 ke 70
+        maxWidth: 1024,      // Ã°Å¸â€Â§ Reduce dari 1920 ke 1024
+        maxHeight: 1024,     // Ã°Å¸â€Â§ Reduce dari 1920 ke 1024
+        imageQuality: 70,    // Ã°Å¸â€Â§ Reduce dari 85 ke 70
       );
 
       if (image == null) {
@@ -568,9 +573,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
         }
 
         if (success) {
-          // ✅ AUTO SYNC after successful photo upload
+          // âœ… AUTO SYNC after successful photo upload
           final syncProvider = context.read<SyncProvider>();
-          debugPrint('🔄 Gallery: Auto sync after photo upload...');
+          debugPrint('ðŸ”„ Gallery: Auto sync after photo upload...');
           await syncProvider.syncAll();
           
           // Show success message
@@ -659,7 +664,7 @@ class _PhotoCard extends StatelessWidget {
             // Photo image
             _buildPhotoImage(),
             
-            // ðŸ†• Favorite indicator
+            // Ã°Å¸â€ â€¢ Favorite indicator
             if (photo.isFavorite)
               const Positioned(
                 top: 4,
@@ -683,7 +688,7 @@ class _PhotoCard extends StatelessWidget {
                 ),
               ),
 
-            // ðŸ†• Category badge
+            // Ã°Å¸â€ â€¢ Category badge
             if (photo.category != null && photo.category!.isNotEmpty)
               Positioned(
                 bottom: 4,

@@ -184,9 +184,7 @@ class PhotoRemoteDatasourceImpl implements PhotoRemoteDatasource {
         throw const AuthorizationException('User tidak login');
       }
 
-      await _photosCollection!
-          .doc(photo.id)
-          .update(_photoToFirestore(photo));
+      await _photosCollection!.doc(photo.id).set(_photoToFirestore(photo), SetOptions(merge: true));
 
       debugPrint('✅ Photo updated: ${photo.id}');
     } catch (e) {

@@ -154,6 +154,17 @@ class SyncProvider with ChangeNotifier {
     }
   }
 
+  /// Delete photo from remote (Firebase)
+  Future<void> deletePhotoRemote(String photoId) async {
+    try {
+      await _repository.deletePhotoRemote(photoId);
+      debugPrint('✅ Photo deleted from remote: $photoId');
+    } catch (e) {
+      debugPrint('❌ Failed to delete photo from remote: $e');
+      // Don't throw - deletion should succeed locally even if remote fails
+    }
+  }
+
   /// Toggle auto sync
   void toggleAutoSync({required bool enabled}) {
     _autoSyncEnabled = enabled;

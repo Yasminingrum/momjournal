@@ -5,6 +5,9 @@ import '/presentation/providers/auth_provider.dart';
 import '/presentation/providers/theme_provider.dart';
 import '/presentation/routes/app_router.dart';
 
+import 'package:flutter/foundation.dart';
+import '/core/utils/seed_database.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -91,6 +94,13 @@ class SettingsScreen extends StatelessWidget {
             },
           ),
 
+
+          // Developer Tools Section
+          if (kDebugMode) ...[
+            const Divider(height: 32),
+            const SeedDataButton(),
+            const ClearDataButton(),
+          ],
 
           const SizedBox(height: 16),
 

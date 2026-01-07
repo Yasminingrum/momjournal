@@ -184,9 +184,7 @@ class ScheduleRemoteDatasourceImpl implements ScheduleRemoteDatasource {
       final scheduleData = _scheduleToFirestore(schedule);
       scheduleData['updatedAt'] = FieldValue.serverTimestamp();
 
-      await _schedulesCollection!
-          .doc(schedule.id)
-          .update(scheduleData);
+      await _schedulesCollection!.doc(schedule.id).set(scheduleData, SetOptions(merge: true));
 
       debugPrint('✅ Schedule updated in Firestore: ${schedule.id}');
     } on FirebaseException catch (e) {

@@ -65,7 +65,7 @@ class AppRouter {
   /// Generate route based on settings
   static Route<dynamic> generateRoute(RouteSettings settings) {
     if (kDebugMode) {
-      print('🗺️ Navigating to: ${settings.name}');
+      print('ðŸ—ºï¸ Navigating to: ${settings.name}');
     }
     
     switch (settings.name) {
@@ -157,6 +157,7 @@ class AppRouter {
           builder: (_) => PhotoDetailScreen(
             photo: args['photo'] as PhotoEntity,
             heroTag: args['heroTag'] as String,
+            allPhotos: args['allPhotos'] as List<PhotoEntity>?, // NEW: untuk swipe support
           ),
         );
       

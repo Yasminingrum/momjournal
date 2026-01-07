@@ -9,6 +9,7 @@ import '../../../domain/entities/photo_entity.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/photo_provider.dart';
+import '../../providers/sync_provider.dart';
 import '../../widgets/dialogs/confirmation_dialog.dart';
 import '../../widgets/dialogs/info_dialog.dart';
 
@@ -16,12 +17,14 @@ class PhotoDetailScreen extends StatefulWidget {
 
   const PhotoDetailScreen({
     required this.photo, 
-    required this.heroTag, 
+    required this.heroTag,
+    this.allPhotos, // New: untuk swipe support
     super.key,
   });
   
   final PhotoEntity photo;
   final String heroTag;
+  final List<PhotoEntity>? allPhotos; // New: list semua foto untuk swipe
 
   @override
   State<PhotoDetailScreen> createState() => _PhotoDetailScreenState();
@@ -30,16 +33,31 @@ class PhotoDetailScreen extends StatefulWidget {
 class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
   late TextEditingController _captionController;
   bool _isEditingCaption = false;
+  late PageController _pageController; // New: untuk swipe
+  late int _currentIndex; // New: track current photo index
+  late PhotoEntity _currentPhoto; // New: track current photo
 
   @override
   void initState() {
     super.initState();
-    _captionController = TextEditingController(text: widget.photo.caption);
+    _currentPhoto = widget.photo;
+    _captionController = TextEditingController(text: _currentPhoto.caption);
+    
+    // Setup page controller untuk swipe
+    if (widget.allPhotos != null) {
+      _currentIndex = widget.allPhotos!.indexWhere((p) => p.id == widget.photo.id);
+      if (_currentIndex == -1) _currentIndex = 0;
+      _pageController = PageController(initialPage: _currentIndex);
+    } else {
+      _currentIndex = 0;
+      _pageController = PageController();
+    }
   }
 
   @override
   void dispose() {
     _captionController.dispose();
+    _pageController.dispose(); // New: cleanup page controller
     super.dispose();
   }
 
@@ -48,10 +66,10 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     final photoProvider = context.watch<PhotoProvider>();
     
     // Get updated photo from provider (in case it changed)
-    final currentPhoto = photoProvider.photos
+    final currentPhotoFromProvider = photoProvider.photos
         .firstWhere(
-          (p) => p.id == widget.photo.id,
-          orElse: () => widget.photo,
+          (p) => p.id == _currentPhoto.id,
+          orElse: () => _currentPhoto,
         );
 
     return Scaffold(
@@ -60,35 +78,61 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
         backgroundColor: Colors.transparent,
         iconTheme: const IconThemeData(color: Colors.white),
         actions: [
-          // 🆕 Favorite button
+          // Favorite button
           IconButton(
             icon: Icon(
-              currentPhoto.isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: currentPhoto.isFavorite ? Colors.red : Colors.white,
+              currentPhotoFromProvider.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: currentPhotoFromProvider.isFavorite ? Colors.red : Colors.white,
             ),
-            onPressed: () => _toggleFavorite(context, currentPhoto),
+            onPressed: () => _toggleFavorite(context, currentPhotoFromProvider),
           ),
           // Delete button
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => _handleDelete(context),
+            onPressed: _handleDelete,
           ),
         ],
       ),
       body: Column(
         children: [
-          // Photo with hero animation
+          // Photo dengan swipe support
           Expanded(
-            child: Center(
-              child: Hero(
-                tag: widget.heroTag,
-                child: InteractiveViewer(
-                  minScale: 0.5,
-                  maxScale: 4,
-                  child: _buildPhotoImage(currentPhoto),
-                ),
-              ),
-            ),
+            child: widget.allPhotos != null && widget.allPhotos!.isNotEmpty
+                ? PageView.builder(
+                    controller: _pageController,
+                    itemCount: widget.allPhotos!.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                        _currentPhoto = widget.allPhotos![index];
+                        _captionController.text = _currentPhoto.caption ?? '';
+                        _isEditingCaption = false;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final photo = widget.allPhotos![index];
+                      return Center(
+                        child: Hero(
+                          tag: '${widget.heroTag}_$index',
+                          child: InteractiveViewer(
+                            minScale: 0.5,
+                            maxScale: 4,
+                            child: _buildPhotoImage(photo),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Center(
+                    child: Hero(
+                      tag: widget.heroTag,
+                      child: InteractiveViewer(
+                        minScale: 0.5,
+                        maxScale: 4,
+                        child: _buildPhotoImage(currentPhotoFromProvider),
+                      ),
+                    ),
+                  ),
           ),
 
           // Photo info
@@ -100,18 +144,33 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🆕 Caption editor
-                _buildCaptionSection(context, currentPhoto),
+                // Page indicator (jika ada multiple photos)
+                if (widget.allPhotos != null && widget.allPhotos!.length > 1)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        '${_currentIndex + 1} / ${widget.allPhotos!.length}',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                
+                // Caption editor
+                _buildCaptionSection(context, currentPhotoFromProvider),
                 
                 const SizedBox(height: 12),
                 
-                // 🆕 Category selector
-                _buildCategorySection(context, currentPhoto),
+                // Category selector
+                _buildCategorySection(context, currentPhotoFromProvider),
 
                 const SizedBox(height: 12),
 
                 // Milestone badge
-                if (currentPhoto.isMilestone)
+                if (currentPhotoFromProvider.isMilestone)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -142,7 +201,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
                 // Date
                 Text(
-                  _formatDate(currentPhoto.dateTaken),
+                  _formatDate(currentPhotoFromProvider.dateTaken),
                   style: TextStyle(
                     color: Colors.grey[400],
                     fontSize: 14,
@@ -156,7 +215,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  /// 🆕 Build caption section with edit capability
+  /// ðŸ†• Build caption section with edit capability
   Widget _buildCaptionSection(BuildContext context, PhotoEntity photo) {
     if (_isEditingCaption) {
       return Row(
@@ -233,7 +292,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  /// 🆕 Build category section
+  /// ðŸ†• Build category section
   Widget _buildCategorySection(BuildContext context, PhotoEntity photo) => GestureDetector(
       onTap: () => _showCategoryPicker(context, photo),
       child: Container(
@@ -266,7 +325,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       ),
     );
 
-  /// 🆕 Toggle favorite status
+  /// ðŸ†• Toggle favorite status
   Future<void> _toggleFavorite(BuildContext context, PhotoEntity photo) async {
     final provider = context.read<PhotoProvider>();
     final success = await provider.togglePhotoFavorite(photo.id);
@@ -286,7 +345,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// 🆕 Save caption
+  /// ðŸ†• Save caption
   Future<void> _saveCaption(BuildContext context, PhotoEntity photo) async {
     final newCaption = _captionController.text.trim();
     final provider = context.read<PhotoProvider>();
@@ -308,8 +367,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// 🆕 Show category picker
-  /// ✅ UPDATED: Show category picker using CategoryProvider
+  /// ðŸ†• Show category picker
+  /// âœ… UPDATED: Show category picker using CategoryProvider
   Future<void> _showCategoryPicker(BuildContext context, PhotoEntity photo) async {
     final categoryProvider = context.read<CategoryProvider>();
     final authProvider = context.read<AuthProvider>();
@@ -380,7 +439,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _parseColor(category.colorHex).withOpacity(0.15),
+                      color: _parseColor(category.colorHex).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -440,7 +499,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// ✅ Helper: Parse color hex string to Color
+  /// âœ… Helper: Parse color hex string to Color
   Color _parseColor(String hexColor) {
     try {
       return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
@@ -449,7 +508,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// ✅ Helper: Convert icon name string to IconData
+  /// âœ… Helper: Convert icon name string to IconData
   IconData _getIconData(String iconName) {
     const iconMap = {
       'restaurant': Icons.restaurant,
@@ -542,7 +601,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  Future<void> _handleDelete(BuildContext context) async {
+  Future<void> _handleDelete() async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => const ConfirmationDialog(
@@ -555,7 +614,21 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
     if ((confirmed ?? false) && mounted) {
       final provider = context.read<PhotoProvider>();
-      final success = await provider.deletePhoto(widget.photo.id);
+      
+      // Delete dengan remote sync support
+      final success = await provider.deletePhoto(
+        _currentPhoto.id,
+        onDeleteRemote: (photoId) async {
+          // Hapus dari Firebase juga via SyncProvider
+          try {
+            final syncProvider = context.read<SyncProvider>();
+            await syncProvider.deletePhotoRemote(photoId);
+          } catch (e) {
+            debugPrint('Failed to delete from remote (SyncProvider not available): $e');
+            // Continue even if remote deletion fails
+          }
+        },
+      );
 
       if (mounted) {
         if (success) {
