@@ -56,8 +56,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: AppBar(
         title: const Text(TextConstants.navGallery),
         actions: [
@@ -237,10 +236,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
         child: const Icon(Icons.add_a_photo),
       ),
     );
-  }
 
-  Widget _buildErrorWidget(String errorMessage) {
-    return Center(
+  Widget _buildErrorWidget(String errorMessage) => Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
@@ -266,7 +263,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ),
       ),
     );
-  }
 
   String _getEmptyStateTitle() {
     if (_showFavoritesOnly) {
@@ -720,8 +716,7 @@ class _PhotoCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
+  Widget build(BuildContext context) => GestureDetector(
       onTap: onTap,
       child: Hero(
         tag: heroTag,
@@ -753,7 +748,6 @@ class _PhotoCard extends StatelessWidget {
         ),
       ),
     );
-  }
 
   Widget _buildPhotoImage() {
     if (photo.cloudUrl != null && photo.cloudUrl!.isNotEmpty) {
@@ -773,8 +767,7 @@ class _PhotoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildCloudImage(String url) {
-    return CachedNetworkImage(
+  Widget _buildCloudImage(String url) => CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
       placeholder: (context, url) => Container(
@@ -791,7 +784,6 @@ class _PhotoCard extends StatelessWidget {
         ),
       ),
     );
-  }
 
   Widget _buildLocalImage(String path) {
     final file = File(path);
@@ -809,15 +801,13 @@ class _PhotoCard extends StatelessWidget {
     return Image.file(
       file,
       fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
+      errorBuilder: (context, error, stackTrace) => Container(
           color: Colors.grey[300],
           child: const Icon(
             Icons.broken_image,
             color: Colors.grey,
           ),
-        );
-      },
+        ),
     );
   }
 }

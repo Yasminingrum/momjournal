@@ -4,15 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
-import '/core/constants/color_constants.dart';
 import '/core/constants/text_constants.dart';
 import '/data/datasources/local/hive_database.dart';
-import '/data/repositories/sync_repository.dart';
 import '/presentation/providers/auth_provider.dart';
 import '/presentation/providers/journal_provider.dart';
-import '/presentation/providers/photo_provider.dart';
 import '/presentation/providers/schedule_provider.dart';
-import '/presentation/providers/sync_provider.dart';
 import '/presentation/screens/gallery/gallery_screen.dart';
 import '/presentation/screens/journal/journal_screen.dart';
 import '/presentation/screens/schedule/schedule_screen.dart';
@@ -119,16 +115,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadData() async {
     final scheduleProvider = context.read<ScheduleProvider>();
     final journalProvider = context.read<JournalProvider>();
-    final photoProvider = context.read<PhotoProvider>();
 
     await Future.wait([
       scheduleProvider.loadTodaySchedules(),
       journalProvider.loadTodayEntry(),
       journalProvider.loadWeeklyMoodStats(),
-      photoProvider.init(),
     ]);
   }
-
 
   // Navigate to Schedule tab
   void _navigateToSchedule() {
@@ -155,17 +148,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Scaffold(
       body: RefreshIndicator(
         onRefresh: _loadData,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            // Custom App Bar with gradient
+            // Minimalist App Bar
             SliverAppBar(
-              expandedHeight: 200,
+              expandedHeight: 140,
               floating: false,
               pinned: true,
+              backgroundColor: theme.primaryColor,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
                   decoration: BoxDecoration(
@@ -173,14 +170,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        ColorConstants.primaryColor,
-                        ColorConstants.primaryColor.withValues(alpha: 0.7),
+                        theme.primaryColor,
+                        theme.primaryColor.withValues(alpha: 0.8),
                       ],
                     ),
                   ),
                   child: SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -199,18 +196,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               padding: const EdgeInsets.all(16),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildSyncStatus(),
-                  const SizedBox(height: 16),
-                  _buildQuickStats(),
-                  const SizedBox(height: 24),
                   _buildQuickActions(),
-                  const SizedBox(height: 24),
-                  _buildTodayAgenda(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   _buildMoodSection(),
-                  const SizedBox(height: 24),
-                  _buildPhotoMemories(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
+                  _buildTodayAgenda(),
+                  const SizedBox(height: 80),
                 ]),
               ),
             ),
@@ -218,6 +209,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
+  }
 
   Widget _buildGreeting() {
     final hour = DateTime.now().hour;
@@ -243,7 +235,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           greeting,
           style: const TextStyle(
             color: Colors.white70,
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -252,294 +244,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
           'Hai, $displayName! 👋',
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 28,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          TextConstants.appTagline,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSyncStatus() => Consumer<SyncProvider>(
-      builder: (context, syncProvider, child) {
-        if (syncProvider.status == SyncStatus.idle) {
-          return const SizedBox.shrink();
-        }
-
-        Color bgColor;
-        IconData icon;
-        String message;
-
-        switch (syncProvider.status) {
-          case SyncStatus.syncing:
-            bgColor = Colors.blue.shade50;
-            icon = Icons.sync;
-            message = 'Sedang sync data...';
-          case SyncStatus.success:
-            bgColor = Colors.green.shade50;
-            icon = Icons.check_circle;
-            message = 'Sync berhasil';
-          case SyncStatus.error:
-            bgColor = Colors.red.shade50;
-            icon = Icons.error;
-            message = syncProvider.errorMessage ?? 'Sync gagal';
-          default:
-            return const SizedBox.shrink();
-        }
-
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: 20, color: bgColor == Colors.blue.shade50 ? Colors.blue : bgColor == Colors.green.shade50 ? Colors.green : Colors.red),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: bgColor == Colors.blue.shade50 ? Colors.blue.shade900 : bgColor == Colors.green.shade50 ? Colors.green.shade900 : Colors.red.shade900,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  Widget _buildQuickStats() => Consumer3<ScheduleProvider, JournalProvider, PhotoProvider>(
-      builder: (context, scheduleProvider, journalProvider, photoProvider, child) => Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                icon: Icons.event_note,
-                label: 'Jadwal Hari Ini',
-                value: '${scheduleProvider.todaySchedules.length}',
-                color: ColorConstants.categoryHealth,
-                onTap: _navigateToSchedule,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FutureBuilder<int>(
-                future: photoProvider.getPhotoCount(),
-                builder: (context, snapshot) => _StatCard(
-                    icon: Icons.photo_library,
-                    label: 'Total Foto',
-                    value: '${snapshot.data ?? 0}',
-                    color: ColorConstants.categoryMilestone,
-                    onTap: _navigateToGallery,
-                  ),
-              ),
-            ),
-          ],
-        ),
-    );
-
-  Widget _buildQuickActions() => Column(
+  Widget _buildQuickActions() {
+    final theme = Theme.of(context);
+    
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Aksi Cepat',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const Icon(Icons.bolt, color: ColorConstants.primaryColor, size: 20),
-          ],
+        Text(
+          'Quick Actions',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
               child: _QuickActionCard(
-                icon: Icons.event_note,
-                label: 'Tambah\nJadwal',
-                gradient: LinearGradient(
-                  colors: [
-                    ColorConstants.categoryHealth, 
-                    ColorConstants.categoryHealth.withValues(alpha: 0.7),
-                  ],
-                ),
+                icon: Icons.photo_library_outlined,
+                label: 'Add Gallery',
+                color: theme.primaryColor,
+                onTap: _navigateToGallery,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _QuickActionCard(
+                icon: Icons.calendar_today_outlined,
+                label: 'Add Schedule',
+                color: theme.primaryColor,
                 onTap: _navigateToSchedule,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _QuickActionCard(
-                icon: Icons.edit_note,
-                label: 'Tulis\nJurnal',
-                gradient: LinearGradient(
-                  colors: [
-                    ColorConstants.primaryColor, 
-                    ColorConstants.primaryColor.withValues(alpha: 0.7),
-                  ],
-                ),
+                icon: Icons.book_outlined,
+                label: 'Add Journal',
+                color: theme.primaryColor,
                 onTap: _navigateToJournal,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _QuickActionCard(
-                icon: Icons.add_a_photo,
-                label: 'Upload\nFoto',
-                gradient: LinearGradient(
-                  colors: [
-                    ColorConstants.categoryMilestone, 
-                    ColorConstants.categoryMilestone.withValues(alpha: 0.7),
-                  ],
-                ),
-                onTap: _navigateToGallery,
               ),
             ),
           ],
         ),
       ],
     );
+  }
 
-  Widget _buildTodayAgenda() => Consumer<ScheduleProvider>(
-      builder: (context, provider, child) {
-        final schedules = provider.todaySchedules;
-        final completedCount = schedules.where((s) => s.isCompleted).length;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  TextConstants.todayAgenda,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                if (schedules.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: ColorConstants.primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '$completedCount/${schedules.length} selesai',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ColorConstants.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (schedules.isEmpty)
-              Card(
-                elevation: 0,
-                color: Colors.grey[50],
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Icon(Icons.event_available, size: 48, color: Colors.grey[400]),
-                        const SizedBox(height: 12),
-                        Text(
-                          TextConstants.noSchedules,
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            else
-              ...schedules.take(3).map(
-                    (schedule) => Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        leading: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: _getCategoryColor(schedule.category).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            _getCategoryIcon(schedule.category),
-                            color: _getCategoryColor(schedule.category),
-                          ),
-                        ),
-                        title: Text(
-                          schedule.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            decoration: schedule.isCompleted ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${schedule.dateTime.hour}:'
-                          '${schedule.dateTime.minute.toString().padLeft(2, '0')}',
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                        trailing: schedule.isCompleted
-                            ? Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 20,
-                                ),
-                              )
-                            : null,
-                      ),
-                    ),
-                  ),
-            if (schedules.length > 3)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TextButton(
-                  onPressed: _navigateToSchedule,
-                  child: Text('Lihat semua ${schedules.length} jadwal'),
-                ),
-              ),
-          ],
-        );
-      },
-    );
-
-  Widget _buildMoodSection() => Consumer<JournalProvider>(
+  Widget _buildMoodSection() {
+    final theme = Theme.of(context);
+    
+    return Consumer<JournalProvider>(
       builder: (context, provider, child) {
         final totalEntries = provider.moodStats.values.fold<int>(0, (sum, count) => sum + count);
         
@@ -551,172 +314,283 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   TextConstants.moodThisWeek,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (totalEntries > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: ColorConstants.primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '$totalEntries catatan',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: ColorConstants.primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
+                  GestureDetector(
+                    onTap: _navigateToJournal,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Lihat Semua',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 12,
+                          color: theme.primaryColor,
+                        ),
+                      ],
                     ),
                   ),
               ],
             ),
             const SizedBox(height: 12),
-            Card(
-              elevation: 0,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey.shade200),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: totalEntries == 0
-                    ? Center(
+              child: totalEntries == 0
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Column(
                           children: [
-                            Icon(Icons.mood, size: 48, color: Colors.grey[400]),
-                            const SizedBox(height: 12),
+                            Icon(Icons.mood_outlined, size: 32, color: theme.disabledColor),
+                            const SizedBox(height: 8),
                             Text(
-                              'Belum ada catatan mood minggu ini',
-                              style: TextStyle(color: Colors.grey[600]),
+                              'Belum ada catatan mood',
+                              style: TextStyle(
+                                color: theme.disabledColor,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildMoodStat('😄', provider.moodStats[MoodType.veryHappy] ?? 0),
-                          _buildMoodStat('🙂', provider.moodStats[MoodType.happy] ?? 0),
-                          _buildMoodStat('😐', provider.moodStats[MoodType.neutral] ?? 0),
-                          _buildMoodStat('☹️', provider.moodStats[MoodType.sad] ?? 0),
-                          _buildMoodStat('😢', provider.moodStats[MoodType.verySad] ?? 0),
-                        ],
                       ),
-              ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildMoodStat(context, '😄', provider.moodStats[MoodType.veryHappy] ?? 0),
+                        _buildMoodStat(context, '🙂', provider.moodStats[MoodType.happy] ?? 0),
+                        _buildMoodStat(context, '😐', provider.moodStats[MoodType.neutral] ?? 0),
+                        _buildMoodStat(context, '☹️', provider.moodStats[MoodType.sad] ?? 0),
+                        _buildMoodStat(context, '😢', provider.moodStats[MoodType.verySad] ?? 0),
+                      ],
+                    ),
             ),
           ],
         );
       },
     );
+  }
 
-  Widget _buildMoodStat(String emoji, int count) => Column(
+  Widget _buildMoodStat(BuildContext context, String emoji, int count) {
+    final theme = Theme.of(context);
+    
+    return Column(
       children: [
-        Text(emoji, style: const TextStyle(fontSize: 36)),
-        const SizedBox(height: 8),
+        Text(emoji, style: const TextStyle(fontSize: 28)),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
           decoration: BoxDecoration(
             color: count > 0 
-                ? ColorConstants.primaryColor.withValues(alpha: 0.1) 
-                : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
+                ? theme.primaryColor.withValues(alpha: 0.1) 
+                : theme.disabledColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             count.toString(),
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: count > 0 ? ColorConstants.primaryColor : Colors.grey,
+              fontSize: 12,
+              color: count > 0 ? theme.primaryColor : theme.disabledColor,
             ),
           ),
         ),
       ],
     );
+  }
 
-  Widget _buildPhotoMemories() => Consumer<PhotoProvider>(
-      builder: (context, provider, child) => Column(
+  Widget _buildTodayAgenda() {
+    final theme = Theme.of(context);
+    
+    return Consumer<ScheduleProvider>(
+      builder: (context, provider, child) {
+        final schedules = provider.todaySchedules;
+        final completedCount = schedules.where((s) => s.isCompleted).length;
+        
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  TextConstants.photoMemories,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  TextConstants.todayAgenda,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                TextButton.icon(
-                  onPressed: _navigateToGallery,
-                  icon: const Icon(Icons.arrow_forward, size: 18),
-                  label: const Text('Lihat Semua'),
-                ),
+                if (schedules.isNotEmpty)
+                  GestureDetector(
+                    onTap: _navigateToSchedule,
+                    child: Row(
+                      children: [
+                        Text(
+                          '$completedCount/${schedules.length} selesai',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.primaryColor,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 12,
+                          color: theme.primaryColor,
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
-            FutureBuilder<int>(
-              future: provider.getPhotoCount(),
-              builder: (context, snapshot) {
-                final count = snapshot.data ?? 0;
-                return Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  child: InkWell(
-                    onTap: _navigateToGallery,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Center(
-                        child: Column(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: ColorConstants.categoryMilestone.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.photo_library,
-                                size: 48,
-                                color: ColorConstants.categoryMilestone,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              '$count Foto',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Kenangan tersimpan',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
+            if (schedules.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  color: theme.cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: theme.dividerColor.withValues(alpha: 0.3)),
+                ),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.event_available, size: 32, color: theme.disabledColor),
+                      const SizedBox(height: 8),
+                      Text(
+                        TextConstants.noSchedules,
+                        style: TextStyle(
+                          color: theme.disabledColor,
+                          fontSize: 13,
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ...schedules.take(5).map(
+                    (schedule) => Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        leading: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: _getCategoryColor(theme, schedule.category)
+                                .withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            _getCategoryIcon(schedule.category),
+                            color: _getCategoryColor(theme, schedule.category),
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          schedule.title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            decoration: schedule.isCompleted
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: schedule.isCompleted
+                                ? theme.disabledColor
+                                : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${schedule.dateTime.hour}:'
+                          '${schedule.dateTime.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.textTheme.bodySmall?.color,
+                          ),
+                        ),
+                        trailing: schedule.isCompleted
+                            ? Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                  size: 16,
+                                ),
+                              )
+                            : InkWell(
+                                onTap: () async {
+                                  // Gunakan copyWith untuk update
+                                  final updatedSchedule = schedule.copyWith(
+                                    isCompleted: true,
+                                    updatedAt: DateTime.now(),
+                                  );
+                                  
+                                  await context
+                                      .read<ScheduleProvider>()
+                                      .updateSchedule(updatedSchedule);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: theme.disabledColor.withValues(alpha: 0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.circle_outlined,
+                                    color: theme.disabledColor,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
                       ),
                     ),
                   ),
-                );
-              },
-            ),
+            if (schedules.length > 5)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Center(
+                  child: TextButton(
+                    onPressed: _navigateToSchedule,
+                    child: Text('Lihat semua ${schedules.length} jadwal'),
+                  ),
+                ),
+              ),
           ],
-        ),
+        );
+      },
     );
+  }
 
-  Color _getCategoryColor(String category) {
+  Color _getCategoryColor(ThemeData theme, String category) {
     switch (category) {
       case 'Pemberian Makan/Menyusui':
         return Colors.orange;
@@ -727,7 +601,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 'Pencapaian':
         return Colors.purple;
       default:
-        return Colors.grey;
+        return theme.primaryColor;
     }
   }
 
@@ -747,99 +621,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  const _StatCard({
+class _QuickActionCard extends StatelessWidget {
+  const _QuickActionCard({
     required this.icon,
     required this.label,
-    required this.value,
     required this.color,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
-  final String value;
   final Color color;
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    return Card(
       elevation: 0,
-      color: Colors.white,
+      color: color.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(icon, color: color, size: 28),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-}
-
-class _QuickActionCard extends StatelessWidget {
-  const _QuickActionCard({
-    required this.icon,
-    required this.label,
-    required this.gradient,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final Gradient gradient;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) => Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: gradient,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
-          child: Column(
-            children: [
-              Icon(icon, color: Colors.white, size: 32),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.textTheme.bodyMedium?.color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -848,4 +667,5 @@ class _QuickActionCard extends StatelessWidget {
         ),
       ),
     );
+  }
 }
