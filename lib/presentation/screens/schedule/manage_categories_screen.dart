@@ -409,48 +409,63 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
 
   IconData _getIconData(String iconName) {
     switch (iconName) {
-      case 'restaurant':
-        return Icons.restaurant;
+      case 'beach_access':
+        return Icons.beach_access;
       case 'bedtime':
         return Icons.bedtime;
-      case 'medical_services':
-        return Icons.medical_services;
-      case 'stars':
-        return Icons.stars;
+      case 'brush':
+        return Icons.brush;
+      case 'cake':
+        return Icons.cake;
       case 'celebration':
         return Icons.celebration;
+      case 'family_restroom':
+        return Icons.family_restroom;
+      case 'favorite':
+        return Icons.favorite;
+      case 'wb_sunny':
+        return Icons.wb_sunny;
+      case 'medical_services':
+        return Icons.medical_services;
+      case 'music_note':
+        return Icons.music_note;
+      case 'pets':
+        return Icons.pets;
+      case 'restaurant':
+        return Icons.restaurant;
       case 'school':
         return Icons.school;
       case 'sports_soccer':
         return Icons.sports_soccer;
-      case 'music_note':
-        return Icons.music_note;
-      case 'brush':
-        return Icons.brush;
-      case 'favorite':
-        return Icons.favorite;
-      case 'pets':
-        return Icons.pets;
-      case 'cake':
-        return Icons.cake;
+      case 'stars':
+        return Icons.stars;
+      case 'toys':
+        return Icons.toys;
+      case 'work':
+        return Icons.work;
       default:
-        return Icons.more_horiz;
+        return Icons.more_horiz; // Lainnya
     }
   }
 
   final List<Map<String, String>> _availableIcons = [
-    {'name': 'restaurant', 'label': 'Makan'},
+    {'name': 'beach_access', 'label': 'Liburan'},
     {'name': 'bedtime', 'label': 'Tidur'},
-    {'name': 'medical_services', 'label': 'Kesehatan'},
-    {'name': 'stars', 'label': 'Pencapaian'},
+    {'name': 'brush', 'label': 'Seni'},
+    {'name': 'cake', 'label': 'Ulang Tahun'},
     {'name': 'celebration', 'label': 'Perayaan'},
+    {'name': 'family_restroom', 'label': 'Keluarga'},
+    {'name': 'favorite', 'label': 'Favorit'},
+    {'name': 'medical_services', 'label': 'Kesehatan'},
+    {'name': 'wb_sunny', 'label': 'Keseharian'},
+    {'name': 'music_note', 'label': 'Musik'},
+    {'name': 'pets', 'label': 'Hewan'},
+    {'name': 'restaurant', 'label': 'Makan'},
     {'name': 'school', 'label': 'Sekolah'},
     {'name': 'sports_soccer', 'label': 'Olahraga'},
-    {'name': 'music_note', 'label': 'Musik'},
-    {'name': 'brush', 'label': 'Seni'},
-    {'name': 'favorite', 'label': 'Favorit'},
-    {'name': 'pets', 'label': 'Hewan'},
-    {'name': 'cake', 'label': 'Ulang Tahun'},
+    {'name': 'stars', 'label': 'Pencapaian'},
+    {'name': 'toys', 'label': 'Bermain'},
+    {'name': 'work', 'label': 'Pekerjaan'},
     {'name': 'more_horiz', 'label': 'Lainnya'},
   ];
 

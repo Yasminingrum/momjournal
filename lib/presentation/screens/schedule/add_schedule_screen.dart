@@ -260,13 +260,15 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           } else {
             // Set default end date to next day
             _endDateTime = _selectedDateTime.add(const Duration(days: 1));
+            // Nonaktifkan recurring jika multi-hari diaktifkan
+            _isRecurring = false;
           }
         });
       },
       title: const Text('Kegiatan Multi-Hari'),
       subtitle: _isMultiDay
           ? Text(
-              'Jadwal akan berlangsung beberapa hari',
+              'Dari tanggal mulai sampai akhir',
               style: TextStyle(fontSize: 12, color: Colors.grey[600]),
             )
           : null,
@@ -538,6 +540,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
           if (_isMultiDay && _endDateTime != null) {
             if (_endDateTime!.isBefore(_selectedDateTime)) {
               _endDateTime = _selectedDateTime.add(const Duration(days: 1));
+            // Nonaktifkan recurring jika multi-hari diaktifkan
+            _isRecurring = false;
             }
           }
         });
@@ -756,7 +760,14 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         CheckboxListTile(
           value: _isRecurring,
           onChanged: (value) {
-            setState(() => _isRecurring = value ?? false);
+            setState(() {
+              _isRecurring = value ?? false;
+              // Nonaktifkan multi-hari jika recurring diaktifkan
+              if (_isRecurring) {
+                _isMultiDay = false;
+                _endDateTime = null;
+              }
+            });
           },
           title: const Text('Jadwal Berulang'),
           subtitle: _isRecurring

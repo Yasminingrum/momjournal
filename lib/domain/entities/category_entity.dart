@@ -173,7 +173,7 @@ class DefaultCategories {
   static const List<Map<String, dynamic>> schedule = [
     {
       'name': 'Olahraga',
-      'icon': 'sports',
+      'icon': 'sports_soccer',
       'colorHex': '#66BB6A',
       'type': 'schedule',
     },
