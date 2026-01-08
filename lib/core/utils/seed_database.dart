@@ -206,8 +206,7 @@ class SeedDataButton extends StatelessWidget {
   const SeedDataButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       child: ListTile(
         leading: const Icon(Icons.science, color: Colors.orange),
         title: const Text('Seed Test Data'),
@@ -237,7 +236,7 @@ class SeedDataButton extends StatelessWidget {
               ),
             );
             
-            if (confirmed == true && context.mounted) {
+            if ((confirmed ?? false) && context.mounted) {
               // Tampilkan loading
               showDialog<void>(
                 context: context,
@@ -296,7 +295,6 @@ class SeedDataButton extends StatelessWidget {
         ),
       ),
     );
-  }
 }
 
 /// Widget tombol untuk clear data (bisa ditaruh di Settings)
@@ -304,8 +302,7 @@ class ClearDataButton extends StatelessWidget {
   const ClearDataButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context) => Card(
       child: ListTile(
         leading: const Icon(Icons.delete_forever, color: Colors.red),
         title: const Text('Clear All Data'),
@@ -339,7 +336,7 @@ class ClearDataButton extends StatelessWidget {
               ),
             );
             
-            if (confirmed == true && context.mounted) {
+            if ((confirmed ?? false) && context.mounted) {
               // Tampilkan loading
               showDialog<void>(
                 context: context,
@@ -397,5 +394,4 @@ class ClearDataButton extends StatelessWidget {
         ),
       ),
     );
-  }
 }

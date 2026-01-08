@@ -27,12 +27,12 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
   late final TextEditingController _descriptionController;
 
   late DateTime _selectedDateTime;
-  late String _selectedCategory;  // âœ… String instead of enum
+  late String _selectedCategory;  // String instead of enum
   late bool _reminderEnabled;
   late int _reminderMinutes;
   bool _isLoading = false;
   
-  // ðŸ†• Multi-day support
+  // Multi-day support
   late bool _isMultiDay;
   DateTime? _endDateTime;
 
@@ -43,11 +43,11 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     _titleController = TextEditingController(text: widget.schedule.title);
     _descriptionController = TextEditingController(text: widget.schedule.notes ?? '');
     _selectedDateTime = widget.schedule.dateTime;
-    _selectedCategory = widget.schedule.category;  // âœ… Already String
+    _selectedCategory = widget.schedule.category;  // Already String
     _reminderEnabled = widget.schedule.hasReminder;
     _reminderMinutes = widget.schedule.reminderMinutes;
     
-    // ðŸ†• Initialize multi-day from existing schedule
+    // Initialize multi-day from existing schedule
     _isMultiDay = widget.schedule.isMultiDay;
     _endDateTime = widget.schedule.endDateTime;
   }
@@ -119,10 +119,10 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
 
             const SizedBox(height: 16),
 
-            // ðŸ†• Multi-day checkbox
+            // Multi-day checkbox
             _buildMultiDayCheckbox(),
 
-            // ðŸ†• Conditional end date picker
+            // Conditional end date picker
             if (_isMultiDay) ...[
               const SizedBox(height: 16),
               _buildEndDatePicker(theme),
@@ -238,7 +238,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
       ),
     );
 
-  // ðŸ†• Multi-day checkbox
+  // Multi-day checkbox
   Widget _buildMultiDayCheckbox() => CheckboxListTile(
       value: _isMultiDay,
       onChanged: (value) {
@@ -262,7 +262,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
       contentPadding: EdgeInsets.zero,
     );
 
-  // ðŸ†• End date picker
+  // End date picker
   Widget _buildEndDatePicker(ThemeData theme) => InkWell(
       onTap: _showEndDatePicker,
       borderRadius: BorderRadius.circular(12),
@@ -472,7 +472,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
     }
   }
 
-  // ðŸ†• End date picker
+  // End date picker
   Future<void> _showEndDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -538,7 +538,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
   }
 
 
-  // ðŸ†• Calculate duration
+  // Calculate duration
   int _calculateDuration() {
     if (_endDateTime == null) {
       return 0;
@@ -571,7 +571,7 @@ class _EditScheduleScreenState extends State<EditScheduleScreen> {
         title: _titleController.text.trim(),
         category: _selectedCategory,
         dateTime: _selectedDateTime,
-        endDateTime: _isMultiDay ? _endDateTime : null,  // ðŸ†• Multi-day support
+        endDateTime: _isMultiDay ? _endDateTime : null,  // Multi-day support
         notes: _descriptionController.text.trim().isEmpty
             ? null
             : _descriptionController.text.trim(),

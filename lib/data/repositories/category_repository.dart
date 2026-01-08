@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/category_entity.dart';
 import '../datasources/local/category_local_datasource.dart';
 import '../datasources/remote/category_remote_datasource.dart';
@@ -101,20 +102,20 @@ class CategoryRepository {
     try {
       await localDataSource.initializeDefaultCategories(userId);
       
-      // ✅ FIX: IMMEDIATELY sync defaults to Firebase
+      // FIX: IMMEDIATELY sync defaults to Firebase
       final defaults = await localDataSource.getCategories(userId);
       
       // Upload to Firebase synchronously
       try {
         await remoteDataSource.syncCategories(defaults);
-        print('✅ Default categories synced to Firebase');
+        debugPrint('✅ Default categories synced to Firebase');
         
         // Mark all as synced
         for (final category in defaults) {
           await localDataSource.markAsSynced(category.id);
         }
       } catch (syncError) {
-        print('⚠️ Failed to sync defaults to Firebase: $syncError');
+        debugPrint('Failed to sync defaults to Firebase: $syncError');
         // Continue anyway, will sync later
       }
     } catch (e) {
@@ -186,16 +187,6 @@ class CategoryRepository {
         .createCategory(category)
         .then((_) => localDataSource.markAsSynced(category.id))
         .catchError((_) {
-      // Will sync later
-    });
-  }
-
-  void _syncCategoriesToRemote(List<CategoryEntity> categories) {
-    remoteDataSource.syncCategories(categories).then((_) {
-      for (final category in categories) {
-        localDataSource.markAsSynced(category.id);
-      }
-    }).catchError((_) {
       // Will sync later
     });
   }

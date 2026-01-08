@@ -3,15 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '/domain/entities/schedule_entity.dart';
+import '/presentation/providers/auth_provider.dart';
 import '/presentation/providers/category_provider.dart';
 import '/presentation/providers/schedule_provider.dart';
 import 'add_schedule_screen.dart';
 import 'manage_categories_screen.dart';
 import 'schedule_detail_screen.dart';
 
-/// Schedule Screen with List, Month, Week, and Day views
-/// FIXED VERSION - Multi-day schedule synchronized across all views
-/// Location: lib/presentation/screens/schedule/schedule_screen.dart
 class ScheduleScreen extends StatefulWidget {
   const ScheduleScreen({super.key});
 
@@ -41,6 +39,23 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Future<void> _loadSchedules() async {
+  if (!mounted) {
+    return;  // Guard against unmounted widget
+  }
+  
+    final authProvider = context.read<AuthProvider>();
+    final categoryProvider = context.read<CategoryProvider>();
+    
+    final userId = authProvider.user?.uid;
+    if (userId != null && categoryProvider.categories.isEmpty) {
+      await categoryProvider.initializeDefaultCategories(userId);
+      await categoryProvider.loadCategories(userId);
+    }
+
+    if (!mounted) {
+      return;
+    }
+    
     final scheduleProvider = context.read<ScheduleProvider>();
     await scheduleProvider.loadSchedulesForMonth(
       _focusedDay.year,

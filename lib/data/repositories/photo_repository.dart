@@ -66,14 +66,14 @@ class PhotoRepository {
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
 
-  /// 🆕 Get favorite photos only
+  ///Get favorite photos only
   Future<List<PhotoEntity>> getFavoritePhotos() async => _box.values
         .map((model) => model.toEntity())
         .where((photo) => photo.isFavorite)
         .toList()
       ..sort((a, b) => b.dateTaken.compareTo(a.dateTaken));
 
-  /// 🆕 Get photos by category
+  ///Get photos by category
   Future<List<PhotoEntity>> getPhotosByCategory(String category) async => _box.values
         .map((model) => model.toEntity())
         .where((photo) => photo.category == category)
@@ -106,7 +106,7 @@ class PhotoRepository {
       if (photo.localPath != null) {
         try {
           final file = File(photo.localPath!);
-          if (await file.exists()) {
+          if (file.existsSync()) {
             await file.delete();
           }
         } catch (e) {
@@ -153,7 +153,7 @@ class PhotoRepository {
       if (photo.localPath != null) {
         try {
           final file = File(photo.localPath!);
-          if (await file.exists()) {
+          if (file.existsSync()) {
             await file.delete();
           }
         } catch (e) {

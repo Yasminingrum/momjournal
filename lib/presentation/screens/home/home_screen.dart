@@ -129,7 +129,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ]);
   }
 
-  // ❌ DELETED: _performSync() - moved to AuthProvider for centralized sync
 
   // Navigate to Schedule tab
   void _navigateToSchedule() {
@@ -193,7 +192,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
               ),
-              // ❌ DELETED: actions with sync button - use Account Settings instead
             ),
             
             // Content
@@ -533,7 +531,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: TextButton(
                   onPressed: _navigateToSchedule,
-                  child: Text('Lihat semua ${schedules.length} jadwal â†’'),
+                  child: Text('Lihat semua ${schedules.length} jadwal'),
                 ),
               ),
           ],

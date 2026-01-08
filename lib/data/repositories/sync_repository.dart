@@ -69,7 +69,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<SyncResult> syncAll() async {
-    debugPrint('ðŸ”„ Starting full sync with soft delete support...');
+    debugPrint('Starting full sync with soft delete support...');
 
     int schedulesCount = 0;
     int journalsCount = 0;
@@ -80,30 +80,30 @@ class SyncRepositoryImpl implements SyncRepository {
       await syncSchedules();
       final schedules = scheduleLocal.getAllSchedules();
       schedulesCount = schedules.length;
-      debugPrint('âœ… Schedules synced: $schedulesCount items');
+      debugPrint('Schedules synced: $schedulesCount items');
     } catch (e) {
       errors.add('Schedules: $e');
-      debugPrint('âŒ Schedule sync failed: $e');
+      debugPrint('Schedule sync failed: $e');
     }
 
     try {
       await syncJournals();
       final journals = journalLocal.getAllJournals();
       journalsCount = journals.length;
-      debugPrint('âœ… Journals synced: $journalsCount items');
+      debugPrint('Journals synced: $journalsCount items');
     } catch (e) {
       errors.add('Journals: $e');
-      debugPrint('âŒ Journal sync failed: $e');
+      debugPrint('Journal sync failed: $e');
     }
 
     try {
       await syncPhotos();
       final photos = photoLocal.getAllPhotos();
       photosCount = photos.length;
-      debugPrint('âœ… Photos synced: $photosCount items');
+      debugPrint('Photos synced: $photosCount items');
     } catch (e) {
       errors.add('Photos: $e');
-      debugPrint('âŒ Photo sync failed: $e');
+      debugPrint('Photo sync failed: $e');
     }
 
     final result = SyncResult(
@@ -114,9 +114,9 @@ class SyncRepositoryImpl implements SyncRepository {
     );
 
     if (errors.isEmpty) {
-      debugPrint('âœ… Full sync completed successfully: ${result.totalSynced} items');
+      debugPrint('Full sync completed successfully: ${result.totalSynced} items');
     } else {
-      debugPrint('âš ï¸ Sync completed with ${errors.length} error(s)');
+      debugPrint('Sync completed with ${errors.length} error(s)');
     }
 
     return result;
@@ -127,7 +127,7 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncSchedules() async {
     try {
-      debugPrint('ðŸ”„ Syncing schedules with soft delete support...');
+      debugPrint('Syncing schedules with soft delete support...');
 
       // Get ALL items INCLUDING deleted from both sources
       final remoteEntities = await scheduleRemote.getAllSchedulesIncludingDeleted();
@@ -137,7 +137,7 @@ class SyncRepositoryImpl implements SyncRepository {
       final remoteMap = {for (final s in remoteEntities) s.id: s};
       final localMap = {for (final s in localModels) s.id: s};
 
-      // SYNC REMOTE â†’ LOCAL
+      // SYNC REMOTE LOCAL
       for (final remoteEntity in remoteEntities) {
         final localModel = localMap[remoteEntity.id];
 
@@ -160,12 +160,12 @@ class SyncRepositoryImpl implements SyncRepository {
             // Remote is newer, update local
             final model = _scheduleEntityToModel(remoteEntity);
             await scheduleLocal.updateSchedule(model);
-            debugPrint('âœ… Updated schedule from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+            debugPrint('Updated schedule from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
           }
         }
       }
 
-      // SYNC LOCAL â†’ REMOTE
+      // SYNC LOCAL REMOTE
       for (final localModel in localModels) {
         final remoteEntity = remoteMap[localModel.id];
 
@@ -178,21 +178,21 @@ class SyncRepositoryImpl implements SyncRepository {
           } else {
             await scheduleRemote.createSchedule(entity);
           }
-          debugPrint('âœ… Uploaded schedule to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+          debugPrint('Uploaded schedule to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
         } else {
           // Exists in remote, check timestamps
           if (localModel.updatedAt.isAfter(remoteEntity.updatedAt)) {
             // Local is newer, update remote
             final entity = _scheduleModelToEntity(localModel);
             await scheduleRemote.updateSchedule(entity);
-            debugPrint('âœ… Updated schedule on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+            debugPrint('Updated schedule on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
           }
         }
       }
 
-      debugPrint('âœ… Schedules synced successfully');
+      debugPrint('Schedules synced successfully');
     } catch (e) {
-      debugPrint('âŒ Schedule sync failed: $e');
+      debugPrint('Schedule sync failed: $e');
       throw SyncException('Gagal sync schedules: $e');
     }
   }
@@ -202,7 +202,7 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncJournals() async {
     try {
-      debugPrint('ðŸ”„ Syncing journals with soft delete support...');
+      debugPrint('Syncing journals with soft delete support...');
 
       // Get ALL items INCLUDING deleted from both sources
       final remoteEntities = await journalRemote.getAllJournalsIncludingDeleted();
@@ -212,7 +212,7 @@ class SyncRepositoryImpl implements SyncRepository {
       final remoteMap = {for (final j in remoteEntities) j.id: j};
       final localMap = {for (final j in localModels) j.id: j};
 
-      // SYNC REMOTE â†’ LOCAL
+      // SYNC REMOTE LOCAL
       for (final remoteEntity in remoteEntities) {
         final localModel = localMap[remoteEntity.id];
 
@@ -235,12 +235,12 @@ class SyncRepositoryImpl implements SyncRepository {
             // Remote is newer, update local
             final model = _journalEntityToModel(remoteEntity);
             await journalLocal.updateJournal(model);
-            debugPrint('âœ… Updated journal from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+            debugPrint('Updated journal from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
           }
         }
       }
 
-      // SYNC LOCAL â†’ REMOTE
+      // SYNC LOCAL REMOTE
       for (final localModel in localModels) {
         final remoteEntity = remoteMap[localModel.id];
         final entity = _journalModelToEntity(localModel);
@@ -253,20 +253,20 @@ class SyncRepositoryImpl implements SyncRepository {
           } else {
             await journalRemote.createJournal(entity);
           }
-          debugPrint('âœ… Uploaded journal to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+          debugPrint('Uploaded journal to remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
         } else {
           // Exists in remote, check timestamps
           if (localModel.updatedAt.isAfter(remoteEntity.updatedAt)) {
             // Local is newer, update remote
             await journalRemote.updateJournal(entity);
-            debugPrint('âœ… Updated journal on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+            debugPrint('Updated journal on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
           }
         }
       }
 
-      debugPrint('âœ… Journals synced successfully');
+      debugPrint('Journals synced successfully');
     } catch (e) {
-      debugPrint('âŒ Journal sync failed: $e');
+      debugPrint('Journal sync failed: $e');
       throw SyncException('Gagal sync journals: $e');
     }
   }
@@ -276,7 +276,7 @@ class SyncRepositoryImpl implements SyncRepository {
   @override
   Future<void> syncPhotos() async {
     try {
-      debugPrint('ðŸ”„ Syncing photos with soft delete support...');
+      debugPrint('Syncing photos with soft delete support...');
 
       // Get ALL items INCLUDING deleted from both sources
       final remoteEntities = await photoRemote.getAllPhotosIncludingDeleted();
@@ -286,7 +286,7 @@ class SyncRepositoryImpl implements SyncRepository {
       final remoteMap = {for (final p in remoteEntities) p.id: p};
       final localMap = {for (final p in localModels) p.id: p};
 
-      // SYNC REMOTE â†’ LOCAL
+      // SYNC REMOTE LOCAL
       for (final remoteEntity in remoteEntities) {
         final localModel = localMap[remoteEntity.id];
 
@@ -309,12 +309,12 @@ class SyncRepositoryImpl implements SyncRepository {
             // Remote is newer, update local
             final model = _photoEntityToModel(remoteEntity);
             await photoLocal.updatePhoto(model);
-            debugPrint('âœ… Updated photo from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
+            debugPrint('Updated photo from remote: ${remoteEntity.id} (isDeleted: ${remoteEntity.isDeleted})');
           }
         }
       }
 
-      // SYNC LOCAL â†’ REMOTE
+      // SYNC LOCAL REMOTE
       for (final localModel in localModels) {
         final remoteEntity = remoteMap[localModel.id];
 
@@ -340,10 +340,10 @@ class SyncRepositoryImpl implements SyncRepository {
                 // Create metadata in Firestore
                 final updatedEntity = _photoModelToEntity(updatedModel);
                 await photoRemote.createPhotoMetadata(updatedEntity);
-                debugPrint('âœ… Photo uploaded and synced: ${localModel.id}');
+                debugPrint('Photo uploaded and synced: ${localModel.id}');
               }
             } catch (e) {
-              debugPrint('âš ï¸ Failed to upload photo ${localModel.id}: $e');
+              debugPrint('Failed to upload photo ${localModel.id}: $e');
             }
           } else if (localModel.imageUrl != null || localModel.isDeleted) {
             // Photo already has cloudUrl or is deleted, just sync metadata
@@ -352,7 +352,7 @@ class SyncRepositoryImpl implements SyncRepository {
             } else {
               await photoRemote.createPhotoMetadata(entity);
             }
-            debugPrint('âœ… Photo metadata synced: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+            debugPrint('Photo metadata synced: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
           }
         } else {
           // Exists in remote, check timestamps
@@ -360,14 +360,14 @@ class SyncRepositoryImpl implements SyncRepository {
             // Local is newer, update remote
             final entity = _photoModelToEntity(localModel);
             await photoRemote.updatePhoto(entity);
-            debugPrint('âœ… Updated photo on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
+            debugPrint('Updated photo on remote: ${localModel.id} (isDeleted: ${localModel.isDeleted})');
           }
         }
       }
 
-      debugPrint('âœ… Photos synced successfully');
+      debugPrint('Photos synced successfully');
     } catch (e) {
-      debugPrint('âŒ Photo sync failed: $e');
+      debugPrint('Photo sync failed: $e');
       throw SyncException('Gagal sync photos: $e');
     }
   }
@@ -380,7 +380,7 @@ class SyncRepositoryImpl implements SyncRepository {
       userId: entity.userId,
       title: entity.title,
       description: entity.notes,
-      category: entity.category,  // âœ… Direct String assignment (no mapping)
+      category: entity.category,  //Direct String assignment (no mapping)
       scheduledTime: entity.dateTime,
       reminderEnabled: entity.hasReminder,
       reminderMinutesBefore: entity.reminderMinutes,
@@ -399,7 +399,7 @@ class SyncRepositoryImpl implements SyncRepository {
         userId: model.userId,
         title: model.title,
         notes: model.description,
-        category: model.category,  // âœ… Direct String assignment (no mapping)
+        category: model.category,  //Direct String assignment (no mapping)
         dateTime: model.scheduledTime,
         hasReminder: model.reminderEnabled,
         reminderMinutes: model.reminderMinutesBefore ?? 15,
@@ -424,8 +424,8 @@ class SyncRepositoryImpl implements SyncRepository {
         createdAt: entity.createdAt,
         updatedAt: entity.updatedAt,
         isSynced: true,
-        isDeleted: entity.isDeleted,      // ðŸ†• ADDED
-        deletedAt: entity.deletedAt,      // ðŸ†• ADDED
+        isDeleted: entity.isDeleted,      // ADDED
+        deletedAt: entity.deletedAt,      // ADDED
       );
 
   /// Convert JournalModel (from local) to JournalEntity (for remote)
@@ -439,8 +439,8 @@ class SyncRepositoryImpl implements SyncRepository {
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
         isSynced: model.isSynced,
-        isDeleted: model.isDeleted,      // ðŸ†• ADDED
-        deletedAt: model.deletedAt,      // ðŸ†• ADDED
+        isDeleted: model.isDeleted,      // ADDED
+        deletedAt: model.deletedAt,      // ADDED
       );
 
   /// Map entity mood to model mood
@@ -490,8 +490,8 @@ class SyncRepositoryImpl implements SyncRepository {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
       isSynced: true,
-      isDeleted: entity.isDeleted,      // ðŸ†• ADDED
-      deletedAt: entity.deletedAt,      // ðŸ†• ADDED
+      isDeleted: entity.isDeleted,      // ADDED
+      deletedAt: entity.deletedAt,      // ADDED
     );
 
   /// Convert PhotoModel (from local) to PhotoEntity (for remote)
@@ -508,8 +508,8 @@ class SyncRepositoryImpl implements SyncRepository {
         createdAt: model.createdAt,
         updatedAt: model.updatedAt,
         isSynced: model.isSynced,
-        isDeleted: model.isDeleted,      // ðŸ†• ADDED
-        deletedAt: model.deletedAt,      // ðŸ†• ADDED
+        isDeleted: model.isDeleted,     
+        deletedAt: model.deletedAt,      
       );
 
   @override

@@ -70,11 +70,11 @@ class SyncService extends ChangeNotifier {
   /// Handle connectivity changes
   void _handleConnectivityChange(ConnectivityResult result) {
     if (result != ConnectivityResult.none) {
-      debugPrint('ðŸ“¡ Connectivity restored: $result');
+      debugPrint('Connectivity restored: $result');
       // Connection available, trigger sync
       syncAll();
     } else {
-      debugPrint('ðŸ“¡ Connection lost');
+      debugPrint('Connection lost');
     }
   }
 
@@ -97,7 +97,7 @@ class SyncService extends ChangeNotifier {
   /// Sync all data (schedules, journals, photos)
   Future<void> syncAll() async {
     if (_isSyncing) {
-      debugPrint('âš ï¸ Sync already in progress');
+      debugPrint('Sync already in progress');
       return;
     }
 
@@ -106,7 +106,7 @@ class SyncService extends ChangeNotifier {
       _syncError = null;
       notifyListeners();
 
-      debugPrint('ðŸ”„ Starting full sync...');
+      debugPrint('Starting full sync...');
 
       // Process sync queue first
       await _processSyncQueue();
@@ -123,10 +123,10 @@ class SyncService extends ChangeNotifier {
       _lastSyncTime = DateTime.now();
       _pendingSyncCount = 0;
 
-      debugPrint('âœ… Sync completed successfully');
+      debugPrint('Sync completed successfully');
     } catch (e) {
       _syncError = e.toString();
-      debugPrint('âŒ Sync failed: $e');
+      debugPrint('Sync failed: $e');
     } finally {
       _isSyncing = false;
       notifyListeners();
@@ -178,9 +178,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('âœ… Schedules synced');
+      debugPrint('Schedules synced');
     } catch (e) {
-      debugPrint('âŒ Schedule sync failed: $e');
+      debugPrint('Schedule sync failed: $e');
       _addToSyncQueue('schedules', null);
       rethrow;
     }
@@ -260,9 +260,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('âœ… Journals synced');
+      debugPrint('Journals synced');
     } catch (e) {
-      debugPrint('âŒ Journal sync failed: $e');
+      debugPrint('Journal sync failed: $e');
       _addToSyncQueue('journals', null);
       rethrow;
     }
@@ -339,9 +339,9 @@ class SyncService extends ChangeNotifier {
         }
       }
 
-      debugPrint('âœ… Photos synced');
+      debugPrint('Photos synced');
     } catch (e) {
-      debugPrint('âŒ Photo sync failed: $e');
+      debugPrint('Photo sync failed: $e');
       _addToSyncQueue('photos', null);
       rethrow;
     }
@@ -390,7 +390,7 @@ class SyncService extends ChangeNotifier {
       return;
     }
 
-    debugPrint('ðŸ”„ Processing sync queue: ${_syncQueue.length} items');
+    debugPrint('Processing sync queue: ${_syncQueue.length} items');
 
     final itemsToRemove = <Map<String, dynamic>>[];
 
@@ -411,7 +411,7 @@ class SyncService extends ChangeNotifier {
         // Success, mark for removal
         itemsToRemove.add(item);
       } catch (e) {
-        debugPrint('âŒ Queue item failed: ${item['collection']}');
+        debugPrint('Queue item failed: ${item['collection']}');
         // Keep in queue for next retry
       }
     }
@@ -424,7 +424,7 @@ class SyncService extends ChangeNotifier {
 
   /// Force sync now (manual trigger)
   Future<void> forceSyncNow() async {
-    debugPrint('ðŸ”„ Force sync triggered');
+    debugPrint('Force sync triggered');
     await syncAll();
   }
 

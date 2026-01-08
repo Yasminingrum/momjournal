@@ -104,6 +104,19 @@ class AuthProvider with ChangeNotifier {
           debugPrint('⚠️ Provider: Category sync failed but continuing: $categoryError');
         }
       }
+
+      // ✅ Initialize default categories after login
+      if (_categoryProvider != null && user != null) {
+        debugPrint('📁 Provider: Initializing default categories...');
+        try {
+          final uid = _user!.uid;
+            await _categoryProvider.initializeDefaultCategories(uid);
+            await _categoryProvider.loadCategories(uid);
+          debugPrint('✅ Provider: Categories initialized');
+        } catch (categoryError) {
+          debugPrint('⚠️ Provider: Category initialization failed but continuing: $categoryError');
+        }
+      }
       
       // ✅ AUTO SYNC DATA before logout
       if (_syncProvider != null) {

@@ -46,7 +46,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     // Setup page controller untuk swipe
     if (widget.allPhotos != null) {
       _currentIndex = widget.allPhotos!.indexWhere((p) => p.id == widget.photo.id);
-      if (_currentIndex == -1) _currentIndex = 0;
+      if (_currentIndex == -1) {
+        _currentIndex = 0;
+      }
       _pageController = PageController(initialPage: _currentIndex);
     } else {
       _currentIndex = 0;
@@ -85,6 +87,14 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               color: currentPhotoFromProvider.isFavorite ? Colors.red : Colors.white,
             ),
             onPressed: () => _toggleFavorite(context, currentPhotoFromProvider),
+          ),
+          // Milestone button
+          IconButton(
+            icon: Icon(
+              currentPhotoFromProvider.isMilestone ? Icons.stars : Icons.stars_outlined,
+              color: currentPhotoFromProvider.isMilestone ? Colors.amber : Colors.white,
+            ),
+            onPressed: () => _toggleMilestone(context, currentPhotoFromProvider),
           ),
           // Delete button
           IconButton(
@@ -215,7 +225,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  /// ðŸ†• Build caption section with edit capability
+  ///Build caption section with edit capability
   Widget _buildCaptionSection(BuildContext context, PhotoEntity photo) {
     if (_isEditingCaption) {
       return Row(
@@ -292,7 +302,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     );
   }
 
-  /// ðŸ†• Build category section
+  /// Build category section
   Widget _buildCategorySection(BuildContext context, PhotoEntity photo) => GestureDetector(
       onTap: () => _showCategoryPicker(context, photo),
       child: Container(
@@ -325,13 +335,19 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       ),
     );
 
-  /// ðŸ†• Toggle favorite status
+  /// Toggle favorite status
   Future<void> _toggleFavorite(BuildContext context, PhotoEntity photo) async {
     final provider = context.read<PhotoProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    
     final success = await provider.togglePhotoFavorite(photo.id);
     
-    if (mounted && success) {
-      ScaffoldMessenger.of(context).showSnackBar(
+    if (!mounted) {
+      return;
+    }
+    
+    if (success) {
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             photo.isFavorite 
@@ -345,19 +361,80 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// ðŸ†• Save caption
+  /// Toggle milestone status
+  Future<void> _toggleMilestone(BuildContext context, PhotoEntity photo) async {
+    final provider = context.read<PhotoProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    
+    final updatedPhoto = photo.copyWith(
+      isMilestone: !photo.isMilestone,
+      updatedAt: DateTime.now(),
+    );
+    
+    final success = await provider.updatePhoto(updatedPhoto);
+    
+    if (!mounted) {
+      return;
+    }
+    
+    if (success) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                updatedPhoto.isMilestone ? Icons.stars : Icons.stars_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                updatedPhoto.isMilestone 
+                    ? 'Ditandai sebagai Milestone' 
+                    : 'Milestone dihapus',
+              ),
+            ],
+          ),
+          backgroundColor: updatedPhoto.isMilestone ? Colors.amber.shade700 : Colors.grey.shade700,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Gagal mengubah status milestone'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  /// Save caption
   Future<void> _saveCaption(BuildContext context, PhotoEntity photo) async {
     final newCaption = _captionController.text.trim();
     final provider = context.read<PhotoProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     
     final success = await provider.updatePhotoCaption(photo.id, newCaption);
     
-    if (mounted && success) {
-      setState(() {
-        _isEditingCaption = false;
-      });
+    if (!mounted) {
+      return;
+    }
+    
+    if (success) {
+      if (mounted) {
+        setState(() {
+          _isEditingCaption = false;
+        });
+      }
       
-      ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) {
+        return;
+      }
+      
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Caption berhasil disimpan'),
           duration: Duration(seconds: 1),
@@ -367,15 +444,18 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// ðŸ†• Show category picker
-  /// âœ… UPDATED: Show category picker using CategoryProvider
+  /// Show category picker
+  /// UPDATED: Show category picker using CategoryProvider
   Future<void> _showCategoryPicker(BuildContext context, PhotoEntity photo) async {
     final categoryProvider = context.read<CategoryProvider>();
     final authProvider = context.read<AuthProvider>();
     final photoProvider = context.read<PhotoProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final userId = authProvider.user?.uid;
     
-    if (userId == null) return;
+    if (userId == null) {
+      return;
+    }
     
     // Load categories if not loaded yet
     if (categoryProvider.categories.isEmpty) {
@@ -384,10 +464,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     
     final photoCategories = categoryProvider.photoCategories;
     
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     
     if (photoCategories.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Belum ada kategori tersedia'),
           behavior: SnackBarBehavior.floating,
@@ -468,14 +550,20 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       ),
     );
     
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
     
     if (selected != null) {
       // User selected a category
       final success = await photoProvider.updatePhotoCategory(photo.id, selected.name);
       
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) {
+        return;
+      }
+      
+      if (success) {
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Kategori diubah menjadi: ${selected.name}'),
             duration: const Duration(seconds: 1),
@@ -487,8 +575,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       // User clicked "Hapus" - remove category
       final success = await photoProvider.updatePhotoCategory(photo.id, null);
       
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (!mounted) {
+        return;
+      }
+      
+      if (success) {
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Kategori dihapus'),
             duration: Duration(seconds: 1),
@@ -499,7 +591,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// âœ… Helper: Parse color hex string to Color
+  /// Helper: Parse color hex string to Color
   Color _parseColor(String hexColor) {
     try {
       return Color(int.parse(hexColor.replaceFirst('#', '0xFF')));
@@ -508,7 +600,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     }
   }
 
-  /// âœ… Helper: Convert icon name string to IconData
+  /// Helper: Convert icon name string to IconData
   IconData _getIconData(String iconName) {
     const iconMap = {
       'restaurant': Icons.restaurant,

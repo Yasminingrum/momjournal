@@ -13,22 +13,22 @@ class PhotoProvider extends ChangeNotifier {
 
   List<PhotoEntity> _photos = [];
   List<PhotoEntity> _milestonePhotos = [];
-  List<PhotoEntity> _favoritePhotos = [];  // ðŸ†• ADDED
+  List<PhotoEntity> _favoritePhotos = [];  // ADDED
   DateTime _selectedDate = DateTime.now();
   bool _showMilestonesOnly = false;
-  bool _showFavoritesOnly = false;  // ðŸ†• ADDED
-  String? _selectedCategory;        // ðŸ†• ADDED
+  bool _showFavoritesOnly = false;  // ADDED
+  String? _selectedCategory;        // ADDED
   bool _isLoading = false;
   String? _error;
 
   // Getters
   List<PhotoEntity> get photos => _photos;
   List<PhotoEntity> get milestonePhotos => _milestonePhotos;
-  List<PhotoEntity> get favoritePhotos => _favoritePhotos;  // ðŸ†• ADDED
+  List<PhotoEntity> get favoritePhotos => _favoritePhotos;  // ADDED
   DateTime get selectedDate => _selectedDate;
   bool get showMilestonesOnly => _showMilestonesOnly;
-  bool get showFavoritesOnly => _showFavoritesOnly;  // ðŸ†• ADDED
-  String? get selectedCategory => _selectedCategory;  // ðŸ†• ADDED
+  bool get showFavoritesOnly => _showFavoritesOnly;  // ADDED
+  String? get selectedCategory => _selectedCategory;  // ADDED
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get errorMessage => _error; // Alias untuk compatibility
@@ -44,7 +44,7 @@ class PhotoProvider extends ChangeNotifier {
       _setLoading(true);
       _photos = await _repository.getAllPhotos();
       _milestonePhotos = await _repository.getMilestonePhotos();
-      _favoritePhotos = await _repository.getFavoritePhotos();  // ðŸ†• ADDED
+      _favoritePhotos = await _repository.getFavoritePhotos();  // ADDED
       _clearError();
     } catch (e) {
       _setError('Failed to load photos: $e');
@@ -96,7 +96,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Load photos by category
+  /// Load photos by category
   Future<void> loadPhotosByCategory(String? category) async {
     try {
       _setLoading(true);
@@ -116,7 +116,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Get all unique categories from photos
+  /// Get all unique categories from photos
   Future<List<String>> getCategories() async {
     try {
       final allPhotos = await _repository.getAllPhotos();
@@ -124,8 +124,8 @@ class PhotoProvider extends ChangeNotifier {
           .where((p) => p.category != null && p.category!.isNotEmpty)
           .map((p) => p.category!)
           .toSet()
-          .toList();
-      categories.sort();
+          .toList()
+        ..sort();
       return categories;
     } catch (e) {
       return [];
@@ -152,7 +152,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Toggle favorite filter
+  /// Toggle favorite filter
   Future<void> toggleFavoriteFilter() async {
     _showFavoritesOnly = !_showFavoritesOnly;
     notifyListeners();
@@ -176,17 +176,17 @@ class PhotoProvider extends ChangeNotifier {
   Future<bool> uploadPhoto({
     required String imagePath,
     String? caption,
-    String? category,     // ðŸ†• ADDED
+    String? category,     // ADDED
     bool isMilestone = false,
-    bool isFavorite = false,  // ðŸ†• ADDED
+    bool isFavorite = false,  // ADDED
     String? userId,
   }) async => createPhoto(
       localPath: imagePath,
       dateTaken: DateTime.now(),
       caption: caption,
-      category: category,        // ðŸ†• ADDED
+      category: category,        // ADDED
       isMilestone: isMilestone,
-      isFavorite: isFavorite,    // ðŸ†• ADDED
+      isFavorite: isFavorite,    // ADDED
       userId: userId,
     );
 
@@ -200,6 +200,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
+
   /// Create a new photo
   Future<bool> createPhoto({
     required String localPath,
@@ -211,6 +212,9 @@ class PhotoProvider extends ChangeNotifier {
     String? userId,
   }) async {
     try {
+      debugPrint('📸 PhotoProvider: Starting createPhoto...');
+      debugPrint('📸 PhotoProvider: localPath = $localPath');
+      
       _setLoading(true);
 
       final photo = PhotoEntity(
@@ -226,20 +230,24 @@ class PhotoProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
+      debugPrint('📸 PhotoProvider: Created PhotoEntity with id = ${photo.id}');
+
       // Save to local first (fast)
       await _repository.createPhoto(photo);
+      debugPrint('📸 PhotoProvider: Saved to repository successfully');
       
-      // âš¡ Update UI immediately without waiting for full reload
+      // Update UI immediately - add to list
       _photos.insert(0, photo);
-      _setLoading(false);
       _clearError();
-      notifyListeners(); // Notify UI immediately
+      _setLoading(false); // IMPORTANT: Set loading false BEFORE notifyListeners
       
-      // ðŸ”„ Reload in background (async, don't await)
-      await loadPhotos(); // This will sync with any changes
+      debugPrint('📸 PhotoProvider: Photo added to list, count = ${_photos.length}');
+      debugPrint('✅ PhotoProvider: createPhoto completed successfully');
       
       return true;
     } catch (e) {
+      debugPrint('❌ PhotoProvider: ERROR in createPhoto: $e');
+      debugPrint('❌ PhotoProvider: Stack trace: ${StackTrace.current}');
       _setError('Failed to create photo: $e');
       _setLoading(false);
       return false;
@@ -262,7 +270,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Update photo caption
+  /// Update photo caption
   Future<bool> updatePhotoCaption(String photoId, String caption) async {
     try {
       _setLoading(true);
@@ -290,7 +298,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Update photo category
+  /// Update photo category
   Future<bool> updatePhotoCategory(String photoId, String? category) async {
     try {
       _setLoading(true);
@@ -318,7 +326,7 @@ class PhotoProvider extends ChangeNotifier {
     }
   }
 
-  /// ðŸ†• Toggle photo favorite status
+  /// Toggle photo favorite status
   Future<bool> togglePhotoFavorite(String photoId) async {
     try {
       _setLoading(true);
@@ -347,7 +355,7 @@ class PhotoProvider extends ChangeNotifier {
   }
 
   /// Delete a photo (with remote sync support)
-  Future<bool> deletePhoto(String id, {Function(String)? onDeleteRemote}) async {
+  Future<bool> deletePhoto(String id, {Future<void> Function(String)? onDeleteRemote}) async {
     try {
       _setLoading(true);
       
@@ -391,7 +399,7 @@ class PhotoProvider extends ChangeNotifier {
     loadPhotosForDate(date);
   }
 
-  /// ðŸ†• Clear category filter
+  /// Clear category filter
   void clearCategoryFilter() {
     _selectedCategory = null;
     loadPhotos();

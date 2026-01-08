@@ -45,7 +45,7 @@ class CategoryEntity {
     required this.colorHex,
     required this.createdAt,
     required this.updatedAt,
-    this.type = CategoryType.both,  // ✅ NEW: Default to 'both' for backward compatibility
+    this.type = CategoryType.both,  // NEW: Default to 'both' for backward compatibility
     this.isDefault = false,
     this.isSynced = false,
     this.isDeleted = false,
@@ -57,7 +57,7 @@ class CategoryEntity {
   final String name;
   final String icon;  // Icon name from Material Icons
   final String colorHex;  // Color in hex format (e.g., "#FF5733")
-  final CategoryType type;  // ✅ NEW: Type of category
+  final CategoryType type;  // NEW: Type of category
   final bool isDefault;  // True for default categories
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -72,7 +72,7 @@ class CategoryEntity {
     String? name,
     String? icon,
     String? colorHex,
-    CategoryType? type,  // ✅ NEW
+    CategoryType? type,  // œ… NEW
     bool? isDefault,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -85,7 +85,7 @@ class CategoryEntity {
       name: name ?? this.name,
       icon: icon ?? this.icon,
       colorHex: colorHex ?? this.colorHex,
-      type: type ?? this.type,  // ✅ NEW
+      type: type ?? this.type,  //
       isDefault: isDefault ?? this.isDefault,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -106,7 +106,7 @@ class CategoryEntity {
         other.name == name &&
         other.icon == icon &&
         other.colorHex == colorHex &&
-        other.type == type &&  // ✅ NEW
+        other.type == type && 
         other.isDefault == isDefault &&
         other.createdAt == createdAt &&
         other.updatedAt == updatedAt &&
@@ -121,7 +121,7 @@ class CategoryEntity {
         name.hashCode ^
         icon.hashCode ^
         colorHex.hashCode ^
-        type.hashCode ^  // ✅ NEW
+        type.hashCode ^
         isDefault.hashCode ^
         createdAt.hashCode ^
         updatedAt.hashCode ^
@@ -131,11 +131,14 @@ class CategoryEntity {
 
   @override
   String toString() => 'CategoryEntity(id: $id, name: $name, '
-        'icon: $icon, colorHex: $colorHex, type: $type, isDefault: $isDefault, isDeleted: $isDeleted)';  // ✅ UPDATED
+        'icon: $icon, colorHex: $colorHex, type: $type, isDefault: $isDefault, isDeleted: $isDeleted)';
 }
 
 /// Default categories untuk pertama kali
 class DefaultCategories {
+  // Private constructor untuk mencegah instantiation
+  const DefaultCategories._();
+  
   // ✅ UPDATED: Kategorikan berdasarkan type
   
   /// Kategori untuk Schedule & Photo (shared)

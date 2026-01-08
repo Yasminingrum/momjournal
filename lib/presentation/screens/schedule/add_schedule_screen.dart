@@ -29,12 +29,12 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   final _descriptionController = TextEditingController();
 
   late DateTime _selectedDateTime;
-  String _selectedCategory = 'Lainnya';  // âœ… String instead of enum
+  String _selectedCategory = 'Lainnya';  // String instead of enum
   bool _reminderEnabled = false;
   int _reminderMinutes = 15;
   bool _isLoading = false;
   
-  // ðŸ†• Multi-day support
+  // Multi-day support
   bool _isMultiDay = false;
   DateTime? _endDateTime;
 
@@ -84,7 +84,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
               left: 16,
               right: 16,
               top: 16,
-              bottom: 48,  // âœ… Extra bottom padding
+              bottom: 48,  // Extra bottom padding
             ),
           children: [
             // Title field
@@ -127,13 +127,13 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
             const SizedBox(height: 16),
 
-            // ðŸ†• Multi-day checkbox
+            // Multi-day checkbox
             _buildMultiDayCheckbox(),
             const SizedBox(height: 16),
 
             _buildRecurringSchedule(theme),
 
-            // ðŸ†• Conditional end date picker
+            // Conditional end date picker
             if (_isMultiDay) ...[
               const SizedBox(height: 16),
               _buildEndDatePicker(theme),
@@ -193,7 +193,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _selectedCategory,  // âœ… Direct String usage
+                    _selectedCategory,  // Direct String usage
                     style: theme.textTheme.bodyLarge,
                   ),
                 ],
@@ -249,7 +249,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       ),
     );
 
-  // ðŸ†• Multi-day checkbox
+  // Multi-day checkbox
   Widget _buildMultiDayCheckbox() => CheckboxListTile(
       value: _isMultiDay,
       onChanged: (value) {
@@ -274,7 +274,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       contentPadding: EdgeInsets.zero,
     );
 
-  // ðŸ†• End date picker
+  // End date picker
   Widget _buildEndDatePicker(ThemeData theme) => InkWell(
       onTap: _showEndDatePicker,
       borderRadius: BorderRadius.circular(12),
@@ -376,7 +376,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     );
 
   Future<void> _showCategoryPicker() async {
-    // âœ… Load categories dari CategoryProvider
+    // Load categories dari CategoryProvider
     final categoryProvider = context.read<CategoryProvider>();
     final authProvider = context.read<AuthProvider>();
     final userId = authProvider.user?.uid;
@@ -403,6 +403,10 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
       return;
     }
 
+    if (!mounted) {
+      return;
+    }
+    
     await showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -447,7 +451,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
                     onPressed: () async {
                       Navigator.pop(context);
                       
-                      final result = await Navigator.push(
+                      await Navigator.push(
                         context,
                         MaterialPageRoute<bool>(
                           builder: (context) => const ManageCategoriesScreen(),
@@ -541,8 +545,8 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // ðŸ†• End date picker
-  // 🆕 End date picker with time support
+  // End date picker
+  // End date picker with time support
   Future<void> _showEndDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -603,7 +607,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // ðŸ†• Calculate duration
+  // Calculate duration
   int _calculateDuration() {
     if (_endDateTime == null) {
       return 0;
@@ -639,7 +643,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         59,
       );
       
-      debugPrint('✅ Auto-calculated end date for recurring: $_endDateTime');
+      debugPrint('Auto-calculated end date for recurring: $_endDateTime');
     }
 
     // Validate end date for multi-day (but not for recurring, already auto-calculated)
@@ -661,7 +665,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
         throw Exception('User not logged in');
       }
 
-      // âœ… RECURRING SCHEDULE LOGIC
+      // RECURRING SCHEDULE LOGIC
       if (_isRecurring) {
         // Create multiple schedules
         int successCount = 0;
@@ -868,7 +872,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
 
   // Helper methods
   Color _getCategoryColor(String category) {
-    // âœ… Try to get from CategoryProvider first
+    // Try to get from CategoryProvider first
     try {
       final categoryProvider = context.read<CategoryProvider>();
       final categoryEntity = categoryProvider.getCategoryByName(category);
@@ -895,7 +899,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // âœ… TAMBAHKAN helper method
+  // TAMBAHKAN helper method
   Color _parseColor(String hexColor) {
     try {
       // Remove # if present
@@ -909,7 +913,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
   }
 
   IconData _getCategoryIcon(String category) {
-  // âœ… Try to get from CategoryProvider first
+  // Try to get from CategoryProvider first
   try {
     final categoryProvider = context.read<CategoryProvider>();
     final categoryEntity = categoryProvider.getCategoryByName(category);
@@ -936,7 +940,7 @@ class _AddScheduleScreenState extends State<AddScheduleScreen> {
     }
   }
 
-  // âœ… TAMBAHKAN helper method
+  // TAMBAHKAN helper method
   IconData _parseIconData(String iconName) {
     // Map icon names to IconData
     const iconMap = {

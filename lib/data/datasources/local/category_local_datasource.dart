@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '/data/models/category_model.dart';
@@ -17,18 +18,16 @@ class CategoryLocalDataSource {
       final categories = _hiveBox.values
           .where((cat) => cat.userId == userId && !cat.isDeleted)
           .map((model) => model.toEntity())
-          .toList();
-      
-      // Sort: default categories first, then custom by name
-      categories.sort((a, b) {
-        if (a.isDefault && !b.isDefault) {
-          return -1;
-        }
-        if (!a.isDefault && b.isDefault) {
-          return 1;
-        }
-        return a.name.compareTo(b.name);
-      });
+          .toList()
+        ..sort((a, b) {
+          if (a.isDefault && !b.isDefault) {
+            return -1;
+          }
+          if (!a.isDefault && b.isDefault) {
+            return 1;
+          }
+          return a.name.compareTo(b.name);
+        });
       
       return categories;
     } catch (e) {
@@ -132,7 +131,7 @@ class CategoryLocalDataSource {
         return; // Already initialized
       }
 
-      // ✅ UPDATED: Use new DefaultCategories.all instead of defaults
+      // UPDATED: Use new DefaultCategories.all instead of defaults
       final defaults = DefaultCategories.all;
       final now = DateTime.now();
 
@@ -146,7 +145,7 @@ class CategoryLocalDataSource {
           name: defaultCat['name'] as String,
           icon: defaultCat['icon'] as String,
           colorHex: defaultCat['colorHex'] as String,
-          type: defaultCat['type'] as String? ?? 'both',  // ✅ NEW FIELD
+          type: defaultCat['type'] as String? ?? 'both',  // NEW FIELD
           isDefault: true,
           createdAt: now,
           updatedAt: now,
@@ -191,13 +190,13 @@ class CategoryLocalDataSource {
       for (final category in categories) {
         final model = CategoryModel.fromEntity(category);
         
-        // ✅ FIX: Check existing before overwriting
+        // FIX: Check existing before overwriting
         final existing = _hiveBox.get(category.id);
         
         if (existing != null) {
-          // ✅ NEVER overwrite default categories
+          // NEVER overwrite default categories
           if (existing.isDefault) {
-            print('⚠️ Skipping default category: ${existing.name}');
+            debugPrint('Skipping default category: ${existing.name}');
             continue;  // Protect default categories
           }
           
@@ -205,14 +204,14 @@ class CategoryLocalDataSource {
           if (category.updatedAt.isAfter(existing.updatedAt)) {
             // Remote is newer, update
             await _hiveBox.put(category.id, model);
-            print('✅ Updated category from remote: ${category.name}');
+            debugPrint('Updated category from remote: ${category.name}');
           } else {
-            print('ℹ️ Keeping local category (newer): ${existing.name}');
+            debugPrint('Keeping local category (newer): ${existing.name}');
           }
         } else {
           // New category from remote, add it
           await _hiveBox.put(category.id, model);
-          print('✅ Added new category from remote: ${category.name}');
+          debugPrint('Added new category from remote: ${category.name}');
         }
       }
     } catch (e) {

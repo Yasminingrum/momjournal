@@ -1,8 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 /// Data Seeder untuk testing aplikasi MomJournal
 /// File ini berisi dummy data untuk semua fitur: Categories, Schedules, Journals, Photos
 class DataSeeder {
+  // Private constructor
+  const DataSeeder._();
+  
   static const _uuid = Uuid();
   
   // User ID untuk testing (ganti dengan user ID yang sebenarnya saat testing)
@@ -200,58 +204,59 @@ class DataSeeder {
       final date = now.subtract(Duration(days: daysAgo));
       
       // Sarapan setiap hari (pagi)
-      schedules.add({
-        'id': _uuid.v4(),
-        'userId': testUserId,
-        'title': 'Sarapan Pagi',
-        'description': 'Bubur + buah',
-        'category': 'Pemberian Makan/Menyusui',
-        'scheduledTime': DateTime(date.year, date.month, date.day, 7, 0).toIso8601String(),
-        'endTime': null,
-        'reminderEnabled': true,
-        'reminderMinutesBefore': 15,
-        'isCompleted': true, // Past schedules sudah completed
-        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-        'updatedAt': date.toIso8601String(),
-        'isSynced': false,
-        'isDeleted': false,
-      });
-      
-      // Tidur Siang setiap hari
-      schedules.add({
-        'id': _uuid.v4(),
-        'userId': testUserId,
-        'title': 'Tidur Siang',
-        'description': 'Durasi 1.5-2 jam',
-        'category': 'Tidur',
-        'scheduledTime': DateTime(date.year, date.month, date.day, 13, 0).toIso8601String(),
-        'endTime': DateTime(date.year, date.month, date.day, 15, 0).toIso8601String(),
-        'reminderEnabled': true,
-        'reminderMinutesBefore': 10,
-        'isCompleted': true,
-        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-        'updatedAt': date.toIso8601String(),
-        'isSynced': false,
-        'isDeleted': false,
-      });
-      
-      // Makan Malam setiap hari
-      schedules.add({
-        'id': _uuid.v4(),
-        'userId': testUserId,
-        'title': 'Makan Malam',
-        'description': 'Menu sayur + protein',
-        'category': 'Pemberian Makan/Menyusui',
-        'scheduledTime': DateTime(date.year, date.month, date.day, 18, 30).toIso8601String(),
-        'endTime': null,
-        'reminderEnabled': true,
-        'reminderMinutesBefore': 15,
-        'isCompleted': true,
-        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-        'updatedAt': date.toIso8601String(),
-        'isSynced': false,
-        'isDeleted': false,
-      });
+      schedules
+        ..add({
+          'id': _uuid.v4(),
+          'userId': testUserId,
+          'title': 'Sarapan Pagi',
+          'description': 'Bubur + buah',
+          'category': 'Pemberian Makan/Menyusui',
+          'scheduledTime': DateTime(date.year, date.month, date.day, 7, 0).toIso8601String(),
+          'endTime': null,
+          'reminderEnabled': true,
+          'reminderMinutesBefore': 15,
+          'isCompleted': true, // Past schedules sudah completed
+          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+          'updatedAt': date.toIso8601String(),
+          'isSynced': false,
+          'isDeleted': false,
+        })
+        
+        // Tidur Siang setiap hari
+        ..add({
+          'id': _uuid.v4(),
+          'userId': testUserId,
+          'title': 'Tidur Siang',
+          'description': 'Durasi 1.5-2 jam',
+          'category': 'Tidur',
+          'scheduledTime': DateTime(date.year, date.month, date.day, 13, 0).toIso8601String(),
+          'endTime': DateTime(date.year, date.month, date.day, 15, 0).toIso8601String(),
+          'reminderEnabled': true,
+          'reminderMinutesBefore': 10,
+          'isCompleted': true,
+          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+          'updatedAt': date.toIso8601String(),
+          'isSynced': false,
+          'isDeleted': false,
+        })
+        
+        // Makan Malam setiap hari
+        ..add({
+          'id': _uuid.v4(),
+          'userId': testUserId,
+          'title': 'Makan Malam',
+          'description': 'Menu sayur + protein',
+          'category': 'Pemberian Makan/Menyusui',
+          'scheduledTime': DateTime(date.year, date.month, date.day, 18, 30).toIso8601String(),
+          'endTime': null,
+          'reminderEnabled': true,
+          'reminderMinutesBefore': 15,
+          'isCompleted': true,
+          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+          'updatedAt': date.toIso8601String(),
+          'isSynced': false,
+          'isDeleted': false,
+        });
     }
     
     // ========================================================================
@@ -263,7 +268,7 @@ class DataSeeder {
       'id': _uuid.v4(),
       'userId': testUserId,
       'title': 'Sarapan Pagi',
-      'description': 'Bubur + buah pisang 🍌',
+      'description': 'Bubur + buah pisang',
       'category': 'Pemberian Makan/Menyusui',
       'scheduledTime': DateTime(now.year, now.month, now.day, 7, 0).toIso8601String(),
       'endTime': null,
@@ -490,7 +495,7 @@ class DataSeeder {
     schedules.add({
       'id': _uuid.v4(),
       'userId': testUserId,
-      'title': 'Pesta Ulang Tahun Pertama 🎂',
+      'title': 'Pesta Ulang Tahun Pertama',
       'description': 'Perayaan ulang tahun di rumah dengan keluarga',
       'category': 'Lainnya',
       'scheduledTime': now.add(const Duration(days: 30)).copyWith(hour: 14, minute: 0).toIso8601String(),
@@ -541,11 +546,11 @@ class DataSeeder {
         'userId': testUserId,
         'date': DateTime(now.year, now.month, now.day).toIso8601String(),
         'mood': 'veryHappy',
-        'content': '''Hari ini luar biasa menyenangkan! Bayi sudah mulai bisa merangkak sendiri 🎉
+        'content': '''Hari ini luar biasa menyenangkan! Bayi sudah mulai bisa merangkak sendiri
         
 Pagi ini dia bangun dengan ceria, langsung tersenyum lebar saat melihat mama. Setelah mandi dan sarapan bubur kesukaan, kami bermain di playmat. 
 
-Yang paling membanggakan adalah saat dia berusaha meraih mainan kesukaannya dan berhasil merangkak sejauh 1 meter! Papa dan mama bertepuk tangan sambil teriak kegirangan. Dia juga ikut ketawa senang melihat kami bahagia 😊
+Yang paling membanggakan adalah saat dia berusaha meraih mainan kesukaannya dan berhasil merangkak sejauh 1 meter! Papa dan mama bertepuk tangan sambil teriak kegirangan. Dia juga ikut ketawa senang melihat kami bahagia
 
 Sore hari kami jalan-jalan ke taman, dia senang sekali melihat anak-anak lain bermain. Semoga besok juga hari yang indah!''',
         'createdAt': now.toIso8601String(),
@@ -566,7 +571,7 @@ Bayi tidur nyenyak semalam sehingga mama bisa istirahat dengan baik. Pagi ini ka
 
 Siang hari agak rewel mungkin karena efek imunisasi, tapi setelah tidur siang jadi lebih baik. Sore kami video call dengan nenek, dia senang sekali melambai-lambai tangannya.
 
-Overall hari yang baik! 😊''',
+Overall hari yang baik!''',
         'createdAt': now.subtract(const Duration(days: 1)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 1)).toIso8601String(),
         'isSynced': false,
@@ -604,7 +609,7 @@ Bayi rewel sepanjang hari, mungkin sedang tumbuh gigi. Dia menangis hampir setia
 
 Papa mencoba membantu saat pulang kantor, tapi tetap saja dia lebih nyaman dengan mama. Kami berdua jadi sama-sama lelah.
 
-Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup 😔''',
+Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup''',
         'createdAt': now.subtract(const Duration(days: 3)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 3)).toIso8601String(),
         'isSynced': false,
@@ -617,13 +622,13 @@ Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup 😔''',
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 7)).toIso8601String(),
         'mood': 'veryHappy',
-        'content': '''Milestone baru! Bayi berhasil duduk sendiri! 🎊
+        'content': '''Milestone baru! Bayi berhasil duduk sendiri!
 
 Ini hari yang akan selalu kami ingat. Pagi ini saat sedang bermain di playmat, tiba-tiba dia berusaha duduk sendiri dari posisi tengkurap. Dan berhasil! Walaupun hanya bertahan beberapa detik, tapi itu sudah luar biasa.
 
 Kami langsung merekam video dan mengirimkannya ke semua keluarga. Semua orang ikut senang dan bangga. Nenek sampai meneteskan air mata bahagia saat video call.
 
-Ini adalah salah satu momen terindah dalam perjalanan parenting kami. Thank you Allah untuk karunia ini ❤️''',
+Ini adalah salah satu momen terindah dalam perjalanan parenting kami. Thank you Allah untuk karunia ini''',
         'createdAt': now.subtract(const Duration(days: 7)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 7)).toIso8601String(),
         'isSynced': false,
@@ -644,7 +649,7 @@ Sepanjang hari mama tidak bisa berbuat apa-apa kecuali menjaga bayi. Dia terus m
 
 Untungnya setelah diberi obat penurun panas, demamnya mulai turun di malam hari. Tapi ini pengalaman yang sangat melelahkan secara emosional.
 
-Note to self: Harus lebih tenang menghadapi situasi seperti ini. Bayi merasakan energi kita 😢''',
+Note to self: Harus lebih tenang menghadapi situasi seperti ini. Bayi merasakan energi kita''',
         'createdAt': now.subtract(const Duration(days: 10)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 10)).toIso8601String(),
         'isSynced': false,
@@ -665,7 +670,7 @@ Awalnya dia agak malu-malu, tapi setelah beberapa saat mulai nyaman. Lucu sekali
 
 Mama juga senang bisa ngobrol dengan sesama ibu muda, berbagi cerita dan pengalaman. Ternyata banyak hal yang kami alami sama.
 
-Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social development! 😊''',
+Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social development!''',
         'createdAt': now.subtract(const Duration(days: 14)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 14)).toIso8601String(),
         'isSynced': false,
@@ -704,7 +709,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/baby_smile_today.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/v0/b/mom-journal.appspot.com/o/demo_photo.jpg', // Belum di-upload
-        'caption': 'Senyum pagi yang cerah hari ini 😊',
+        'caption': 'Senyum pagi yang cerah hari ini',
         'category': 'Keseharian',
         'isMilestone': false,
         'isFavorite': true,
@@ -722,7 +727,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/first_crawl.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/first_crawl.jpg',
-        'caption': 'Merangkak pertama kali! Milestone baru 🎉',
+        'caption': 'Merangkak pertama kali! Milestone baru',
         'category': 'Pencapaian',
         'isMilestone': true,
         'isFavorite': true,
@@ -758,7 +763,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/sleeping_angel.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/sleeping_angel.jpg',
-        'caption': 'Tidur seperti malaikat kecil 😴',
+        'caption': 'Tidur seperti malaikat kecil',
         'category': 'Tidur',
         'isMilestone': false,
         'isFavorite': true,
@@ -776,7 +781,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/vaccination.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/vaccination.jpg',
-        'caption': 'Imunisasi DPT tahap 3. Anak pemberani! 💉',
+        'caption': 'Imunisasi DPT tahap 3. Anak pemberani!',
         'category': 'Kesehatan',
         'isMilestone': false,
         'isFavorite': false,
@@ -794,7 +799,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/first_sit.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/first_sit.jpg',
-        'caption': 'Duduk sendiri pertama kali! 🎊',
+        'caption': 'Duduk sendiri pertama kali!',
         'category': 'Pencapaian',
         'isMilestone': true,
         'isFavorite': true,
@@ -812,7 +817,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/family_photo.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/family_photo.jpg',
-        'caption': 'Foto bersama Papa dan Mama ❤️',
+        'caption': 'Foto bersama Papa dan Mama',
         'category': 'Keluarga',
         'isMilestone': false,
         'isFavorite': true,
@@ -830,7 +835,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/first_solid_food.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/first_solid_food.jpg',
-        'caption': 'Mencoba makanan padat pertama kali - bubur pisang! 🍌',
+        'caption': 'Mencoba makanan padat pertama kali - bubur pisang!',
         'category': 'Pemberian Makan/Menyusui',
         'isMilestone': true,
         'isFavorite': true,
@@ -848,7 +853,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/birthday_party.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/birthday_party.jpg',
-        'caption': 'Pesta ulang tahun pertama yang meriah! 🎂🎈',
+        'caption': 'Pesta ulang tahun pertama yang meriah!‚',
         'category': 'Ulang Tahun',
         'isMilestone': true,
         'isFavorite': true,
@@ -866,7 +871,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/beach_vacation.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/beach_vacation.jpg',
-        'caption': 'Liburan pertama ke pantai 🏖️',
+        'caption': 'Liburan pertama ke pantai',
         'category': 'Liburan',
         'isMilestone': false,
         'isFavorite': true,
@@ -928,32 +933,32 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
     final journals = seedJournals();
     final photos = seedPhotos();
     
-    print('=== DATA SEEDER SUMMARY ===');
-    print('Categories: ${categories.length}');
-    print('  - Schedule only: ${categories.where((c) => c['type'] == 'schedule').length}');
-    print('  - Photo only: ${categories.where((c) => c['type'] == 'photo').length}');
-    print('  - Both: ${categories.where((c) => c['type'] == 'both').length}');
-    print('');
-    print('Schedules: ${schedules.length}');
-    print('  - Completed: ${schedules.where((s) => s['isCompleted'] == true).length}');
-    print('  - Upcoming: ${schedules.where((s) => s['isCompleted'] == false && s['isDeleted'] == false).length}');
-    print('  - Deleted: ${schedules.where((s) => s['isDeleted'] == true).length}');
-    print('  - Recurring (past 7 days): 21 schedules');
-    print('  - Recurring (next 7 days): 21 schedules');
-    print('');
-    print('Journals: ${journals.length}');
-    print('  - Very Happy: ${journals.where((j) => j['mood'] == 'veryHappy').length}');
-    print('  - Happy: ${journals.where((j) => j['mood'] == 'happy').length}');
-    print('  - Neutral: ${journals.where((j) => j['mood'] == 'neutral').length}');
-    print('  - Sad: ${journals.where((j) => j['mood'] == 'sad').length}');
-    print('  - Very Sad: ${journals.where((j) => j['mood'] == 'verySad').length}');
-    print('  - Deleted: ${journals.where((j) => j['isDeleted'] == true).length}');
-    print('');
-    print('Photos: ${photos.length}');
-    print('  - Favorites: ${photos.where((p) => p['isFavorite'] == true).length}');
-    print('  - Milestones: ${photos.where((p) => p['isMilestone'] == true).length}');
-    print('  - Uploaded: ${photos.where((p) => p['isUploaded'] == true).length}');
-    print('  - Deleted: ${photos.where((p) => p['isDeleted'] == true).length}');
-    print('===========================');
+    debugPrint('=== DATA SEEDER SUMMARY ===');
+    debugPrint('Categories: ${categories.length}');
+    debugPrint('  - Schedule only: ${categories.where((c) => c['type'] == 'schedule').length}');
+    debugPrint('  - Photo only: ${categories.where((c) => c['type'] == 'photo').length}');
+    debugPrint('  - Both: ${categories.where((c) => c['type'] == 'both').length}');
+    debugPrint('');
+    debugPrint('Schedules: ${schedules.length}');
+    debugPrint('  - Completed: ${schedules.where((s) => s['isCompleted'] == true).length}');
+    debugPrint('  - Upcoming: ${schedules.where((s) => s['isCompleted'] == false && s['isDeleted'] == false).length}');
+    debugPrint('  - Deleted: ${schedules.where((s) => s['isDeleted'] == true).length}');
+    debugPrint('  - Recurring (past 7 days): 21 schedules');
+    debugPrint('  - Recurring (next 7 days): 21 schedules');
+    debugPrint('');
+    debugPrint('Journals: ${journals.length}');
+    debugPrint('  - Very Happy: ${journals.where((j) => j['mood'] == 'veryHappy').length}');
+    debugPrint('  - Happy: ${journals.where((j) => j['mood'] == 'happy').length}');
+    debugPrint('  - Neutral: ${journals.where((j) => j['mood'] == 'neutral').length}');
+    debugPrint('  - Sad: ${journals.where((j) => j['mood'] == 'sad').length}');
+    debugPrint('  - Very Sad: ${journals.where((j) => j['mood'] == 'verySad').length}');
+    debugPrint('  - Deleted: ${journals.where((j) => j['isDeleted'] == true).length}');
+    debugPrint('');
+    debugPrint('Photos: ${photos.length}');
+    debugPrint('  - Favorites: ${photos.where((p) => p['isFavorite'] == true).length}');
+    debugPrint('  - Milestones: ${photos.where((p) => p['isMilestone'] == true).length}');
+    debugPrint('  - Uploaded: ${photos.where((p) => p['isUploaded'] == true).length}');
+    debugPrint('  - Deleted: ${photos.where((p) => p['isDeleted'] == true).length}');
+    debugPrint('===========================');
   }
 }

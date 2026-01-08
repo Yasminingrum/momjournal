@@ -13,10 +13,8 @@ import '/domain/entities/photo_entity.dart';
 import '/presentation/providers/auth_provider.dart';
 import '/presentation/providers/category_provider.dart';
 import '/presentation/providers/photo_provider.dart';
-import '/presentation/providers/sync_provider.dart';
 import '/presentation/routes/app_router.dart';
 import '/presentation/widgets/common/empty_state.dart';
-import '/presentation/widgets/common/error_widget.dart';
 import '/presentation/widgets/common/loading_indicator.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -28,9 +26,9 @@ class GalleryScreen extends StatefulWidget {
 
 class _GalleryScreenState extends State<GalleryScreen> {
   bool _showMilestonesOnly = false;
-  bool _showFavoritesOnly = false;  // Ã°Å¸â€ â€¢ ADDED
+  bool _showFavoritesOnly = false;
   bool _sortNewestFirst = true;
-  String? _selectedCategory;  // Ã°Å¸â€ â€¢ ADDED
+  String? _selectedCategory;
 
   @override
   void initState() {
@@ -39,16 +37,31 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   Future<void> _loadPhotos() async {
+    // ✅ Load categories first
+    final authProvider = context.read<AuthProvider>();
+    final categoryProvider = context.read<CategoryProvider>();
+    
+    final userId = authProvider.user?.uid;
+    if (userId != null && categoryProvider.categories.isEmpty) {
+      await categoryProvider.initializeDefaultCategories(userId);
+      await categoryProvider.loadCategories(userId);
+    }
+    
+    if (!mounted) {
+      return;
+    }
+
     final provider = context.read<PhotoProvider>();
     await provider.loadPhotos();
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(
         title: const Text(TextConstants.navGallery),
         actions: [
-          // Ã°Å¸â€ â€¢ Category filter button
+          // Category filter button
           IconButton(
             icon: Icon(
               _selectedCategory != null ? Icons.folder : Icons.folder_outlined,
@@ -56,13 +69,21 @@ class _GalleryScreenState extends State<GalleryScreen> {
             ),
             onPressed: _showCategoryFilter,
           ),
-          // Ã°Å¸â€ â€¢ Favorite filter button
+          // Favorite filter button
           IconButton(
             icon: Icon(
               _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
               color: _showFavoritesOnly ? Colors.red : null,
             ),
             onPressed: _toggleFavoriteFilter,
+          ),
+          // Milestone filter button (ADDED - was missing in simplified version)
+          IconButton(
+            icon: Icon(
+              _showMilestonesOnly ? Icons.stars : Icons.stars_outlined,
+              color: _showMilestonesOnly ? ColorConstants.primaryColor : null,
+            ),
+            onPressed: _toggleMilestoneFilter,
           ),
           // Sort button
           PopupMenuButton<bool>(
@@ -133,16 +154,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
       body: Consumer<PhotoProvider>(
-        builder: (context, provider, _) {
-          if (provider.isLoading) {
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.photos.isEmpty) {
             return const LoadingIndicator();
           }
 
-          if (provider.error != null) {
-            return ErrorDisplayWidget(
-              message: provider.error!,
-              onRetry: _loadPhotos,
-            );
+          if (provider.error != null && provider.photos.isEmpty) {
+            return _buildErrorWidget(provider.error!);
           }
 
           final filteredPhotos = _getFilteredPhotos(provider);
@@ -161,59 +179,56 @@ class _GalleryScreenState extends State<GalleryScreen> {
             );
           }
 
-          // Group photos by month
           final groupedPhotos = _groupPhotosByMonth(filteredPhotos);
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: groupedPhotos.length,
-            itemBuilder: (context, index) {
-              final monthYear = groupedPhotos.keys.elementAt(index);
-              final photos = groupedPhotos[monthYear]!;
+          return RefreshIndicator(
+            onRefresh: _loadPhotos,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: groupedPhotos.length,
+              itemBuilder: (context, index) {
+                final monthYear = groupedPhotos.keys.elementAt(index);
+                final photos = groupedPhotos[monthYear]!;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Month header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 12,
-                    ),
-                    child: Text(
-                      monthYear,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 12,
+                      ),
+                      child: Text(
+                        monthYear,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-
-                  // Photo grid
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 4,
+                      ),
+                      itemCount: photos.length,
+                      itemBuilder: (context, photoIndex) {
+                        final photo = photos[photoIndex];
+                        final globalIndex = filteredPhotos.indexOf(photo);
+                        return _PhotoCard(
+                          photo: photo,
+                          heroTag: 'photo_${photo.id}_$globalIndex',
+                          onTap: () => _navigateToDetail(photo, globalIndex),
+                        );
+                      },
                     ),
-                    itemCount: photos.length,
-                    itemBuilder: (context, photoIndex) {
-                      final photo = photos[photoIndex];
-                      final globalIndex =
-                          filteredPhotos.indexOf(photo);
-                      return _PhotoCard(
-                        photo: photo,
-                        heroTag: 'photo_${photo.id}_$globalIndex',
-                        onTap: () => _navigateToDetail(photo, globalIndex),
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           );
         },
       ),
@@ -222,6 +237,36 @@ class _GalleryScreenState extends State<GalleryScreen> {
         child: const Icon(Icons.add_a_photo),
       ),
     );
+  }
+
+  Widget _buildErrorWidget(String errorMessage) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.red,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadPhotos,
+              child: const Text('Coba Lagi'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   String _getEmptyStateTitle() {
     if (_showFavoritesOnly) {
@@ -249,38 +294,47 @@ class _GalleryScreenState extends State<GalleryScreen> {
     return 'Mulai dokumentasikan momen berharga Anda';
   }
 
-  /// Ã°Å¸â€ â€¢ Toggle favorite filter
   Future<void> _toggleFavoriteFilter() async {
     setState(() {
       _showFavoritesOnly = !_showFavoritesOnly;
       if (_showFavoritesOnly) {
         _showMilestonesOnly = false;
+        _selectedCategory = null;
       }
     });
     await _loadPhotos();
   }
 
-  /// âœ… UPDATED: Show category filter with CategoryProvider
+  Future<void> _toggleMilestoneFilter() async {
+    setState(() {
+      _showMilestonesOnly = !_showMilestonesOnly;
+      if (_showMilestonesOnly) {
+        _showFavoritesOnly = false;
+        _selectedCategory = null;
+      }
+    });
+    await _loadPhotos();
+  }
+
   Future<void> _showCategoryFilter() async {
     final categoryProvider = context.read<CategoryProvider>();
     final authProvider = context.read<AuthProvider>();
     final userId = authProvider.user?.uid;
-    
+
     if (userId == null) {
       return;
     }
-    
-    // Load categories if not loaded
+
     if (categoryProvider.categories.isEmpty) {
       await categoryProvider.loadCategories(userId);
     }
-    
+
     final photoCategories = categoryProvider.photoCategories;
-    
+
     if (!mounted) {
       return;
     }
-    
+
     if (photoCategories.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -290,7 +344,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
       );
       return;
     }
-    
+
     final selected = await showModalBottomSheet<CategoryEntity>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -327,12 +381,13 @@ class _GalleryScreenState extends State<GalleryScreen> {
               itemBuilder: (context, index) {
                 final category = photoCategories[index];
                 final isSelected = _selectedCategory == category.name;
-                
+
                 return ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Color(int.parse(category.colorHex.replaceFirst('#', '0xFF'))).withValues (alpha: 0.1),
+                      color: Color(int.parse(category.colorHex.replaceFirst('#', '0xFF')))
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -347,8 +402,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
-                  trailing: isSelected 
-                      ? const Icon(Icons.check, color: ColorConstants.primaryColor) 
+                  trailing: isSelected
+                      ? const Icon(Icons.check, color: ColorConstants.primaryColor)
                       : null,
                   onTap: () => Navigator.pop(context, category),
                 );
@@ -359,7 +414,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
         ],
       ),
     );
-    
+
     if (selected != null && mounted) {
       setState(() {
         _selectedCategory = selected.name;
@@ -370,7 +425,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
       });
       await _loadPhotos();
     } else if (selected == null && _selectedCategory != null && mounted) {
-      // User cleared filter
       setState(() {
         _selectedCategory = null;
       });
@@ -378,7 +432,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }
 
-  // âœ… Helper method untuk convert icon string ke IconData
   IconData _getIconData(String iconName) {
     const iconMap = {
       'restaurant': Icons.restaurant,
@@ -394,9 +447,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
       'sports': Icons.sports,
     };
     return iconMap[iconName] ?? Icons.folder;
-}
+  }
 
-  /// Ã°Å¸â€ â€¢ Clear all filters
   Future<void> _clearAllFilters() async {
     setState(() {
       _selectedCategory = null;
@@ -409,22 +461,18 @@ class _GalleryScreenState extends State<GalleryScreen> {
   List<PhotoEntity> _getFilteredPhotos(PhotoProvider provider) {
     var photos = provider.photos;
 
-    // Filter by category
     if (_selectedCategory != null) {
       photos = photos.where((p) => p.category == _selectedCategory).toList();
     }
 
-    // Filter by favorite
     if (_showFavoritesOnly) {
       photos = photos.where((p) => p.isFavorite).toList();
     }
 
-    // Filter by milestone
     if (_showMilestonesOnly) {
       photos = photos.where((p) => p.isMilestone).toList();
     }
 
-    // Sort
     photos.sort((a, b) {
       if (_sortNewestFirst) {
         return b.dateTaken.compareTo(a.dateTaken);
@@ -450,50 +498,47 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   void _navigateToDetail(PhotoEntity photo, int index) {
-    // Get all filtered photos untuk swipe support
     final provider = context.read<PhotoProvider>();
     final filteredPhotos = _getFilteredPhotos(provider);
-    
+
     Navigator.pushNamed(
       context,
       Routes.photoDetail,
       arguments: {
         'photo': photo,
         'heroTag': 'photo_${photo.id}_$index',
-        'allPhotos': filteredPhotos, // NEW: pass all photos untuk swipe
+        'allPhotos': filteredPhotos,
       },
     ).then((_) {
-      // Reload photos after returning from detail (in case photo was deleted/updated)
       _loadPhotos();
     });
   }
 
-  /// Show dialog to choose image source (Camera or Gallery)
   Future<void> _showImageSourceDialog(BuildContext context) async {
     final ImageSource? source = await showDialog<ImageSource>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
-          title: const Text('Pilih Sumber Foto'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Kamera'),
-                onTap: () {
-                  Navigator.pop(dialogContext, ImageSource.camera);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeri'),
-                onTap: () {
-                  Navigator.pop(dialogContext, ImageSource.gallery);
-                },
-              ),
-            ],
-          ),
+        title: const Text('Pilih Sumber Foto'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Kamera'),
+              onTap: () {
+                Navigator.pop(dialogContext, ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Galeri'),
+              onTap: () {
+                Navigator.pop(dialogContext, ImageSource.gallery);
+              },
+            ),
+          ],
         ),
+      ),
     );
 
     if (source != null && context.mounted) {
@@ -501,21 +546,23 @@ class _GalleryScreenState extends State<GalleryScreen> {
     }
   }
 
-  /// Pick image and upload
   Future<void> _pickAndUploadImage(
     BuildContext context,
     ImageSource source,
   ) async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
+      final XFile? image;
+
+      image = await picker.pickImage(
         source: source,
-        maxWidth: 1024,      // Ã°Å¸â€Â§ Reduce dari 1920 ke 1024
-        maxHeight: 1024,     // Ã°Å¸â€Â§ Reduce dari 1920 ke 1024
-        imageQuality: 70,    // Ã°Å¸â€Â§ Reduce dari 85 ke 70
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 70,
       );
 
       if (image == null) {
+        debugPrint('Gallery: User cancelled image picker');
         return;
       }
 
@@ -523,16 +570,15 @@ class _GalleryScreenState extends State<GalleryScreen> {
         return;
       }
 
-      // Get provider before async operations
       final photoProvider = context.read<PhotoProvider>();
 
-      // Show loading indicator with message
-      await showDialog<void>(
+      // Show loading dialog
+      showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext dialogContext) => WillPopScope(
-          onWillPop: () async => false,
-          child: const AlertDialog(
+        builder: (BuildContext dialogContext) => const PopScope(
+          canPop: false,
+          child: AlertDialog(
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -554,7 +600,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
       );
 
       try {
-        // Upload photo using provider
+        debugPrint('Gallery: Uploading photo from ${image.path}');
+
         final success = await photoProvider.uploadPhoto(
           imagePath: image.path,
           caption: '',
@@ -568,26 +615,33 @@ class _GalleryScreenState extends State<GalleryScreen> {
         // Close loading dialog
         Navigator.of(context).pop();
 
+        // IMPORTANT: Wait a bit for dialog to close before showing snackbar
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
         if (!context.mounted) {
           return;
         }
 
         if (success) {
-          // âœ… AUTO SYNC after successful photo upload
-          final syncProvider = context.read<SyncProvider>();
-          debugPrint('ðŸ”„ Gallery: Auto sync after photo upload...');
-          await syncProvider.syncAll();
-          
-          // Show success message
+          debugPrint('Gallery: Photo uploaded successfully');
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Foto berhasil ditambahkan!'),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 2),
             ),
           );
+
+          // Reload photos AFTER showing snackbar
+          // Use addPostFrameCallback to avoid setState during build
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _loadPhotos();
+            }
+          });
         } else {
-          // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -595,53 +649,65 @@ class _GalleryScreenState extends State<GalleryScreen> {
               ),
               backgroundColor: Colors.red,
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
       } catch (uploadError) {
+        debugPrint('Gallery: Upload error: $uploadError');
         if (!context.mounted) {
           return;
         }
 
         // Make sure dialog is closed
-        Navigator.of(context).pop();
+        if (Navigator.canPop(context)) {
+          Navigator.of(context).pop();
+        }
+
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
         if (!context.mounted) {
           return;
         }
 
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Gagal menambahkan foto: $uploadError'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
+      debugPrint('Gallery: Error picking image: $e');
       if (!context.mounted) {
         return;
       }
 
-      // Close loading dialog if open
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
 
-      // Show error message
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      if (!context.mounted) {
+        return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Gagal memilih foto: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
         ),
       );
     }
   }
 }
 
-/// Photo Card Widget (UPDATED with favorite indicator)
+/// Photo Card Widget
 class _PhotoCard extends StatelessWidget {
   const _PhotoCard({
     required this.photo,
@@ -654,17 +720,15 @@ class _PhotoCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
+  Widget build(BuildContext context) {
+    return GestureDetector(
       onTap: onTap,
       child: Hero(
         tag: heroTag,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Photo image
             _buildPhotoImage(),
-            
-            // Ã°Å¸â€ â€¢ Favorite indicator
             if (photo.isFavorite)
               const Positioned(
                 top: 4,
@@ -675,8 +739,6 @@ class _PhotoCard extends StatelessWidget {
                   size: 20,
                 ),
               ),
-            
-            // Milestone badge
             if (photo.isMilestone)
               const Positioned(
                 bottom: 4,
@@ -687,72 +749,75 @@ class _PhotoCard extends StatelessWidget {
                   size: 20,
                 ),
               ),
-
-            // Ã°Å¸â€ â€¢ Category badge
-            if (photo.category != null && photo.category!.isNotEmpty)
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    photo.category!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),
     );
-
-  Widget _buildPhotoImage() {
-    // Try local file first
-    if (photo.localPath != null && File(photo.localPath!).existsSync()) {
-      return Image.file(
-        File(photo.localPath!),
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildCloudImage(),
-      );
-    }
-
-    return _buildCloudImage();
   }
 
-  Widget _buildCloudImage() {
-    if (photo.cloudUrl == null || photo.cloudUrl!.isEmpty) {
-      return Container(
-        color: Colors.grey[300],
-        child: const Center(
-          child: Icon(Icons.broken_image, color: Colors.grey),
-        ),
-      );
+  Widget _buildPhotoImage() {
+    if (photo.cloudUrl != null && photo.cloudUrl!.isNotEmpty) {
+      return _buildCloudImage(photo.cloudUrl!);
     }
 
+    if (photo.localPath != null && photo.localPath!.isNotEmpty) {
+      return _buildLocalImage(photo.localPath!);
+    }
+
+    return Container(
+      color: Colors.grey[300],
+      child: const Icon(
+        Icons.image_not_supported,
+        color: Colors.grey,
+      ),
+    );
+  }
+
+  Widget _buildCloudImage(String url) {
     return CachedNetworkImage(
-      imageUrl: photo.cloudUrl!,
+      imageUrl: url,
       fit: BoxFit.cover,
       placeholder: (context, url) => Container(
         color: Colors.grey[300],
         child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
+          child: CircularProgressIndicator(),
         ),
       ),
       errorWidget: (context, url, error) => Container(
         color: Colors.grey[300],
-        child: const Icon(Icons.error_outline, color: Colors.red),
+        child: const Icon(
+          Icons.error_outline,
+          color: Colors.red,
+        ),
       ),
+    );
+  }
+
+  Widget _buildLocalImage(String path) {
+    final file = File(path);
+
+    if (!file.existsSync()) {
+      return Container(
+        color: Colors.grey[300],
+        child: const Icon(
+          Icons.broken_image,
+          color: Colors.grey,
+        ),
+      );
+    }
+
+    return Image.file(
+      file,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: Colors.grey[300],
+          child: const Icon(
+            Icons.broken_image,
+            color: Colors.grey,
+          ),
+        );
+      },
     );
   }
 }
