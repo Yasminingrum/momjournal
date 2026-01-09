@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '/data/repositories/schedule_repository.dart';
 import '/domain/entities/schedule_entity.dart';
+import '/services/notification_service.dart';
 
 /// ViewModel for Schedule management
 /// Manages schedule state and business logic using Provider pattern
@@ -13,11 +14,12 @@ class ScheduleProvider extends ChangeNotifier {
   ScheduleProvider();
   final ScheduleRepository _repository = ScheduleRepository();
   final Uuid _uuid = const Uuid();
+  final NotificationService _notificationService = NotificationService();
 
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];
   DateTime _selectedDate = DateTime.now();
-  String? _selectedCategory;  // ✅ Changed from ScheduleCategory? to String?
+  String? _selectedCategory;  // âœ… Changed from ScheduleCategory? to String?
   bool _isLoading = false;
   String? _error;
 
@@ -25,7 +27,7 @@ class ScheduleProvider extends ChangeNotifier {
   List<ScheduleEntity> get schedules => _schedules;
   List<ScheduleEntity> get todaySchedules => _todaySchedules;
   DateTime get selectedDate => _selectedDate;
-  String? get selectedCategory => _selectedCategory;  // ✅ Returns String? now
+  String? get selectedCategory => _selectedCategory;  // âœ… Returns String? now
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -80,7 +82,7 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Filter by category
-  /// ✅ NOW ACCEPTS String? instead of ScheduleCategory?
+  /// âœ… NOW ACCEPTS String? instead of ScheduleCategory?
   Future<void> filterByCategory(String? category) async {
     try {
       _setLoading(true);
@@ -100,12 +102,12 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Create a new schedule
-  /// ✅ PARAMETER CHANGED: category is now String
+  /// âœ… PARAMETER CHANGED: category is now String
   Future<bool> createSchedule({
     required String title,
-    required String category,  // ✅ Changed from ScheduleCategory to String
+    required String category,  // âœ… Changed from ScheduleCategory to String
     required DateTime dateTime,
-    DateTime? endDateTime,  // 🆕 Multi-day support
+    DateTime? endDateTime,  // ðŸ†• Multi-day support
     String? notes,
     bool hasReminder = false,
     int? reminderMinutes,
@@ -118,9 +120,9 @@ class ScheduleProvider extends ChangeNotifier {
         id: _uuid.v4(),
         userId: userId ?? 'default_user',
         title: title,
-        category: category,  // ✅ Direct String usage
+        category: category,  // âœ… Direct String usage
         dateTime: dateTime,
-        endDateTime: endDateTime,  // 🆕 Multi-day support
+        endDateTime: endDateTime,  // ðŸ†• Multi-day support
         notes: notes,
         hasReminder: hasReminder,
         reminderMinutes: reminderMinutes ?? 0,
@@ -129,6 +131,11 @@ class ScheduleProvider extends ChangeNotifier {
       );
 
       await _repository.createSchedule(schedule);
+      
+      // Schedule notification if reminder is enabled
+      if (hasReminder && reminderMinutes != null && reminderMinutes > 0) {
+        await _scheduleNotificationForSchedule(schedule);
+      }
       
       // Reload data yang sesuai dengan context
       await _reloadCurrentView();
@@ -148,6 +155,14 @@ class ScheduleProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       await _repository.updateSchedule(schedule);
+      
+      // Cancel existing notification
+      await _cancelNotificationForSchedule(schedule.id);
+      
+      // Schedule new notification if reminder is enabled
+      if (schedule.hasReminder && schedule.reminderMinutes > 0) {
+        await _scheduleNotificationForSchedule(schedule);
+      }
       
       // Reload data yang sesuai dengan context
       await _reloadCurrentView();
@@ -182,6 +197,10 @@ class ScheduleProvider extends ChangeNotifier {
   Future<bool> deleteSchedule(String id) async {
     try {
       _setLoading(true);
+      
+      // Cancel notification before deleting
+      await _cancelNotificationForSchedule(id);
+      
       await _repository.deleteSchedule(id);
       
       // Reload data yang sesuai dengan context
@@ -339,6 +358,44 @@ class ScheduleProvider extends ChangeNotifier {
   void _clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Schedule notification for a schedule entity
+  Future<void> _scheduleNotificationForSchedule(ScheduleEntity schedule) async {
+    try {
+      await _notificationService.scheduleForScheduleEntity(
+        scheduleId: schedule.id,
+        title: schedule.title,
+        description: schedule.notes ?? 'Jangan lupa!',
+        scheduleTime: schedule.dateTime,
+        reminderMinutes: schedule.reminderMinutes,
+      );
+      
+      if (kDebugMode) {
+        print('🔔 Notification scheduled for: ${schedule.title}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Failed to schedule notification: $e');
+      }
+    }
+  }
+
+  /// Cancel notification for a schedule
+  Future<void> _cancelNotificationForSchedule(String scheduleId) async {
+    try {
+      final notificationId = 
+          scheduleId.hashCode % 1000000 + 100; // Same calculation as in NotificationService
+      await _notificationService.cancelNotification(notificationId);
+      
+      if (kDebugMode) {
+        print('🔕 Notification cancelled for schedule: $scheduleId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Failed to cancel notification: $e');
+      }
+    }
   }
 
   @override

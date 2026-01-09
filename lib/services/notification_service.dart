@@ -52,6 +52,9 @@ class NotificationService {
     // Create notification channel for Android
     await _createNotificationChannel();
     
+    // Request permissions for Android 13+ and iOS
+    await requestPermissions();
+    
     _initialized = true;
   }
   
@@ -79,18 +82,35 @@ class NotificationService {
     }
   }
   
-  /// Request permissions (iOS)
+  /// Request permissions (iOS and Android 13+)
   Future<bool> requestPermissions() async {
-    final result = await _notifications
+    // For Android 13+ (API level 33+), request POST_NOTIFICATIONS permission
+    final androidImpl = _notifications
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+            AndroidFlutterLocalNotificationsPlugin>();
     
-    return result ?? true;
+    if (androidImpl != null) {
+      final granted = await androidImpl.requestNotificationsPermission();
+      if (granted ?? false) {
+        return true;
+      }
+    }
+    
+    // For iOS
+    final iosImpl = _notifications
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>();
+    
+    if (iosImpl != null) {
+      final result = await iosImpl.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      return result ?? false;
+    }
+    
+    return true; // Default untuk platform lain
   }
   
   /// Show instant notification
@@ -263,7 +283,7 @@ class NotificationService {
     
     await scheduleNotificationWithReminder(
       id: notificationId,
-      title: '📅 $title',
+      title: 'ðŸ“… $title',
       body: '$reminderText\n$description',
       eventTime: scheduleTime,
       reminderMinutes: reminderMinutes,
@@ -277,7 +297,7 @@ class NotificationService {
   }) async {
     await scheduleDailyNotification(
       id: AppConstants.notificationIdJournal,
-      title: '📝 Waktunya Journaling',
+      title: 'ðŸ“ Waktunya Journaling',
       body: 'Jangan lupa tulis jurnal hari ini!',
       time: time,
       payload: '{"type":"journal"}',

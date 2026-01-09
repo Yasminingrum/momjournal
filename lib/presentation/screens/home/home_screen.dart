@@ -5,7 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 
 import '/core/constants/text_constants.dart';
-import '/data/datasources/local/hive_database.dart';
+import '/core/utils/child_profile_helper.dart';
 import '/presentation/providers/auth_provider.dart';
 import '/presentation/providers/journal_provider.dart';
 import '/presentation/providers/schedule_provider.dart';
@@ -84,33 +84,14 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  String? _childName;
-  String? _userName;
 
-  @override
-  void initState() {
-    super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _loadUserInfo();
-      _loadData();
-    });
-  }
-
-  Future<void> _loadUserInfo() async {
-    final authProvider = context.read<AuthProvider>();
-    final hiveDb = HiveDatabase();
-    
-    setState(() {
-      _userName = authProvider.userDisplayName?.split(' ')[0];
-      
-      // Get child name from Hive
-      final userBox = hiveDb.userBox;
-      if (userBox.isNotEmpty) {
-        final user = userBox.getAt(0);
-        _childName = user?.childName;
-      }
-    });
-  }
+@override
+   void initState() {
+     super.initState();
+     SchedulerBinding.instance.addPostFrameCallback((_) {
+       _loadData();
+     });
+   }
 
   Future<void> _loadData() async {
     final scheduleProvider = context.read<ScheduleProvider>();
@@ -221,12 +202,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ? 'Selamat Sore'
                 : 'Selamat Malam';
 
-    String displayName = 'Mom';
-    if (_childName != null && _childName!.isNotEmpty) {
-      displayName = 'Mom ${_childName!}';
-    } else if (_userName != null && _userName!.isNotEmpty) {
-      displayName = _userName!;
-    }
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.userId;
+    
+    // Get child info using helper
+    final childName = ChildProfileHelper.getChildName(userId);
+    final childAge = ChildProfileHelper.getChildAgeString(userId);
+    final isProfileComplete = ChildProfileHelper.isProfileComplete(userId);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,13 +223,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Hai, $displayName! 👋',
+          'Ibu dari $childName! 👶',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
+        // Show child age if profile is complete
+        if (isProfileComplete && childAge.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '$childName sudah berusia $childAge',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

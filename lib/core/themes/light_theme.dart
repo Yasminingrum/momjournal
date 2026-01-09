@@ -117,18 +117,18 @@ class LightTheme {
         shape: CircleBorder(),
       ),
       
-      // Input Decoration Theme
+      // Input Decoration Theme - IMPROVED CONTRAST
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFF5F5F5), // grey100 equivalent
+        fillColor: const Color(0xFFEEEEEE), // grey200 for better contrast
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)), // grey300
+          borderSide: const BorderSide(color: Color(0xFFBDBDBD)), // grey400 for better visibility
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFFE0E0E0)), // grey300
+          borderSide: const BorderSide(color: Color(0xFFBDBDBD)), // grey400 for better visibility
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),

@@ -292,7 +292,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  // ✅ FIXED: List View dengan multi-day schedule support
+  // FIXED: List View dengan multi-day schedule support
   Widget _buildListView() {
     final theme = Theme.of(context);
     final schedules = _getFilteredListSchedules();
@@ -368,7 +368,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ✅ Month View (sudah benar)
+  // âœ… Month View (sudah benar)
   Widget _buildMonthView() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
@@ -411,7 +411,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ✅ FIXED: Week View dengan multi-day schedule support
+  // âœ… FIXED: Week View dengan multi-day schedule support
   Widget _buildWeekView() => SingleChildScrollView(
       child: Column(
         children: [
@@ -422,7 +422,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
     );
 
-  // ✅ FIXED: Day View dengan multi-day schedule support
+  // âœ… FIXED: Day View dengan multi-day schedule support
   Widget _buildDayView() => Column(
       children: [
         _buildDaySelector(),
@@ -579,7 +579,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ✅ FIXED: Week timeline dengan multi-day schedule support
+  // âœ… FIXED: Week timeline dengan multi-day schedule support
   Widget _buildWeekTimeline() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
@@ -589,7 +589,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       children: List.generate(7, (index) {
         final day = weekStart.add(Duration(days: index));
         
-        // ✅ FIX: Filter dengan mempertimbangkan multi-day schedule
+        // FIX: Filter dengan mempertimbangkan multi-day schedule
         final daySchedules = schedules.where((s) {
           final dayNormalized = DateTime(day.year, day.month, day.day);
           final scheduleDateNormalized = DateTime(
@@ -717,7 +717,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ✅ Tampilkan indikator multi-day
+          // âœ… Tampilkan indikator multi-day
           if (schedule.isMultiDay)
             Icon(
               Icons.date_range,
@@ -826,12 +826,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ✅ FIXED: Day timeline dengan multi-day schedule support
+  // âœ… FIXED: Day timeline dengan multi-day schedule support
   Widget _buildDayTimeline() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
     
-    // ✅ FIX: Pisahkan multi-day dan single-day schedules
+    // âœ… FIX: Pisahkan multi-day dan single-day schedules
     final dayNormalized = DateTime(
       _selectedDay.year,
       _selectedDay.month,
@@ -860,7 +860,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return Column(
       children: [
-        // ✅ Tampilkan multi-day schedules di atas timeline
+        // âœ… Tampilkan multi-day schedules di atas timeline
         if (multiDaySchedules.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -905,7 +905,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // ✅ NEW: Widget untuk multi-day schedule card
+  // âœ… NEW: Widget untuk multi-day schedule card
   Widget _buildMultiDayScheduleCard(ScheduleEntity schedule) {
     final theme = Theme.of(context);
     final color = _getCategoryColor(schedule.category);
@@ -1096,7 +1096,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 activeColor: color,
               ),
               
-              // ✅ Tampilkan info berbeda untuk multi-day
+              // âœ… Tampilkan info berbeda untuk multi-day
               if (schedule.isMultiDay && schedule.endDateTime != null)
                 Expanded(
                   child: Column(
@@ -1394,7 +1394,9 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     final categories = categoryProvider.categories;
     
     return Container(
-      padding: const EdgeInsets.all(16),
+      constraints: const BoxConstraints(
+        maxHeight: 350, // Batasi tinggi maksimal
+      ),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -1403,97 +1405,101 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           color: theme.colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Filter Berdasarkan',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-          const SizedBox(height: 12),
-          
-          // Category filter
-          Text(
-            'Kategori:',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ChoiceChip(
-                label: const Text('Semua', style: TextStyle(fontSize: 12)),
-                selected: _filterCategory == null,
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() => _filterCategory = null);
-                  }
-                },
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Filter Berdasarkan',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
               ),
-              ...categories.map((cat) => ChoiceChip(
-                  label: Text(cat.name, style: const TextStyle(fontSize: 12)),
-                  selected: _filterCategory == cat.name,
-                  onSelected: (selected) {
-                    setState(() {
-                      _filterCategory = selected ? cat.name : null;
-                    });
-                  },
-                ),),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Status filter
-          Text(
-            'Status:',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
-          ),
-          const SizedBox(height: 8),
-          CheckboxListTile(
-            title: const Text('Hanya Selesai', style: TextStyle(fontSize: 13)),
-            value: _showOnlyCompleted,
-            onChanged: (value) {
-              setState(() {
-                _showOnlyCompleted = value ?? false;
-                if (value ?? false) {
-                  _showOnlyIncomplete = false;
-                }
-              });
-            },
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
-          CheckboxListTile(
-            title: const Text('Hanya Belum Selesai', style: TextStyle(fontSize: 13)),
-            value: _showOnlyIncomplete,
-            onChanged: (value) {
-              setState(() {
-                _showOnlyIncomplete = value ?? false;
-                if (value ?? false) {
-                  _showOnlyCompleted = false;
-                }
-              });
-            },
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
-        ],
+            const SizedBox(height: 12),
+            
+            // Category filter
+            Text(
+              'Kategori:',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ChoiceChip(
+                  label: const Text('Semua', style: TextStyle(fontSize: 12)),
+                  selected: _filterCategory == null,
+                  onSelected: (selected) {
+                    if (selected) {
+                      setState(() => _filterCategory = null);
+                    }
+                  },
+                ),
+                ...categories.map((cat) => ChoiceChip(
+                    label: Text(cat.name, style: const TextStyle(fontSize: 12)),
+                    selected: _filterCategory == cat.name,
+                    onSelected: (selected) {
+                      setState(() {
+                        _filterCategory = selected ? cat.name : null;
+                      });
+                    },
+                  ),),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            // Status filter
+            Text(
+              'Status:',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              title: const Text('Hanya Selesai', style: TextStyle(fontSize: 13)),
+              value: _showOnlyCompleted,
+              onChanged: (value) {
+                setState(() {
+                  _showOnlyCompleted = value ?? false;
+                  if (value ?? false) {
+                    _showOnlyIncomplete = false;
+                  }
+                });
+              },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+            CheckboxListTile(
+              title: const Text('Hanya Belum Selesai', style: TextStyle(fontSize: 13)),
+              value: _showOnlyIncomplete,
+              onChanged: (value) {
+                setState(() {
+                  _showOnlyIncomplete = value ?? false;
+                  if (value ?? false) {
+                    _showOnlyCompleted = false;
+                  }
+                });
+              },
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1587,7 +1593,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 child: Text(
                   wasCompleted 
                       ? 'Ditandai belum selesai' 
-                      : 'Ditandai selesai ✓',
+                      : 'Ditandai selesai âœ“',
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -1633,11 +1639,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  // ✅ FIXED: Filter untuk List View dengan multi-day support
+  // âœ… FIXED: Filter untuk List View dengan multi-day support
   List<ScheduleEntity> _getFilteredListSchedules() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     
-    // ✅ FIX: Gunakan logika yang sama dengan Month View
+    // âœ… FIX: Gunakan logika yang sama dengan Month View
     var schedules = scheduleProvider.schedules.where((s) {
       final selectedDayNormalized = DateTime(
         _selectedDay.year,

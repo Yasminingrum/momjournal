@@ -11,10 +11,10 @@ class ColorConstants {
   static const Color neutralColor = Color(0xFFD6CBBF); // Warm beige
   static const Color backgroundLight = Color(0xFFF0EEEA); // Off-white background
 
-  // Text colors
-  static const Color textPrimary = Color(0xFF333333); // Dark gray
-  static const Color textSecondary = Color(0xFF666666); // Medium gray
-  static const Color textHint = Color(0xFF999999); // Light gray
+  // Text colors - IMPROVED CONTRAST
+  static const Color textPrimary = Color(0xFF2B2B2B); // Darker gray for better readability
+  static const Color textSecondary = Color(0xFF5A5A5A); // Darker medium gray for better contrast
+  static const Color textHint = Color(0xFF8A8A8A); // Darker hint for better visibility
   
   // Surface colors
   static const Color surfaceLight = Color(0xFFFFFFFF); // White
@@ -80,7 +80,7 @@ class LazydaysTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: ColorConstants.neutralColor.withValues(alpha: 0.3),
+              color: ColorConstants.neutralColor.withValues(alpha: 0.4),
               width: 1,
             ),
           ),
@@ -108,7 +108,7 @@ class LazydaysTheme {
         // Text Button Theme
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: ColorConstants.primaryLight,
+            foregroundColor: ColorConstants.primaryDark, // Darker for better contrast
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -124,7 +124,7 @@ class LazydaysTheme {
         // Outlined Button Theme
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: ColorConstants.primaryLight,
+            foregroundColor: ColorConstants.primaryDark, // Darker for better contrast
             side: const BorderSide(
               color: ColorConstants.primaryLight,
               width: 1.5,
@@ -149,28 +149,28 @@ class LazydaysTheme {
           shape: CircleBorder(),
         ),
 
-        // Input Decoration Theme
+        // Input Decoration Theme - IMPROVED CONTRAST
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: ColorConstants.surfaceLight,
+          fillColor: ColorConstants.surfaceVariant, // More visible background
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: ColorConstants.neutralColor.withValues(alpha: 0.5),
+              color: ColorConstants.neutralColor.withValues(alpha: 0.6), // More visible border
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: ColorConstants.neutralColor.withValues(alpha: 0.5),
+              color: ColorConstants.neutralColor.withValues(alpha: 0.6), // More visible border
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(
-              color: ColorConstants.primaryLight,
+              color: ColorConstants.primaryDark, // Darker for better contrast
               width: 2,
             ),
           ),
@@ -210,7 +210,7 @@ class LazydaysTheme {
             if (states.contains(WidgetState.selected)) {
               return ColorConstants.primaryLight;
             }
-            return ColorConstants.neutralColor.withValues(alpha: 0.5);
+            return ColorConstants.neutralColor.withValues(alpha: 0.6);
           }),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
@@ -223,7 +223,7 @@ class LazydaysTheme {
             if (states.contains(WidgetState.selected)) {
               return ColorConstants.primaryLight;
             }
-            return ColorConstants.neutralColor.withValues(alpha: 0.5);
+            return ColorConstants.neutralColor.withValues(alpha: 0.6);
           }),
         ),
 
@@ -239,7 +239,7 @@ class LazydaysTheme {
             if (states.contains(WidgetState.selected)) {
               return ColorConstants.primaryLight.withValues(alpha: 0.5);
             }
-            return ColorConstants.neutralColor.withValues(alpha: 0.3);
+            return ColorConstants.neutralColor.withValues(alpha: 0.4);
           }),
         ),
 
@@ -305,7 +305,7 @@ class LazydaysTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: BorderSide(
-              color: ColorConstants.primaryLight.withValues(alpha: 0.2),
+              color: ColorConstants.primaryLight.withValues(alpha: 0.3),
             ),
           ),
         ),
@@ -331,7 +331,7 @@ class LazydaysTheme {
 
         // Divider Theme
         dividerTheme: DividerThemeData(
-          color: ColorConstants.neutralColor.withValues(alpha: 0.3),
+          color: ColorConstants.neutralColor.withValues(alpha: 0.4),
           thickness: 1,
           space: 1,
         ),

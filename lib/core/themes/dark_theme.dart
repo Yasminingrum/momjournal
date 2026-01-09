@@ -116,19 +116,19 @@ class DarkTheme {
           shape: CircleBorder(),
         ),
 
-        // Input Decoration Theme
+        // Input Decoration Theme - IMPROVED CONTRAST
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF424242), // grey800 equivalent
+          fillColor: const Color(0xFF3A3045), // Lighter purple-grey for better visibility
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF757575)), // grey600
+            borderSide: const BorderSide(color: Color(0xFF5A4A6A)), // Better visible border
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFF757575)), // grey600
+            borderSide: const BorderSide(color: Color(0xFF5A4A6A)), // Better visible border
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),

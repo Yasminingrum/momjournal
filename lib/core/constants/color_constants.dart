@@ -23,13 +23,13 @@ class ColorConstants {
   
   // Text Colors
   static const Color textPrimary = Color(0xFF2D2438);         // Dark purple-grey (softer than black)
-  static const Color textSecondary = Color(0xFF6B5B7B);       // Medium purple-grey
+  static const Color textSecondary = Color(0xFF5A4A6A);       // Darker purple-grey for better contrast
   static const Color textOnPrimary = Color(0xFFFFFFFF);
   static const Color white = Color(0xFFFFFFFF);
   
   // Text Colors for Dark Mode
-  static const Color textPrimaryDark = Color(0xFFE8E0F0);     // Light purple-white (very readable)
-  static const Color textSecondaryDark = Color(0xFFB8A8C8);   // Medium light purple-grey
+  static const Color textPrimaryDark = Color(0xFFF0EAF8);     // Brighter light purple-white (very readable)
+  static const Color textSecondaryDark = Color(0xFFC8B8D8);   // Brighter medium purple-grey for better contrast
   
   // Category Colors
   static const Color categoryFeeding = Color(0xFF2196F3);      // Blue

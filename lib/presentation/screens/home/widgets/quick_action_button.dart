@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// QuickActionButton
-/// Circular action button with icon and label for quick access to common actions.
-/// Used on the home screen for quick navigation to add screens.
-///
-/// Features:
-/// - Circular design with icon
-/// - Label below icon
-/// - Customizable colors
-/// - Ripple effect on tap
-/// - Disabled state
 class QuickActionButton extends StatelessWidget {
 
   const QuickActionButton({
@@ -32,7 +22,7 @@ class QuickActionButton extends StatelessWidget {
         children: [
           // Circular button
           Material(
-            color: color.withValues (alpha:0.1),
+            color: color.withValues (alpha:0.15),
             borderRadius: BorderRadius.circular(size / 2),
             child: InkWell(
               onTap: enabled ? onTap : null,
@@ -43,7 +33,7 @@ class QuickActionButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: color.withValues (alpha:0.3),
+                    color: color.withValues (alpha:0.5),
                     width: 2,
                   ),
                 ),
