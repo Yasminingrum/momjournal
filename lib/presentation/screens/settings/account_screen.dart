@@ -96,13 +96,14 @@ class AccountScreen extends StatelessWidget {
                 title: const Text('Edit Profil Anak'),
                 subtitle: const Text('Ubah informasi anak'),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute<void>(
                       builder: (context) => const EditProfileScreen(),
                     ),
                   );
+                  // Consumer will rebuild automatically when authProvider.refreshUserData() is called
                 },
               ),
 

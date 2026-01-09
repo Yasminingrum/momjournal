@@ -34,6 +34,7 @@ class AuthProvider with ChangeNotifier {
   AuthState _state = AuthState.initial;
   User? _user;
   String? _errorMessage;
+  int _profileUpdateTimestamp = 0;
 
   // Getters
   AuthState get state => _state;
@@ -45,6 +46,7 @@ class AuthProvider with ChangeNotifier {
   String? get userEmail => _user?.email;
   String? get userDisplayName => _user?.displayName;
   String? get userPhotoUrl => _user?.photoURL;
+  int get profileUpdateTimestamp => _profileUpdateTimestamp;
 
   /// Initialize provider - check current auth state
   void _initialize() {
@@ -65,21 +67,21 @@ class AuthProvider with ChangeNotifier {
       _setState(AuthState.loading);
       _errorMessage = null;
 
-      debugPrint('🔐 Provider: Starting Google Sign-In...');
+      debugPrint('Provider: Starting Google Sign-In...');
       final user = await _authRepository.signInWithGoogle();
       
       _user = user;
       _setState(AuthState.authenticated);
       
-      debugPrint('✅ Provider: Sign-In successful');
+      debugPrint('Provider: Sign-In successful');
       return true;
     } on Exception catch (e) {
-      debugPrint('❌ Provider: AuthException: $e');
+      debugPrint('Provider: AuthException: $e');
       _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {
-      debugPrint('❌ Provider: Unexpected error: $e');
+      debugPrint('Provider: Unexpected error: $e');
       _errorMessage = 'Terjadi kesalahan tak terduga';
       _setState(AuthState.error);
       return false;
@@ -92,40 +94,40 @@ class AuthProvider with ChangeNotifier {
       _setState(AuthState.loading);
       _errorMessage = null;
 
-      debugPrint('🚪 Provider: Signing out...');
+      debugPrint('Provider: Signing out...');
       
-      // ✅ AUTO SYNC CATEGORIES before logout
+      // AUTO SYNC CATEGORIES before logout
       if (_categoryProvider != null && _user != null) {
-        debugPrint('🔄 Provider: Syncing categories before logout...');
+        debugPrint('Provider: Syncing categories before logout...');
         try {
           await _categoryProvider.syncToRemote(_user!.uid);
-          debugPrint('✅ Provider: Categories synced');
+          debugPrint('Provider: Categories synced');
         } catch (categoryError) {
-          debugPrint('⚠️ Provider: Category sync failed but continuing: $categoryError');
+          debugPrint('Provider: Category sync failed but continuing: $categoryError');
         }
       }
 
-      // ✅ Initialize default categories after login
+      // Initialize default categories after login
       if (_categoryProvider != null && user != null) {
-        debugPrint('📁 Provider: Initializing default categories...');
+        debugPrint('Provider: Initializing default categories...');
         try {
           final uid = _user!.uid;
             await _categoryProvider.initializeDefaultCategories(uid);
             await _categoryProvider.loadCategories(uid);
-          debugPrint('✅ Provider: Categories initialized');
+          debugPrint('Provider: Categories initialized');
         } catch (categoryError) {
-          debugPrint('⚠️ Provider: Category initialization failed but continuing: $categoryError');
+          debugPrint('Provider: Category initialization failed but continuing: $categoryError');
         }
       }
       
-      // ✅ AUTO SYNC DATA before logout
+      // AUTO SYNC DATA before logout
       if (_syncProvider != null) {
-        debugPrint('🔄 Provider: Auto sync data before logout...');
+        debugPrint('Provider: Auto sync data before logout...');
         try {
           await _syncProvider.syncAll();
-          debugPrint('✅ Provider: Data sync completed');
+          debugPrint('Provider: Data sync completed');
         } catch (syncError) {
-          debugPrint('⚠️ Provider: Data sync failed but continuing logout: $syncError');
+          debugPrint('Provider: Data sync failed but continuing logout: $syncError');
           // Continue with logout even if sync fails
         }
       }
@@ -135,15 +137,15 @@ class AuthProvider with ChangeNotifier {
       _user = null;
       _setState(AuthState.unauthenticated);
       
-      debugPrint('✅ Provider: Sign-Out successful');
+      debugPrint('Provider: Sign-Out successful');
       return true;
     } on Exception catch (e) {
-      debugPrint('❌ Provider: Sign-Out failed: $e');
+      debugPrint('Provider: Sign-Out failed: $e');
       _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {
-      debugPrint('❌ Provider: Unexpected error during sign-out: $e');
+      debugPrint('Provider: Unexpected error during sign-out: $e');
       _errorMessage = 'Gagal keluar';
       _setState(AuthState.error);
       return false;
@@ -156,21 +158,21 @@ class AuthProvider with ChangeNotifier {
       _setState(AuthState.loading);
       _errorMessage = null;
 
-      debugPrint('🗑️ Provider: Deleting account...');
+      debugPrint('Provider: Deleting account...');
       await _authRepository.deleteAccount();
       
       _user = null;
       _setState(AuthState.unauthenticated);
       
-      debugPrint('✅ Provider: Account deleted');
+      debugPrint('Provider: Account deleted');
       return true;
     } on Exception catch (e) {
-      debugPrint('❌ Provider: Delete account failed: $e');
+      debugPrint('Provider: Delete account failed: $e');
       _errorMessage = e.toString();
       _setState(AuthState.error);
       return false;
     } catch (e) {
-      debugPrint('❌ Provider: Unexpected error deleting account: $e');
+      debugPrint('Provider: Unexpected error deleting account: $e');
       _errorMessage = 'Gagal menghapus akun';
       _setState(AuthState.error);
       return false;
@@ -197,5 +199,13 @@ class AuthProvider with ChangeNotifier {
     _state = _user != null ? AuthState.authenticated : AuthState.unauthenticated;
     notifyListeners();
     return _user != null;
+  }
+  
+  /// Refresh user data - call this after updating child profile
+  /// This will trigger rebuild of all consumers
+  void refreshUserData() {
+    debugPrint('🔄 Provider: Refreshing user data');
+    _profileUpdateTimestamp = DateTime.now().millisecondsSinceEpoch;
+    notifyListeners();
   }
 }

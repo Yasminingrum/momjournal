@@ -85,7 +85,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 CustomTextField(
                   label: 'Nama Anak',
                   controller: _nameController,
-                  hint: 'Contoh: Fjola',
+                  hint: 'Contoh: Emyr',
                   prefixIcon: Icons.person,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {

@@ -14,15 +14,23 @@ class ChildProfileHelper {
 
   /// Get child name dari Hive UserModel
   /// Returns 'Si Kecil' jika belum diisi
+  /// Get child name dari Hive UserModel
+  /// Returns 'Si Kecil' jika belum diisi
   static String getChildName(String? userId) {
+    debugPrint('🔍 getChildName called for userId: $userId');
+    
     if (userId == null) {
+      debugPrint('⚠️ userId is null, returning default');
       return 'Si Kecil';
     }
     
     try {
       final hiveDb = HiveDatabase();
       final user = hiveDb.userBox.get(userId);
-      return user?.childName ?? 'Si Kecil';
+      final name = user?.childName ?? 'Si Kecil';
+      
+      debugPrint('📦 Retrieved from Hive: "$name" (raw: ${user?.childName})');
+      return name;
     } catch (e) {
       debugPrint('❌ Error getting child name: $e');
       return 'Si Kecil';
@@ -40,7 +48,7 @@ class ChildProfileHelper {
       final user = hiveDb.userBox.get(userId);
       return user?.childBirthDate;
     } catch (e) {
-      debugPrint('❌ Error getting child birth date: $e');
+      debugPrint('Error getting child birth date: $e');
       return null;
     }
   }
@@ -56,7 +64,7 @@ class ChildProfileHelper {
       final user = hiveDb.userBox.get(userId);
       return user?.childGender;
     } catch (e) {
-      debugPrint('❌ Error getting child gender: $e');
+      debugPrint('Error getting child gender: $e');
       return null;
     }
   }
@@ -189,12 +197,12 @@ class ChildProfileHelper {
   }
 
   /// Get personalized greeting with child name
-  /// Example: "Selamat pagi, Ibu dari Fjola! 👶"
+  /// Example: "Selamat pagi, Ibu dari Emyr!"
   static String getPersonalizedGreeting(String? userId) {
     final greeting = getTimeOfDayGreeting();
     final childName = getChildName(userId);
     
-    return '$greeting, Ibu dari $childName! 👶';
+    return '$greeting, Ibu dari $childName!';
   }
 
   /// Check if child profile is complete
@@ -207,8 +215,13 @@ class ChildProfileHelper {
       final hiveDb = HiveDatabase();
       final user = hiveDb.userBox.get(userId);
       
-      return user?.childName != null && 
-             user?.childBirthDate != null;
+      // Check both fields are not null AND not empty
+      final hasName = user?.childName != null && 
+                      user!.childName!.isNotEmpty &&
+                      user.childName != 'Si Kecil';
+      final hasBirthDate = user?.childBirthDate != null;
+      
+      return hasName && hasBirthDate;
     } catch (e) {
       debugPrint('❌ Error checking profile completion: $e');
       return false;

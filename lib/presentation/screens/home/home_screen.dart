@@ -85,13 +85,13 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
 
-@override
-   void initState() {
-     super.initState();
-     SchedulerBinding.instance.addPostFrameCallback((_) {
-       _loadData();
-     });
-   }
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
 
   Future<void> _loadData() async {
     final scheduleProvider = context.read<ScheduleProvider>();
@@ -202,54 +202,63 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ? 'Selamat Sore'
                 : 'Selamat Malam';
 
-    final authProvider = context.read<AuthProvider>();
-    final userId = authProvider.userId;
-    
-    // Get child info using helper
-    final childName = ChildProfileHelper.getChildName(userId);
-    final childAge = ChildProfileHelper.getChildAgeString(userId);
-    final isProfileComplete = ChildProfileHelper.isProfileComplete(userId);
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final userId = authProvider.userId;
+        // Reference timestamp to force rebuild when profile updates
+        final timestamp = authProvider.profileUpdateTimestamp;
+        
+        debugPrint('🔄 Consumer rebuilding: timestamp=$timestamp, userId=$userId');
+        
+        // Get child info using helper - will update when user data changes
+        final childName = ChildProfileHelper.getChildName(userId);
+        final childAge = ChildProfileHelper.getChildAgeString(userId);
+        final isProfileComplete = ChildProfileHelper.isProfileComplete(userId);
+        
+        debugPrint('📛 Current childName: $childName');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          greeting,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Ibu dari $childName! 👶',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        // Show child age if profile is complete
-        if (isProfileComplete && childAge.isNotEmpty) ...[
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '$childName sudah berusia $childAge',
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              greeting,
               style: const TextStyle(
-                color: Colors.white,
-                fontSize: 13,
+                color: Colors.white70,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-        ],
-      ],
+            const SizedBox(height: 4),
+            Text(
+              'Ibu dari $childName! 👶',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            // Show child age if profile is complete
+            if (isProfileComplete && childAge.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '$childName sudah berusia $childAge',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -375,7 +384,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         _buildMoodStat(context, '😄', provider.moodStats[MoodType.veryHappy] ?? 0),
                         _buildMoodStat(context, '🙂', provider.moodStats[MoodType.happy] ?? 0),
                         _buildMoodStat(context, '😐', provider.moodStats[MoodType.neutral] ?? 0),
-                        _buildMoodStat(context, '☹️', provider.moodStats[MoodType.sad] ?? 0),
+                        _buildMoodStat(context, '🙁', provider.moodStats[MoodType.sad] ?? 0),
                         _buildMoodStat(context, '😢', provider.moodStats[MoodType.verySad] ?? 0),
                       ],
                     ),

@@ -83,20 +83,47 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         return;
       }
 
+      final childName = data['childName'] as String? ?? '';
+      DateTime? childBirthDate;
+      
+      if (data['childBirthDate'] != null) {
+        final birthDateData = data['childBirthDate'];
+        childBirthDate = birthDateData is Timestamp
+            ? birthDateData.toDate()
+            : DateTime.parse(birthDateData as String);
+      }
+      
+      final childGender = data['childGender'] as String?;
+
+      // Update UI
       setState(() {
-        _nameController.text = data['childName'] as String? ?? '';
-        
-        if (data['childBirthDate'] != null) {
-          final birthDateData = data['childBirthDate'];
-          _selectedDate = birthDateData is Timestamp
-              ? birthDateData.toDate()
-              : DateTime.parse(birthDateData as String);
-        }
-        
-        _selectedGender = data['childGender'] as String?;
+        _nameController.text = childName;
+        _selectedDate = childBirthDate;
+        _selectedGender = childGender;
       });
       
-      debugPrint('✅ Loaded profile from Firestore');
+      // ✅ CRITICAL FIX: Save to Hive for future use
+      try {
+        final existingUser = userBox.get(userId);
+        if (existingUser != null) {
+          // User model exists, update it
+          final updatedUser = existingUser.copyWith(
+            childName: childName.isNotEmpty ? childName : null,
+            childBirthDate: childBirthDate,
+            childGender: childGender,
+          );
+          await userBox.put(userId, updatedUser);
+          debugPrint('✅ Profile loaded from Firestore and saved to Hive');
+        } else {
+          // No user model in Hive - this means data seeding didn't work properly
+          // User should have been created during login
+          debugPrint('⚠️ WARNING: No user model in Hive for userId: $userId');
+          debugPrint('   This should have been created during login/signup');
+        }
+      } catch (e) {
+        debugPrint('❌ Failed to save profile to Hive: $e');
+      }
+      
     } catch (e) {
       debugPrint('❌ Error loading profile: $e');
     }
@@ -142,7 +169,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 CustomTextField(
                   label: 'Nama Anak',
                   controller: _nameController,
-                  hint: 'Contoh: Fjola',
+                  hint: 'Contoh: Emyr',
                   prefixIcon: Icons.person,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
@@ -377,7 +404,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         
         // Save to Hive
         await userBox.put(userId, updatedUser);
-        debugPrint('✅ Profile updated in local Hive');
+        debugPrint('Profile updated in local Hive');
       }
 
       // Try to update Firestore (optional, may fail due to permissions)
@@ -396,6 +423,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         debugPrint('⚠️ Firestore update failed (will sync later): $firestoreError');
         // Continue even if Firestore fails - data is saved locally
       }
+      
+      // Trigger rebuild of UI that depends on child profile
+      authProvider.refreshUserData();
 
       if (!mounted) {
         return;
@@ -416,7 +446,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      debugPrint('❌ Error saving profile: $e');
+      debugPrint('Error saving profile: $e');
       
       if (!mounted) {
         return;
