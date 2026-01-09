@@ -368,7 +368,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // âœ… Month View (sudah benar)
+  //Month View (sudah benar)
   Widget _buildMonthView() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
@@ -411,7 +411,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // âœ… FIXED: Week View dengan multi-day schedule support
+  //FIXED: Week View dengan multi-day schedule support
   Widget _buildWeekView() => SingleChildScrollView(
       child: Column(
         children: [
@@ -422,7 +422,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       ),
     );
 
-  // âœ… FIXED: Day View dengan multi-day schedule support
+  // FIXED: Day View dengan multi-day schedule support
   Widget _buildDayView() => Column(
       children: [
         _buildDaySelector(),
@@ -579,7 +579,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // âœ… FIXED: Week timeline dengan multi-day schedule support
+  // FIXED: Week timeline dengan multi-day schedule support
   Widget _buildWeekTimeline() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
@@ -717,7 +717,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // âœ… Tampilkan indikator multi-day
+          // Tampilkan indikator multi-day
           if (schedule.isMultiDay)
             Icon(
               Icons.date_range,
@@ -826,12 +826,12 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // âœ… FIXED: Day timeline dengan multi-day schedule support
+  // FIXED: Day timeline dengan multi-day schedule support
   Widget _buildDayTimeline() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     final schedules = scheduleProvider.schedules;
     
-    // âœ… FIX: Pisahkan multi-day dan single-day schedules
+    // FIX: Pisahkan multi-day dan single-day schedules
     final dayNormalized = DateTime(
       _selectedDay.year,
       _selectedDay.month,
@@ -860,7 +860,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
     return Column(
       children: [
-        // âœ… Tampilkan multi-day schedules di atas timeline
+        //Tampilkan multi-day schedules di atas timeline
         if (multiDaySchedules.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -905,7 +905,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     );
   }
 
-  // âœ… NEW: Widget untuk multi-day schedule card
+  // NEW: Widget untuk multi-day schedule card
   Widget _buildMultiDayScheduleCard(ScheduleEntity schedule) {
     final theme = Theme.of(context);
     final color = _getCategoryColor(schedule.category);
@@ -1096,7 +1096,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 activeColor: color,
               ),
               
-              // âœ… Tampilkan info berbeda untuk multi-day
+              // Tampilkan info berbeda untuk multi-day
               if (schedule.isMultiDay && schedule.endDateTime != null)
                 Expanded(
                   child: Column(
@@ -1593,7 +1593,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                 child: Text(
                   wasCompleted 
                       ? 'Ditandai belum selesai' 
-                      : 'Ditandai selesai âœ“',
+                      : 'Ditandai selesai',
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -1639,11 +1639,11 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
     }
   }
 
-  // âœ… FIXED: Filter untuk List View dengan multi-day support
+  // FIXED: Filter untuk List View dengan multi-day support
   List<ScheduleEntity> _getFilteredListSchedules() {
     final scheduleProvider = context.watch<ScheduleProvider>();
     
-    // âœ… FIX: Gunakan logika yang sama dengan Month View
+    // FIX: Gunakan logika yang sama dengan Month View
     var schedules = scheduleProvider.schedules.where((s) {
       final selectedDayNormalized = DateTime(
         _selectedDay.year,

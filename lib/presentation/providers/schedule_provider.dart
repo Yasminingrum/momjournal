@@ -19,7 +19,7 @@ class ScheduleProvider extends ChangeNotifier {
   List<ScheduleEntity> _schedules = [];
   List<ScheduleEntity> _todaySchedules = [];
   DateTime _selectedDate = DateTime.now();
-  String? _selectedCategory;  // âœ… Changed from ScheduleCategory? to String?
+  String? _selectedCategory;  // Changed from ScheduleCategory? to String?
   bool _isLoading = false;
   String? _error;
 
@@ -27,7 +27,7 @@ class ScheduleProvider extends ChangeNotifier {
   List<ScheduleEntity> get schedules => _schedules;
   List<ScheduleEntity> get todaySchedules => _todaySchedules;
   DateTime get selectedDate => _selectedDate;
-  String? get selectedCategory => _selectedCategory;  // âœ… Returns String? now
+  String? get selectedCategory => _selectedCategory;  // Returns String? now
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -82,7 +82,7 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Filter by category
-  /// âœ… NOW ACCEPTS String? instead of ScheduleCategory?
+  /// NOW ACCEPTS String? instead of ScheduleCategory?
   Future<void> filterByCategory(String? category) async {
     try {
       _setLoading(true);
@@ -102,12 +102,12 @@ class ScheduleProvider extends ChangeNotifier {
   }
 
   /// Create a new schedule
-  /// âœ… PARAMETER CHANGED: category is now String
+  /// PARAMETER CHANGED: category is now String
   Future<bool> createSchedule({
     required String title,
-    required String category,  // âœ… Changed from ScheduleCategory to String
+    required String category,  //Changed from ScheduleCategory to String
     required DateTime dateTime,
-    DateTime? endDateTime,  // ðŸ†• Multi-day support
+    DateTime? endDateTime,  //Multi-day support
     String? notes,
     bool hasReminder = false,
     int? reminderMinutes,
@@ -120,9 +120,9 @@ class ScheduleProvider extends ChangeNotifier {
         id: _uuid.v4(),
         userId: userId ?? 'default_user',
         title: title,
-        category: category,  // âœ… Direct String usage
+        category: category,  // Direct String usage
         dateTime: dateTime,
-        endDateTime: endDateTime,  // ðŸ†• Multi-day support
+        endDateTime: endDateTime,  // Multi-day support
         notes: notes,
         hasReminder: hasReminder,
         reminderMinutes: reminderMinutes ?? 0,

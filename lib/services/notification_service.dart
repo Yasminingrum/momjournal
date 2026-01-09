@@ -283,7 +283,7 @@ class NotificationService {
     
     await scheduleNotificationWithReminder(
       id: notificationId,
-      title: 'ðŸ“… $title',
+      title: '$title',
       body: '$reminderText\n$description',
       eventTime: scheduleTime,
       reminderMinutes: reminderMinutes,
@@ -297,7 +297,7 @@ class NotificationService {
   }) async {
     await scheduleDailyNotification(
       id: AppConstants.notificationIdJournal,
-      title: 'ðŸ“ Waktunya Journaling',
+      title: 'Waktunya Journaling',
       body: 'Jangan lupa tulis jurnal hari ini!',
       time: time,
       payload: '{"type":"journal"}',

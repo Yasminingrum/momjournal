@@ -190,7 +190,7 @@ class AccountScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Made with â¤ï¸ for Moms',
+                      'Made with love for Moms',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.grey[600],
                       ),
