@@ -6,20 +6,20 @@ import 'package:uuid/uuid.dart';
 class DataSeeder {
   // Private constructor
   const DataSeeder._();
-  
+
   static const _uuid = Uuid();
-  
+
   // User ID untuk testing (ganti dengan user ID yang sebenarnya saat testing)
   static const String testUserId = 'test-user-123';
-  
+
   /// ============================================================================
   /// CATEGORIES SEEDER
   /// ============================================================================
-  
+
   /// Seed categories dengan berbagai tipe (schedule, photo, both)
   static List<Map<String, dynamic>> seedCategories() {
     final now = DateTime.now();
-    
+
     return [
       // Categories untuk BOTH (Schedule & Photo)
       {
@@ -37,83 +37,82 @@ class DataSeeder {
       },
     ];
   }
-  
+
   /// ============================================================================
   /// SCHEDULES SEEDER
   /// ============================================================================
-  
+
   /// Seed schedules dengan berbagai skenario
   static List<Map<String, dynamic>> seedSchedules() {
     final now = DateTime.now();
     final schedules = <Map<String, dynamic>>[];
-    
+
     // ========================================================================
     // RECURRING SCHEDULES - Seminggu ke Belakang (Past Week)
     // ========================================================================
-    
+
     for (int daysAgo = 7; daysAgo >= 1; daysAgo--) {
       final date = now.subtract(Duration(days: daysAgo));
-      
+
       // Sarapan setiap hari (pagi)
-      schedules
-        ..add({
-          'id': _uuid.v4(),
-          'userId': testUserId,
-          'title': 'Sarapan Pagi',
-          'description': 'Bubur + buah',
-          'category': 'Pemberian Makan/Menyusui',
-          'scheduledTime': DateTime(date.year, date.month, date.day, 7, 0).toIso8601String(),
-          'endTime': null,
-          'reminderEnabled': true,
-          'reminderMinutesBefore': 15,
-          'isCompleted': true, // Past schedules sudah completed
-          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-          'updatedAt': date.toIso8601String(),
-          'isSynced': false,
-          'isDeleted': false,
-        })
-        
-        // Tidur Siang setiap hari
-        ..add({
-          'id': _uuid.v4(),
-          'userId': testUserId,
-          'title': 'Tidur Siang',
-          'description': 'Durasi 1.5-2 jam',
-          'category': 'Tidur',
-          'scheduledTime': DateTime(date.year, date.month, date.day, 13, 0).toIso8601String(),
-          'endTime': DateTime(date.year, date.month, date.day, 15, 0).toIso8601String(),
-          'reminderEnabled': true,
-          'reminderMinutesBefore': 10,
-          'isCompleted': true,
-          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-          'updatedAt': date.toIso8601String(),
-          'isSynced': false,
-          'isDeleted': false,
-        })
-        
-        // Makan Malam setiap hari
-        ..add({
-          'id': _uuid.v4(),
-          'userId': testUserId,
-          'title': 'Makan Malam',
-          'description': 'Menu sayur + protein',
-          'category': 'Pemberian Makan/Menyusui',
-          'scheduledTime': DateTime(date.year, date.month, date.day, 18, 30).toIso8601String(),
-          'endTime': null,
-          'reminderEnabled': true,
-          'reminderMinutesBefore': 15,
-          'isCompleted': true,
-          'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
-          'updatedAt': date.toIso8601String(),
-          'isSynced': false,
-          'isDeleted': false,
-        });
+      schedules.add({
+        'id': _uuid.v4(),
+        'userId': testUserId,
+        'title': 'Sarapan Pagi',
+        'description': 'Bubur + buah',
+        'category': 'Pemberian Makan/Menyusui',
+        'scheduledTime': DateTime(date.year, date.month, date.day, 7, 0).toIso8601String(),
+        'endTime': null,
+        'reminderEnabled': true,
+        'reminderMinutesBefore': 15,
+        'isCompleted': true, // Past schedules sudah completed
+        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+        'updatedAt': date.toIso8601String(),
+        'isSynced': false,
+        'isDeleted': false,
+      });
+
+      // Tidur Siang setiap hari
+      schedules.add({
+        'id': _uuid.v4(),
+        'userId': testUserId,
+        'title': 'Tidur Siang',
+        'description': 'Durasi 1.5-2 jam',
+        'category': 'Tidur',
+        'scheduledTime': DateTime(date.year, date.month, date.day, 13, 0).toIso8601String(),
+        'endTime': DateTime(date.year, date.month, date.day, 15, 0).toIso8601String(),
+        'reminderEnabled': true,
+        'reminderMinutesBefore': 10,
+        'isCompleted': true,
+        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+        'updatedAt': date.toIso8601String(),
+        'isSynced': false,
+        'isDeleted': false,
+      });
+
+      // Makan Malam setiap hari
+      schedules.add({
+        'id': _uuid.v4(),
+        'userId': testUserId,
+        'title': 'Makan Malam',
+        'description': 'Menu sayur + protein',
+        'category': 'Pemberian Makan/Menyusui',
+        'scheduledTime': DateTime(date.year, date.month, date.day, 18, 30).toIso8601String(),
+        'endTime': null,
+        'reminderEnabled': true,
+        'reminderMinutesBefore': 15,
+        'isCompleted': true,
+        'createdAt': date.subtract(const Duration(days: 30)).toIso8601String(),
+        'updatedAt': date.toIso8601String(),
+        'isSynced': false,
+        'isDeleted': false,
+      });
     }
-    
+
     // ========================================================================
     // HARI INI - Current Day Schedules
     // ========================================================================
-    
+
     // Sarapan hari ini (completed)
     schedules.add({
       'id': _uuid.v4(),
@@ -131,7 +130,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Tidur Siang hari ini (ongoing/upcoming)
     schedules.add({
       'id': _uuid.v4(),
@@ -149,7 +148,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Bermain di Taman hari ini (upcoming)
     schedules.add({
       'id': _uuid.v4(),
@@ -167,7 +166,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Makan Malam hari ini (upcoming)
     schedules.add({
       'id': _uuid.v4(),
@@ -185,14 +184,14 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // ========================================================================
     // RECURRING SCHEDULES - Seminggu ke Depan (Next Week)
     // ========================================================================
-    
+
     for (int daysAhead = 1; daysAhead <= 7; daysAhead++) {
       final date = now.add(Duration(days: daysAhead));
-      
+
       // Sarapan setiap hari (upcoming)
       schedules.add({
         'id': _uuid.v4(),
@@ -210,7 +209,7 @@ class DataSeeder {
         'isSynced': false,
         'isDeleted': false,
       });
-      
+
       // Tidur Siang setiap hari (upcoming)
       schedules.add({
         'id': _uuid.v4(),
@@ -228,7 +227,7 @@ class DataSeeder {
         'isSynced': false,
         'isDeleted': false,
       });
-      
+
       // Makan Malam setiap hari (upcoming)
       schedules.add({
         'id': _uuid.v4(),
@@ -247,11 +246,11 @@ class DataSeeder {
         'isDeleted': false,
       });
     }
-    
+
     // ========================================================================
     // SPECIAL SCHEDULES - Event Khusus
     // ========================================================================
-    
+
     // Kontrol Kesehatan Rutin (besok)
     schedules.add({
       'id': _uuid.v4(),
@@ -269,7 +268,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Baby Gym Class (3 hari lagi)
     schedules.add({
       'id': _uuid.v4(),
@@ -287,7 +286,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Imunisasi (kemarin - completed)
     schedules.add({
       'id': _uuid.v4(),
@@ -305,7 +304,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Multi-day Event: Liburan ke Rumah Nenek (minggu depan)
     schedules.add({
       'id': _uuid.v4(),
@@ -323,7 +322,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Schedule yang terlewat (past - not completed)
     schedules.add({
       'id': _uuid.v4(),
@@ -341,7 +340,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Schedule bulan depan
     schedules.add({
       'id': _uuid.v4(),
@@ -359,7 +358,7 @@ class DataSeeder {
       'isSynced': false,
       'isDeleted': false,
     });
-    
+
     // Schedule yang di-delete (soft delete)
     schedules.add({
       'id': _uuid.v4(),
@@ -378,18 +377,18 @@ class DataSeeder {
       'isDeleted': true,
       'deletedAt': now.toIso8601String(),
     });
-    
+
     return schedules;
   }
-  
+
   /// ============================================================================
   /// JOURNALS SEEDER
   /// ============================================================================
-  
+
   /// Seed journals dengan berbagai mood dan konten
   static List<Map<String, dynamic>> seedJournals() {
     final now = DateTime.now();
-    
+
     return [
       // Journal hari ini - Very Happy
       {
@@ -398,8 +397,8 @@ class DataSeeder {
         'date': DateTime(now.year, now.month, now.day).toIso8601String(),
         'mood': 'veryHappy',
         'content': '''Hari ini luar biasa menyenangkan! Bayi sudah mulai bisa merangkak sendiri
-        
-Pagi ini dia bangun dengan ceria, langsung tersenyum lebar saat melihat mama. Setelah mandi dan sarapan bubur kesukaan, kami bermain di playmat. 
+
+Pagi ini dia bangun dengan ceria, langsung tersenyum lebar saat melihat mama. Setelah mandi dan sarapan bubur kesukaan, kami bermain di playmat.
 
 Yang paling membanggakan adalah saat dia berusaha meraih mainan kesukaannya dan berhasil merangkak sejauh 1 meter! Papa dan mama bertepuk tangan sambil teriak kegirangan. Dia juga ikut ketawa senang melihat kami bahagia
 
@@ -409,7 +408,7 @@ Sore hari kami jalan-jalan ke taman, dia senang sekali melihat anak-anak lain be
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal kemarin - Happy
       {
         'id': _uuid.v4(),
@@ -428,7 +427,7 @@ Overall hari yang baik!''',
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal 2 hari lalu - Neutral
       {
         'id': _uuid.v4(),
@@ -447,7 +446,7 @@ Semoga besok lebih seru!''',
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal 3 hari lalu - Sad
       {
         'id': _uuid.v4(),
@@ -466,7 +465,7 @@ Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup''',
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal minggu lalu - Very Happy
       {
         'id': _uuid.v4(),
@@ -485,7 +484,7 @@ Ini adalah salah satu momen terindah dalam perjalanan parenting kami. Thank you 
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal 10 hari lalu - Very Sad
       {
         'id': _uuid.v4(),
@@ -506,7 +505,7 @@ Note to self: Harus lebih tenang menghadapi situasi seperti ini. Bayi merasakan 
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal 2 minggu lalu - Happy
       {
         'id': _uuid.v4(),
@@ -527,7 +526,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isSynced': false,
         'isDeleted': false,
       },
-      
+
       // Journal yang di-delete (soft delete)
       {
         'id': _uuid.v4(),
@@ -543,16 +542,16 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
       },
     ];
   }
-  
+
   /// ============================================================================
   /// PHOTOS SEEDER
   /// ============================================================================
-  
+
   /// Seed photos dengan berbagai kategori dan status
   /// Note: localPath dan cloudUrl perlu disesuaikan dengan asset yang ada
   static List<Map<String, dynamic>> seedPhotos() {
     final now = DateTime.now();
-    
+
     return [
       // Photo hari ini - Favorite
       {
@@ -571,7 +570,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': false,
         'isDeleted': false,
       },
-      
+
       // Photo kemarin - Milestone merangkak
       {
         'id': _uuid.v4(),
@@ -589,7 +588,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 2 hari lalu - Bermain
       {
         'id': _uuid.v4(),
@@ -607,7 +606,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo minggu lalu - Tidur
       {
         'id': _uuid.v4(),
@@ -625,7 +624,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 10 hari lalu - Kesehatan (imunisasi)
       {
         'id': _uuid.v4(),
@@ -643,7 +642,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 2 minggu lalu - Milestone duduk
       {
         'id': _uuid.v4(),
@@ -661,7 +660,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 3 minggu lalu - Keluarga
       {
         'id': _uuid.v4(),
@@ -679,7 +678,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo sebulan lalu - Makan
       {
         'id': _uuid.v4(),
@@ -697,14 +696,14 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 2 bulan lalu - Ulang tahun
       {
         'id': _uuid.v4(),
         'userId': testUserId,
         'localPath': '/storage/photos/birthday_party.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/birthday_party.jpg',
-        'caption': 'Pesta ulang tahun pertama yang meriah!‚',
+        'caption': 'Pesta ulang tahun pertama yang meriah!â€š',
         'category': 'Ulang Tahun',
         'isMilestone': true,
         'isFavorite': true,
@@ -715,7 +714,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo 3 bulan lalu - Liburan
       {
         'id': _uuid.v4(),
@@ -733,7 +732,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isUploaded': true,
         'isDeleted': false,
       },
-      
+
       // Photo yang di-delete (soft delete)
       {
         'id': _uuid.v4(),
@@ -752,7 +751,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'isDeleted': true,
         'deletedAt': now.toIso8601String(),
       },
-      
+
       // Photo belum dikategorikan
       {
         'id': _uuid.v4(),
@@ -772,18 +771,18 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
       },
     ];
   }
-  
+
   /// ============================================================================
   /// HELPER METHODS
   /// ============================================================================
-  
+
   /// Print summary dari seeded data
   static void printSummary() {
     final categories = seedCategories();
     final schedules = seedSchedules();
     final journals = seedJournals();
     final photos = seedPhotos();
-    
+
     debugPrint('=== DATA SEEDER SUMMARY ===');
     debugPrint('Categories: ${categories.length}');
     debugPrint('  - Schedule only: ${categories.where((c) => c['type'] == 'schedule').length}');

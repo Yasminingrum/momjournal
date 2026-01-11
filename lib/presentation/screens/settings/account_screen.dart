@@ -283,36 +283,77 @@ class AccountScreen extends StatelessWidget {
     // Read provider before any async call
     final authProvider = context.read<AuthProvider>();
 
-    // Show loading
+    // Show loading with message
     if (!context.mounted) {
       return;
     }
 
-    await showDialog<void>(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (context) => const Center(
-        child: CircularProgressIndicator(),
+        child: Card(
+          margin: EdgeInsets.all(24),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Menghapus akun...',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Mohon tunggu, ini mungkin memakan waktu.',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
 
-    final success = await authProvider.deleteAccount();
+    try {
+      final success = await authProvider.deleteAccount().timeout(
+        const Duration(seconds: 60),
+        onTimeout: () {
+          throw Exception('Timeout menghapus akun. Silakan coba lagi.');
+        },
+      );
 
-    if (!context.mounted) {
-      return;
-    }
+      if (!context.mounted) {
+        return;
+      }
 
-    Navigator.pop(context); // Close loading
+      Navigator.pop(context); // Close loading
 
-    if (success) {
-      await Nav.toLogin(context);
-    } else {
+      if (success) {
+        await Nav.toLogin(context);
+      } else {
+        await showErrorDialog(
+          context,
+          title: 'Gagal Menghapus Akun',
+          message: authProvider.errorMessage ?? 'Terjadi kesalahan',
+        );
+        authProvider.clearError();
+      }
+    } catch (e) {
+      if (!context.mounted) {
+        return;
+      }
+      
+      Navigator.pop(context); // Close loading
+      
       await showErrorDialog(
         context,
         title: 'Gagal Menghapus Akun',
-        message: authProvider.errorMessage ?? 'Terjadi kesalahan',
+        message: e.toString(),
       );
-      authProvider.clearError();
     }
   }
 

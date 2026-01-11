@@ -283,7 +283,7 @@ class NotificationService {
     
     await scheduleNotificationWithReminder(
       id: notificationId,
-      title: '$title',
+      title: title,
       body: '$reminderText\n$description',
       eventTime: scheduleTime,
       reminderMinutes: reminderMinutes,

@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'dart:async' show unawaited;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -235,30 +237,52 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         throw const AuthenticationException ('Tidak ada pengguna yang masuk');
       }
 
-      debugPrint('Deleting user account: ${user.uid}');
+      debugPrint('🗑️ Deleting user account: ${user.uid}');
 
-      // Delete user data from Firestore
-      await _deleteUserData(user.uid);
+      // Try to delete user data and handle requires-recent-login
+      try {
+        // Delete user data from Firestore with timeout
+        await _deleteUserData(user.uid).timeout(
+          const Duration(seconds: 45),
+          onTimeout: () {
+            throw const AuthenticationException('Timeout menghapus data. Coba lagi.');
+          },
+        );
 
-      // Delete user from Firebase Auth
-      await user.delete();
+        // Delete user from Firebase Auth
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          debugPrint('🔐 Requires recent login, re-authenticating...');
+          
+          // Re-authenticate and retry
+          await reauthenticateWithGoogle();
+          
+          // Retry deletion
+          final currentUser = getCurrentUser();
+          if (currentUser != null) {
+            await _deleteUserData(currentUser.uid).timeout(
+              const Duration(seconds: 45),
+              onTimeout: () {
+                throw const AuthenticationException('Timeout menghapus data. Coba lagi.');
+              },
+            );
+            await currentUser.delete();
+          }
+        } else {
+          rethrow;
+        }
+      }
 
       // Sign out from Google
       await _googleSignIn.signOut();
 
-      debugPrint('User account deleted successfully');
+      debugPrint('✅ User account deleted successfully');
     } on FirebaseAuthException catch (e) {
-      debugPrint('FirebaseAuthException during deletion: ${e.code}');
-      
-      if (e.code == 'requires-recent-login') {
-        throw const AuthenticationException (
-          'Untuk keamanan, silakan login ulang sebelum menghapus akun',
-        );
-      }
-      
+      debugPrint('❌ FirebaseAuthException during deletion: ${e.code}');
       throw AuthenticationException (FirebaseErrorHandler.getErrorMessage(e));
     } catch (e) {
-      debugPrint('Error deleting account: $e');
+      debugPrint('❌ Error deleting account: $e');
       if (e is AuthenticationException) {
         rethrow;
       }
@@ -269,38 +293,50 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   /// Helper: Delete all user data from Firestore
   Future<void> _deleteUserData(String uid) async {
     try {
+      debugPrint('🗑️ Starting user data deletion for: $uid');
+      
+      // Run queries in parallel for better performance
+      final results = await Future.wait([
+        _firestore.collection('users').doc(uid).collection('schedules').get(),
+        _firestore.collection('users').doc(uid).collection('journals').get(),
+        _firestore.collection('users').doc(uid).collection('photos').get(),
+      ]);
+      
+      final schedulesSnapshot = results[0];
+      final journalsSnapshot = results[1];
+      final photosSnapshot = results[2];
+      
+      debugPrint('📊 Found ${schedulesSnapshot.docs.length} schedules, '
+                 '${journalsSnapshot.docs.length} journals, '
+                 '${photosSnapshot.docs.length} photos');
+      
+      // Use batch for efficient deletion
       final WriteBatch batch = _firestore.batch();
 
       // Delete schedules
-      final schedulesSnapshot = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('schedules')
-          .get();
-      
       for (final doc in schedulesSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
       // Delete journals
-      final journalsSnapshot = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('journals')
-          .get();
-      
       for (final doc in journalsSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
       // Delete photos metadata
-      final photosSnapshot = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('photos')
+      for (final doc in photosSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Delete categories
+      final categoriesSnapshot = await _firestore
+          .collection('categories')
+          .where('userId', isEqualTo: uid)
           .get();
       
-      for (final doc in photosSnapshot.docs) {
+      debugPrint('📊 Found ${categoriesSnapshot.docs.length} categories');
+      
+      for (final doc in categoriesSnapshot.docs) {
         batch.delete(doc.reference);
       }
 
@@ -310,12 +346,17 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
       // Commit batch
       await batch.commit();
 
-      debugPrint('User data deleted from Firestore');
+      debugPrint('✅ User data deleted from Firestore');
 
-      // Delete photos from Storage
-      await _deleteUserPhotos(uid);
+      // Delete photos from Storage (run in background, don't wait)
+      unawaited(
+        _deleteUserPhotos(uid).catchError((Object e) {
+          debugPrint('⚠️ Error deleting photos from storage: $e');
+          return null;
+        }),
+      );
     } catch (e) {
-      debugPrint('Error deleting user data: $e');
+      debugPrint('❌ Error deleting user data: $e');
       throw DatabaseException('Gagal menghapus data pengguna: $e');
     }
   }

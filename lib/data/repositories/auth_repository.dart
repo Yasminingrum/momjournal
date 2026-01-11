@@ -110,7 +110,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteAccount() async {
     try {
       debugPrint('🗑️ Repository: Deleting account...');
+      
+      // Step 1: Clear local data first (faster, no network needed)
+      debugPrint('🗑️ Repository: Clearing local data...');
+      await _clearLocalData();
+      debugPrint('✅ Repository: Local data cleared');
+      
+      // Step 2: Delete account from remote (Firestore + Auth)
+      debugPrint('🔥 Repository: Deleting remote data...');
       await _remoteDatasource.deleteUserAccount();
+      
       debugPrint('✅ Repository: Account deleted');
     } on AuthorizationException {
       rethrow;
