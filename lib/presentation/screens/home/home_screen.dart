@@ -508,6 +508,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           horizontal: 12,
                           vertical: 4,
                         ),
+                        onTap: () {
+                          // Navigate to schedule detail
+                          Navigator.pushNamed(
+                            context,
+                            '/schedule/detail',
+                            arguments: schedule,
+                          );
+                        },
                         leading: Container(
                           width: 40,
                           height: 40,
@@ -543,44 +551,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             color: theme.textTheme.bodySmall?.color,
                           ),
                         ),
-                        trailing: schedule.isCompleted
-                            ? Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 16,
-                                ),
-                              )
-                            : InkWell(
-                                onTap: () async {
-                                  // Gunakan copyWith untuk update
-                                  final updatedSchedule = schedule.copyWith(
-                                    isCompleted: true,
-                                    updatedAt: DateTime.now(),
-                                  );
-                                  
-                                  await context
-                                      .read<ScheduleProvider>()
-                                      .updateSchedule(updatedSchedule);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: theme.disabledColor.withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.circle_outlined,
-                                    color: theme.disabledColor,
-                                    size: 16,
-                                  ),
-                                ),
+                        trailing: GestureDetector(
+                          onTapDown: (_) {}, // Stop event propagation to ListTile
+                          child: InkWell(
+                            onTap: () async {
+                              // Toggle complete/incomplete
+                              final updatedSchedule = schedule.copyWith(
+                                isCompleted: !schedule.isCompleted,
+                                updatedAt: DateTime.now(),
+                              );
+                              
+                              await context
+                                  .read<ScheduleProvider>()
+                                  .updateSchedule(updatedSchedule);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: schedule.isCompleted
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : theme.disabledColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
                               ),
+                              child: Icon(
+                                schedule.isCompleted
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
+                                color: schedule.isCompleted
+                                    ? Colors.green
+                                    : theme.disabledColor,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),

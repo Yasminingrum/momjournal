@@ -234,16 +234,23 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             child: TextField(
               controller: _captionController,
               style: const TextStyle(color: Colors.white, fontSize: 16),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Tambahkan caption...',
-                hintStyle: TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(),
+                hintStyle: const TextStyle(color: Colors.grey),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.white54),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.blue, width: 2),
                 ),
+                filled: true,
+                fillColor: Colors.black54,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               ),
               maxLines: 3,
               minLines: 1,
@@ -545,7 +552,29 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               },
             ),
           ),
-          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'Selesai',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

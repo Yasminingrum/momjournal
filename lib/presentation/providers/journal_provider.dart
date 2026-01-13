@@ -31,7 +31,7 @@ class JournalProvider extends ChangeNotifier {
     try {
       _setLoading(true);
       _journals = await _repository.getAllJournals();
-      await loadMoodStats();
+      // Don't call loadMoodStats() here - let caller decide what stats to load
       _clearError();
     } catch (e) {
       _setError('Failed to load journals: $e');

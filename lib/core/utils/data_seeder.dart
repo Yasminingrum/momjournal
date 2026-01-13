@@ -396,13 +396,7 @@ class DataSeeder {
         'userId': testUserId,
         'date': DateTime(now.year, now.month, now.day).toIso8601String(),
         'mood': 'veryHappy',
-        'content': '''Hari ini luar biasa menyenangkan! Bayi sudah mulai bisa merangkak sendiri
-
-Pagi ini dia bangun dengan ceria, langsung tersenyum lebar saat melihat mama. Setelah mandi dan sarapan bubur kesukaan, kami bermain di playmat.
-
-Yang paling membanggakan adalah saat dia berusaha meraih mainan kesukaannya dan berhasil merangkak sejauh 1 meter! Papa dan mama bertepuk tangan sambil teriak kegirangan. Dia juga ikut ketawa senang melihat kami bahagia
-
-Sore hari kami jalan-jalan ke taman, dia senang sekali melihat anak-anak lain bermain. Semoga besok juga hari yang indah!''',
+        'content': 'Hari ini luar biasa! Bayi berhasil merangkak sendiri pertama kali! Pagi ini dia bangun ceria dan tersenyum lebar. Saat bermain di playmat, dia berusaha meraih mainan dan berhasil merangkak sejauh 1 meter! Papa dan mama bertepuk tangan, dia ikut ketawa senang. Sore hari jalan-jalan ke taman, dia senang melihat anak-anak bermain.',
         'createdAt': now.toIso8601String(),
         'updatedAt': now.toIso8601String(),
         'isSynced': false,
@@ -415,13 +409,7 @@ Sore hari kami jalan-jalan ke taman, dia senang sekali melihat anak-anak lain be
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 1)).toIso8601String(),
         'mood': 'happy',
-        'content': '''Hari yang cukup menyenangkan walau sedikit lelah.
-
-Bayi tidur nyenyak semalam sehingga mama bisa istirahat dengan baik. Pagi ini kami ke dokter untuk imunisasi DPT tahap ke-3. Dia menangis sebentar saat disuntik, tapi segera tenang setelah digendong.
-
-Siang hari agak rewel mungkin karena efek imunisasi, tapi setelah tidur siang jadi lebih baik. Sore kami video call dengan nenek, dia senang sekali melambai-lambai tangannya.
-
-Overall hari yang baik!''',
+        'content': 'Hari yang menyenangkan walau sedikit lelah. Bayi tidur nyenyak semalam. Pagi ini ke dokter untuk imunisasi DPT ke-3. Dia menangis sebentar saat disuntik tapi segera tenang. Siang agak rewel karena efek imunisasi, tapi setelah tidur siang lebih baik. Sore video call dengan nenek, dia senang melambai-lambai.',
         'createdAt': now.subtract(const Duration(days: 1)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 1)).toIso8601String(),
         'isSynced': false,
@@ -434,13 +422,7 @@ Overall hari yang baik!''',
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 2)).toIso8601String(),
         'mood': 'neutral',
-        'content': '''Hari yang biasa-biasa saja.
-
-Rutinitas seperti biasa - makan, tidur, bermain. Tidak ada kejadian spesial hari ini. Bayi dalam kondisi sehat dan cukup aktif.
-
-Papa masih harus lembur di kantor, jadi mama seharian di rumah sendiri dengan bayi. Agak capek tapi masih bisa dijalani.
-
-Semoga besok lebih seru!''',
+        'content': 'Hari yang biasa-biasa saja. Rutinitas seperti biasa - makan, tidur, bermain. Tidak ada kejadian spesial hari ini. Bayi dalam kondisi sehat dan cukup aktif. Papa masih lembur, jadi mama seharian di rumah sendiri dengan bayi. Agak capek tapi masih bisa dijalani.',
         'createdAt': now.subtract(const Duration(days: 2)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 2)).toIso8601String(),
         'isSynced': false,
@@ -453,13 +435,7 @@ Semoga besok lebih seru!''',
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 3)).toIso8601String(),
         'mood': 'sad',
-        'content': '''Hari yang cukup melelahkan.
-
-Bayi rewel sepanjang hari, mungkin sedang tumbuh gigi. Dia menangis hampir setiap 30 menit dan susah ditidurkan. Mama jadi kurang tidur dan badan terasa pegal-pegal.
-
-Papa mencoba membantu saat pulang kantor, tapi tetap saja dia lebih nyaman dengan mama. Kami berdua jadi sama-sama lelah.
-
-Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup''',
+        'content': 'Hari yang melelahkan. Bayi rewel sepanjang hari, mungkin sedang tumbuh gigi. Dia menangis hampir setiap 30 menit dan susah ditidurkan. Mama jadi kurang tidur dan badan pegal-pegal. Papa mencoba membantu saat pulang kantor, tapi dia lebih nyaman dengan mama.',
         'createdAt': now.subtract(const Duration(days: 3)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 3)).toIso8601String(),
         'isSynced': false,
@@ -472,13 +448,7 @@ Berharap besok kondisinya membaik. Mama butuh istirahat yang cukup''',
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 7)).toIso8601String(),
         'mood': 'veryHappy',
-        'content': '''Milestone baru! Bayi berhasil duduk sendiri!
-
-Ini hari yang akan selalu kami ingat. Pagi ini saat sedang bermain di playmat, tiba-tiba dia berusaha duduk sendiri dari posisi tengkurap. Dan berhasil! Walaupun hanya bertahan beberapa detik, tapi itu sudah luar biasa.
-
-Kami langsung merekam video dan mengirimkannya ke semua keluarga. Semua orang ikut senang dan bangga. Nenek sampai meneteskan air mata bahagia saat video call.
-
-Ini adalah salah satu momen terindah dalam perjalanan parenting kami. Thank you Allah untuk karunia ini''',
+        'content': 'Milestone baru! Bayi berhasil duduk sendiri! Pagi ini saat bermain di playmat, tiba-tiba dia duduk sendiri dari posisi tengkurap. Berhasil! Walaupun hanya beberapa detik, tapi luar biasa. Kami merekam video dan kirim ke keluarga. Semua ikut senang. Nenek sampai nangis bahagia saat video call.',
         'createdAt': now.subtract(const Duration(days: 7)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 7)).toIso8601String(),
         'isSynced': false,
@@ -491,15 +461,7 @@ Ini adalah salah satu momen terindah dalam perjalanan parenting kami. Thank you 
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 10)).toIso8601String(),
         'mood': 'verySad',
-        'content': '''Hari terburuk minggu ini.
-
-Bayi demam tinggi sejak pagi, mencapai 38.5°C. Kami langsung panik dan membawanya ke dokter. Dokter bilang ini hanya demam biasa karena tumbuh gigi, tapi sebagai orangtua baru kami tetap sangat khawatir.
-
-Sepanjang hari mama tidak bisa berbuat apa-apa kecuali menjaga bayi. Dia terus menangis dan susah tidur. Mama juga ikut menangis karena tidak tahu harus berbuat apa lagi.
-
-Untungnya setelah diberi obat penurun panas, demamnya mulai turun di malam hari. Tapi ini pengalaman yang sangat melelahkan secara emosional.
-
-Note to self: Harus lebih tenang menghadapi situasi seperti ini. Bayi merasakan energi kita''',
+        'content': 'Hari terburuk minggu ini. Bayi demam tinggi 38.5°C sejak pagi. Langsung ke dokter. Katanya demam biasa karena tumbuh gigi, tapi kami tetap khawatir. Sepanjang hari mama jaga bayi. Dia terus nangis dan susah tidur. Untung setelah diberi obat, demamnya turun.',
         'createdAt': now.subtract(const Duration(days: 10)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 10)).toIso8601String(),
         'isSynced': false,
@@ -512,15 +474,7 @@ Note to self: Harus lebih tenang menghadapi situasi seperti ini. Bayi merasakan 
         'userId': testUserId,
         'date': now.subtract(const Duration(days: 14)).toIso8601String(),
         'mood': 'happy',
-        'content': '''Playdate pertama!
-
-Hari ini kami mengunjungi rumah teman yang juga punya bayi seusia. Ini kali pertama bayi kami bertemu dengan bayi lain.
-
-Awalnya dia agak malu-malu, tapi setelah beberapa saat mulai nyaman. Lucu sekali melihat mereka saling menatap dan berusaha menyentuh satu sama lain.
-
-Mama juga senang bisa ngobrol dengan sesama ibu muda, berbagi cerita dan pengalaman. Ternyata banyak hal yang kami alami sama.
-
-Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social development!''',
+        'content': 'Playdate pertama! Hari ini mengunjungi teman yang punya bayi seusia. Pertama kali bayi kami bertemu bayi lain. Awalnya malu-malu, tapi lama-lama nyaman. Lucu melihat mereka saling menatap. Mama juga senang ngobrol dengan sesama ibu muda, berbagi cerita. Sudah sepakat playdate rutin sebulan sekali!',
         'createdAt': now.subtract(const Duration(days: 14)).toIso8601String(),
         'updatedAt': now.subtract(const Duration(days: 14)).toIso8601String(),
         'isSynced': false,
@@ -703,7 +657,7 @@ Kami sudah sepakat untuk rutin playdate sebulan sekali. Good for baby's social d
         'userId': testUserId,
         'localPath': '/storage/photos/birthday_party.jpg',
         'cloudUrl': 'https://firebasestorage.googleapis.com/photos/birthday_party.jpg',
-        'caption': 'Pesta ulang tahun pertama yang meriah!â€š',
+        'caption': 'Pesta ulang tahun pertama yang meriah!Ã¢â‚¬Å¡',
         'category': 'Ulang Tahun',
         'isMilestone': true,
         'isFavorite': true,
